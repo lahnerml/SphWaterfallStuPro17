@@ -1,0 +1,5 @@
+D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/SphWaterfall/build/Debug_x86/CMakeFiles/edit_cache.dir
+D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/SphWaterfall/build/Debug_x86/CMakeFiles/rebuild_cache.dir
+D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/SphWaterfall/build/Debug_x86/SphWaterfall/CMakeFiles/edit_cache.dir
+D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/SphWaterfall/build/Debug_x86/SphWaterfall/CMakeFiles/SphWaterfall.dir
+D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/SphWaterfall/build/Debug_x86/SphWaterfall/CMakeFiles/rebuild_cache.dir
