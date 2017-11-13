@@ -1,3 +1,0 @@
-D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/build/CMakeFiles/ALL_BUILD.dir
-D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/build/CMakeFiles/ZERO_CHECK.dir
-D:/Users/Magnus/Documents/Studium/StuPro/Project/SphWaterfall/build/SphWaterfall/CMakeFiles/SphWaterfall.dir
