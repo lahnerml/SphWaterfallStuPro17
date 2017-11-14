@@ -5,6 +5,6 @@ class Vector3 {
 		int x, y, z;
 		Vector3();
 		Vector3(int, int, int);
-		~Vector3();
+		~Vector();
 	private:
 };
