@@ -11,6 +11,6 @@ Vector3::Vector3(int x, int y, int z) :
 	z(z) {
 }
 
-Vector3::~Vector() {
+Vector3::~Vector3() {
 
 }
