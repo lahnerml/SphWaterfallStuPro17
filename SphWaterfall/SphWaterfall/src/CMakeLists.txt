@@ -1,4 +1,10 @@
 add_executable(
     SphWaterfall 
-        "src/SphWaterfall.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/SphWaterfall.cpp"
 )
+
+include("${CMAKE_CURRENT_LIST_DIR}/data/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/geometry/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/particleGen/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/simulation/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/visualization/CMakeLists.txt")
