@@ -1,6 +1,6 @@
 add_executable(
     SphWaterfall 
-        "${CMAKE_CURRENT_LIST_DIR}/src/SphWaterfall.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/SphWaterfall.cpp"
 )
 
 include("${CMAKE_CURRENT_LIST_DIR}/data/CMakeLists.txt")
