@@ -4,5 +4,8 @@ target_sources(
 		"${CMAKE_CURRENT_LIST_DIR}/ITerrainParser.h"
 		"${CMAKE_CURRENT_LIST_DIR}/TerrainParser.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Terrain.h"
+		"${CMAKE_CURRENT_LIST_DIR}/Terrain.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/Face.h"
+		"${CMAKE_CURRENT_LIST_DIR}/Face.cpp"
 )
 #"${CMAKE_CURRENT_LIST_DIR}/Terrain.cpp"
