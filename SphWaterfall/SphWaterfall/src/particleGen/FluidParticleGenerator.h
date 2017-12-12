@@ -14,8 +14,8 @@ public:
 
 
 private:
-	ISphParticle activeParticles[];
-	ISphParticle inactiveParticles[];
+	std::vector<ISphParticle> activeParticles;
+	std::vector<ISphParticle> inactiveParticles;
 	double disposalHeight;
 	Vector3 spawn;
 };

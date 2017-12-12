@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 
+#include "../geometry/Terrain.h"
 #include "../data/ISphParticle.h"
 
 class StaticParticleGenerator {
