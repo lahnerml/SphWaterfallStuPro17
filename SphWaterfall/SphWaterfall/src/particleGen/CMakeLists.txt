@@ -5,3 +5,4 @@ target_sources(
 		"${CMAKE_CURRENT_LIST_DIR}/FluidParticleGenerator.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/StaticParticleGenerator.h"
 		"${CMAKE_CURRENT_LIST_DIR}/StaticParticleGenerator.cpp"
+)
