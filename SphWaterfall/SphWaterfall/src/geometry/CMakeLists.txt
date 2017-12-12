@@ -1,0 +1,8 @@
+target_sources(
+	SphWaterfall
+	PUBLIC
+		"${CMAKE_CURRENT_LIST_DIR}/ITerrainParser.h"
+		"${CMAKE_CURRENT_LIST_DIR}/TerrainParser.cpp"
+)
+#"${CMAKE_CURRENT_LIST_DIR}/Terrain.h"
+#"${CMAKE_CURRENT_LIST_DIR}/Terrain.cpp"
