@@ -7,7 +7,7 @@
 
 class Terrain{
 public:
-	Terrain(std::vector<Vector3> vertices, std::vector<Vector3> normals, std::vector<Vector3> faces);
+	Terrain(std::vector<Vector3> vertices, std::vector<Vector3> normals, std::vector<int> faces);
 
 	int getVertexCount();
 	int getFaceCount();
@@ -15,9 +15,7 @@ public:
 	int getFaceVertexId(int index, int vertexNr);
 
 private:
-	Vector3 vertices[];
-	Vector3 normals[];
-	Face faces[];
-
-
+	std::vector<Vector3> vertices;
+	std::vector<Vector3> normals;
+	std::vector<Face> faces;
 };
