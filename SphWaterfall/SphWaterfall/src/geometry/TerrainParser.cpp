@@ -1,37 +1,39 @@
-#include <string>
 #include <vector>
+#include <string>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 
-#include "ITerrainParser.h"
+#include "TerrainParser.h"
+#include "Terrain.h"
 #include "../data/Vector3.h"
 
-void TerrainParser::loadFromFile(std::string fileName) {
+Terrain TerrainParser::loadFromFile(std::string fileName) {
 	std::vector<Vector3> vertices;
 	std::vector<Vector3> normals;
-	std::vector<short> faces;
+	std::vector<int> faces;
 
 	//Read 3d object data from file
 	readObjFile(fileName, vertices, normals, faces);
 
 	//Generate terrain
-
+	return Terrain::Terrain(vertices, normals, faces);
 }
 
-void readObjFile(std::string filename, std::vector<Vector3> &vertices, std::vector<Vector3> &normals, std::vector<short> &faces)
+void TerrainParser::readObjFile(std::string fileName, std::vector<Vector3> &vertices, std::vector<Vector3> &normals, std::vector<int> &faces)
 {
-	ifstream in(filename, ios::in);
+	std::ifstream in(fileName);
 	if (!in)
 	{
-		cerr << "Cannot open " << filename << endl; exit(1);
+		//cerr << "Cannot open " << filename << endl; exit(1);
 	}
 
-	string line;
-	while (getline(in, line))
+	std::string line;
+	while (std::getline(in, line))
 	{
 		if (line.substr(0, 2) == "v ")
 		{
+			// Read vertex from file
 			std::istringstream s(line.substr(2));
 			Vector3 v;
 			s >> v.x; s >> v.y; s >> v.z;
@@ -39,6 +41,7 @@ void readObjFile(std::string filename, std::vector<Vector3> &vertices, std::vect
 		}
 		else if (line.substr(0, 3) == "vn ")
 		{
+			//Read vertex normal from file
 			std::istringstream s(line.substr(3));
 			Vector3 n;
 			s >> n.x; s >> n.y; s >> n.z;
@@ -46,19 +49,23 @@ void readObjFile(std::string filename, std::vector<Vector3> &vertices, std::vect
 		}
 		else if (line.substr(0, 2) == "f ")
 		{
+			//Read face from file
 			std::istringstream s(line.substr(2));
-			short a, b, c;
+			int a, b, c;
 			s >> a; s >> b; s >> c;
 			a--; b--; c--;
-			elements.push_back(a); elements.push_back(b); elements.push_back(c);
+			//TODO Create Face object here
+			faces.push_back(a); faces.push_back(b); faces.push_back(c);
 		}
 		else if (line[0] == '#')
 		{
-			/* ignoring this line */
+			// Ignore comments
 		}
 		else
 		{
-			/* ignoring this line */
+			//Ignore other lines
 		}
 	}
+
+	
 }
