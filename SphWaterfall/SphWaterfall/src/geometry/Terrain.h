@@ -2,7 +2,7 @@
 #include "../data/Vector3.h"
 #include "Face.h"
 
-class Terrain {
+class Terrain{
 public:
 	Terrain(int verticeCount, int faceCount);
 

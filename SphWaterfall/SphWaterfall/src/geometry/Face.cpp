@@ -1,6 +1,6 @@
 #pragma once
 #include "Face.h"
 
-Face::Face() {
+Face::Face(int a, int b, int c) {
 
 }

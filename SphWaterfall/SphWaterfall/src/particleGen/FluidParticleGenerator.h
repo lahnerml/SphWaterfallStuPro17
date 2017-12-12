@@ -1,4 +1,6 @@
 #pragma once
+#include "vector"
+
 #include "../data/Vector3.h"
 #include "../data/ISphParticle.h" 
 
