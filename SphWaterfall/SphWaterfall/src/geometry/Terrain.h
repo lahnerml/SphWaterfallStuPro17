@@ -5,7 +5,7 @@
 #include "../data/Vector3.h"
 #include "Face.h"
 
-class Terrain {
+class Terrain{
 public:
 	Terrain(std::vector<Vector3> vertices, std::vector<Vector3> normals, std::vector<Vector3> faces);
 
