@@ -6,6 +6,7 @@
 
 class ParticleDomain {
 public:
+	ParticleDomain();
 	ParticleDomain(ISphParticle particles[], Vector3, Vector3);
 	~ParticleDomain();
 

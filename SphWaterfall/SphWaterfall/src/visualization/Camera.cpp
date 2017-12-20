@@ -30,7 +30,7 @@ Vector3 Camera::getDirection() {
 }
 
 Frame Camera::getFrame(unsigned int frameID) {
-	if (frames.size >= frameID) {
+	if (frames.size() >= frameID) {
 		return Frame();
 		// ^ TODO changend by Magnus
 	}
