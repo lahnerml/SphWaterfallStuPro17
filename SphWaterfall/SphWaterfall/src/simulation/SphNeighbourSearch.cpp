@@ -10,9 +10,11 @@ SphNeighbourSearch::~SphNeighbourSearch() {
 }
 
 std::vector<ISphParticle> findNeigbours(ISphParticle, ParticleDomain domains[]) {
-	return _Null_;
+	std::vector<ISphParticle> neighbours;
+	return neighbours;
 }
 
 std::vector<ParticleDomain> findRelevantNeighbourDomains(ISphParticle, ParticleDomain domains[]){
-	return _Null_;
+	std::vector<ParticleDomain> relevantNeighbourDomain;
+	return relevantNeighbourDomain;
 }
