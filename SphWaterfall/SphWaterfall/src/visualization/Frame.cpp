@@ -13,7 +13,7 @@ Frame::Frame(unsigned int width, unsigned int height) {
 }
 
 Pixel Frame::getPixel(unsigned int x, unsigned int y) {
-	if (pixels.size >= y*height + x) {
+	if (pixels.size() >= y*height + x) {
 		return Pixel();
 		// ^ TODO changend by Magnus
 	}
