@@ -23,8 +23,9 @@ int main(int argc, char** argv) {
 		" out of %d processors\n",
 		processorName, worldRank, worldSize);
 
+	MPI_Wait;
+
 	// Finalize the MPI environment.
 	MPI_Finalize();
 
-	system("pause");
 }
