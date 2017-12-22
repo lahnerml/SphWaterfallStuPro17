@@ -14,15 +14,17 @@ int main(int argc, char** argv) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 
 	// Get the name of the processor
-	char processor_name[MPI_MAX_PROCESSOR_NAME];
+	char processorName[MPI_MAX_PROCESSOR_NAME];
 	int nameLen;
-	MPI_Get_processor_name(processor_name, &nameLen);
+	MPI_Get_processor_name(processorName, &nameLen);
 
 	// Print off a hello world message
 	printf("Hello world from processor %s, rank %d"
 		" out of %d processors\n",
-		processor_name, worldRank, worldSize);
+		processorName, worldRank, worldSize);
 
 	// Finalize the MPI environment.
 	MPI_Finalize();
+
+	system("pause");
 }
