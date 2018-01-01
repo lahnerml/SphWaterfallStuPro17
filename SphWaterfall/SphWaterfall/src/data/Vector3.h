@@ -2,9 +2,16 @@
 
 class Vector3 {
 	public:
-		float x, y, z;
+		double x, y, z;
 		Vector3();
-		Vector3(float, float, float);
+		Vector3(double, double, double);
 		~Vector3();
+
+		friend Vector3 operator*(const Vector3&, double);
+		friend Vector3 operator*(double, const Vector3&);
+		friend Vector3 operator/(const Vector3&, double);
+
+		double length() const;
+		Vector3 normalize() const;
 	private:
 };
