@@ -6,7 +6,7 @@
 
 class FluidParticleGenerator {
 public:
-	
+	FluidParticleGenerator();
 	FluidParticleGenerator(double disposalHeight, Vector3 spawn);
 	ISphParticle spawnParticle();
 	void collectInactive();
