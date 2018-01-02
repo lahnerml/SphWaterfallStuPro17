@@ -34,6 +34,11 @@ Vector3 operator/(const Vector3& vector, double factor) {
 	return Vector3(vector.x / factor, vector.y / factor, vector.z / factor);
 }
 
+Vector3 operator+(const Vector3& a, const Vector3& b)
+{
+	return Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
 double Vector3::length() const {
 	return sqrt(x * x + y * y + z * z);
 }
