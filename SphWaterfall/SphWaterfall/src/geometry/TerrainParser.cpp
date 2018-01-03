@@ -66,6 +66,4 @@ void TerrainParser::readObjFile(std::string fileName, std::vector<Vector3> &vert
 			//Ignore other lines
 		}
 	}
-
-	
 }
