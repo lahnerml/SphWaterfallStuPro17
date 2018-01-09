@@ -69,8 +69,8 @@ void loadMesh(std::queue<std::string> &tokens)
 		readNextCombinedToken(tokens, fileName);
 		std::cout << fileName << std::endl;
 
-		//Terrain loadedFile = TerrainParser::loadFromFile(fileName);
-		//std::cout << "Vertices: " << loadedFile.getVertexCount() << " Faces: " << loadedFile.getFaceCount() << std::endl;
+		Terrain loadedFile = TerrainParser::loadFromFile(fileName);
+		std::cout << "Vertices: " << loadedFile.getVertexCount() << " Faces: " << loadedFile.getFaceCount() << std::endl;
 	}
 	else
 	{
