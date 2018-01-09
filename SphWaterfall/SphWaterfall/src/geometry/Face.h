@@ -2,7 +2,12 @@
 
 class Face {
 public:
-	int vertices[];
 	Face(int a, int b, int c);
 
+
+private:
+	int a;
+	int b;
+	int c;
+	int vertices[];
 };
