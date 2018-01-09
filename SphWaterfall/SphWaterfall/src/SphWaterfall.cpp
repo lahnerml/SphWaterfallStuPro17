@@ -4,6 +4,8 @@
 #include <vector>
 #include <queue>
 
+#include "geometry/TerrainParser.h"
+
 void trim(std::string &str) {
 	int pos1 = str.find_first_not_of(" ");
 	int pos2 = str.find_last_not_of(" ");
@@ -22,6 +24,39 @@ bool readNextToken(std::queue<std::string> &tokens, std::string &nextToken)
 	}
 }
 
+bool readNextCombinedToken(std::queue<std::string> &tokens, std::string &nextToken) {
+	std::string tempToken = "", resultToken = "";
+	
+	//Read first token
+	if (!readNextToken(tokens, tempToken))
+		return false;
+	if (tempToken.find_first_of('\"') != 0) {
+		//No combined token
+		nextToken = tempToken;
+		return true;
+	}
+	if (tempToken.find_last_of('\"') == tempToken.length() - 1) {
+		//Combined token without spaces
+		nextToken = tempToken.substr(1, tempToken.length() - 2);
+		return true;
+	}
+
+	//Read following tokens
+	do {
+		resultToken += tempToken + " ";
+		if (!readNextToken(tokens, tempToken)) {
+			// No second quotation mark
+			nextToken = resultToken.substr(1);
+			return true;
+		}
+	} while (tempToken.find_last_of('\"') != tempToken.length() - 1);
+
+	//Return combined token
+	resultToken += tempToken;
+	nextToken = resultToken.substr(1, resultToken.length() - 2);
+	return true;
+}
+
 /* -_-_-_Comands Begin_-_-_- */
 
 void loadMesh(std::queue<std::string> &tokens)
@@ -31,8 +66,11 @@ void loadMesh(std::queue<std::string> &tokens)
 	//Read fileName Parameter
 	if (readNextToken(tokens, paramName) && paramName == "-p") {
 		fileName = "";
-		readNextToken(tokens, fileName);
-		std::cout << fileName << std::endl;
+		readNextCombinedToken(tokens, fileName);
+		std::cout << "\"" << fileName << "\"" << std::endl;
+
+		//Terrain loadedFile = TerrainParser::loadFromFile(fileName);
+		//std::cout << "Vertices: " << loadedFile.getVertexCount() << " Faces: " << loadedFile.getFaceCount() << std::endl;
 	}
 	else
 	{
