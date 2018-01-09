@@ -10,20 +10,15 @@ void trim(std::string &str) {
 	str = str.substr(pos1, pos2 - pos1 + 1);
 }
 
-bool readParameter(char paramName, std::istringstream &parameters)
-{
-	std::string nameToken, valueToken;
-	return (parameters >> nameToken && nameToken == "-" + paramName);
-}
-
-std::string readNextToken(std::queue<std::string> &tokens)
+bool readNextToken(std::queue<std::string> &tokens, std::string &nextToken)
 {
 	if (tokens.empty()) {
-		return "";
-	} else {
-		auto result = tokens.front();
+		return false;
+	}
+	else {
+		nextToken = tokens.front();
 		tokens.pop();
-		return result;
+		return true;
 	}
 }
 
@@ -34,12 +29,14 @@ void loadMesh(std::queue<std::string> &tokens)
 	std::string paramName, fileName;
 
 	//Read fileName Parameter
-	paramName = readNextToken(tokens);
-	if (paramName != "-p") {
-		std::cout << "Missing path parameter '-p'" << std::endl;
-	} else {
-		fileName = readNextToken(tokens);
+	if (readNextToken(tokens, paramName) && paramName == "-p") {
+		fileName = "";
+		readNextToken(tokens, fileName);
 		std::cout << fileName << std::endl;
+	}
+	else
+	{
+		std::cout << "Missing path parameter '-p'" << std::endl;
 	}
 }
 
@@ -61,7 +58,7 @@ void readCommands()
 	std::queue<std::string> tokens;
 
 	while (true)
-	{	
+	{
 		//Read command
 		std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
 		std::getline(std::cin, inputLine);
