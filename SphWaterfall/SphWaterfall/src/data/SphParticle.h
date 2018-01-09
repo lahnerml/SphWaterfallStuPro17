@@ -8,6 +8,7 @@ class SphParticle : public ISphParticle {
 		SphParticle(Vector3, Vector3);
 		~SphParticle();
 
+		Vector3 position;
 		Vector3 velocity;
 	private:
 };

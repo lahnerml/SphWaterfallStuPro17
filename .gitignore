@@ -1,2 +1,13 @@
+# VS
 SphWaterfall/build/
 .vs/
+
+# CLion
+**/.idea/
+**/CMakeFiles/
+**/target/
+**/*.iml
+.settings/
+
+# CMake
+cmake-build-debug/

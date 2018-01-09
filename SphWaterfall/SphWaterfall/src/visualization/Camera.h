@@ -1,7 +1,7 @@
 #pragma once
 #include "Frame.h"
-#include "Vector3.h"
-#include "ISphParticle.h"
+#include "../data/ISphParticle.h"
+#include "../data/Vector3.h"
 #include <vector>
 #include <string>
 
