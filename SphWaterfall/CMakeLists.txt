@@ -9,7 +9,7 @@ endif()
 
 find_package(MPI REQUIRED)
 # add this line only when you are using openmpi which has a different c++ bindings
-# add_definitions(-DOMPI_SKIP_MPICXX)
+add_definitions(-DOMPI_SKIP_MPICXX)
 
 include("SphWaterfall/src/CMakeLists.txt")
 
