@@ -38,6 +38,6 @@ int Terrain::getFaceVertexId(int index, int vertexNr)
 		|| vertexNr < 0 || vertexNr > 2)
 		return -1;
 
-	return this->faces[index].vertices[vertexNr];
+	return 0; //this->faces[index].vertices[vertexNr];
 	//TODO Implement .vertices[]
 }
