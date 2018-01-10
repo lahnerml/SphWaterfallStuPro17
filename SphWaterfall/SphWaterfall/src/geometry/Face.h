@@ -2,7 +2,8 @@
 
 class Face {
 public:
-	int vertices[];
-	Face(int, int, int);
-
+	Face(int a, int b, int c);
+	int a;
+	int b;
+	int c;
 };
