@@ -4,6 +4,7 @@
 #include <vector>
 #include <queue>
 
+	int worldSize;
 #include "geometry/TerrainParser.h"
 
 void trim(std::string &str) {
