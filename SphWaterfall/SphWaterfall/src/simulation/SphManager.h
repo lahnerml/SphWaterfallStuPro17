@@ -1,5 +1,6 @@
 #pragma once
 #include "ParticleDomain.h"
+#include "mpi.h"
 
 class SphManager {
 public:
