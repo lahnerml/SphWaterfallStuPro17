@@ -80,7 +80,7 @@ void CUI::loadMesh(std::queue<std::string> &tokens)
 void CUI::simulate(std::queue<std::string> &tokens)
 {
 	// TODO add correct dimensions
-	SphManager sphManager = SphManager::SphManager(Vector3(10, 10, 10));
+	SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10));
 }
 
 void CUI::showHelp()
@@ -97,9 +97,6 @@ void CUI::showHelp()
 
 void CUI::readCommands(int* buffer)
 {
-	std::string inputLine, command;
-	std::queue<std::string> tokens;
-
 	while (true)
 	{
 		//Read command

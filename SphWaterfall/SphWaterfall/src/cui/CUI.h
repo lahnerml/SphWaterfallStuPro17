@@ -19,5 +19,6 @@ public:
 	void showHelp();
 	void readCommands(int* buffer);
 private:
-
+	std::string inputLine, command;
+	std::queue<std::string> tokens;
 };

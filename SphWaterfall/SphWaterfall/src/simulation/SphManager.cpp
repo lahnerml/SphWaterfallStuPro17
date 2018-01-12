@@ -7,7 +7,7 @@
 SphManager::SphManager(const Vector3& domain_dimensions) :
 	domain_dimensions(domain_dimensions)
 {
-	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 }
 
 SphManager::~SphManager() {
@@ -127,7 +127,7 @@ int SphManager::computeTargetDomain(const ISphParticle& particle) const{
 }
 
 int SphManager::computeTargetProcess(const ISphParticle& particle) const {
-	return computeTargetDomain(particle) % worldSize;
+	return computeTargetDomain(particle) % world_size;
 }
 
 ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {

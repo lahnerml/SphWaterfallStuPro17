@@ -18,8 +18,8 @@ public:
 private:
 	std::vector<ISphParticle> particles;
 	std::vector<ISphParticle> static_particles;
-	std::vector<int> neighbourDomains;
-	int particlesOutsideDomain;
+	std::vector<int> neighbour_domains;
+	int particles_outside_domain;
 	Vector3 origin;
 	Vector3 dimensions;
 };

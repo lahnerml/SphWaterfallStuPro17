@@ -30,8 +30,8 @@ int main(int argc, char** argv)
 
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	int worldSize;
-	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+	int world_size;
+	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 	CUI cui = CUI::CUI();
 	if (rank == 0) {
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	}
 
 	MPI_Bcast(buffer, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	printf("Hello world from processor rank %d out of %d processors, buffer is %d\n", rank, worldSize, buffer[0]);
+	printf("Hello world from processor rank %d out of %d processors, buffer is %d\n", rank, world_size, buffer[0]);
 
 	if (*buffer == 1) {
 		loadMesh();

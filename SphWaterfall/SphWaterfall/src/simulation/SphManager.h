@@ -10,8 +10,9 @@ public:
 
 	void update(double);
 private:
-	int worldSize;
+	int world_size;
 	Vector3 domain_dimensions;
+	std::unordered_map<int, ParticleDomain> domains;
 
 	void clearAccellerations();
 	void updateVelocity(ISphParticle);
@@ -27,6 +28,4 @@ private:
 	int hash(const Vector3&) const;
 	Vector3& unhash(const int&) const;
 	ParticleDomain& getParticleDomain(const int&);
-
-	std::unordered_map<int, ParticleDomain> domains;
 };

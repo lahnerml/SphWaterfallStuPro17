@@ -21,12 +21,12 @@ ParticleDomain::~ParticleDomain() {
 }
 
 std::vector<ISphParticle> ParticleDomain::removeParticlesOutsideDomain() {
-	particlesOutsideDomain = 0;
+	particles_outside_domain = 0;
 	std::vector<ISphParticle> outsideParticles;
 	for (int i = 0; i < particles.size(); i++) {
 		ISphParticle each_particle = particles.at(i);
 		if (!(each_particle.position - origin).in_range_of(dimensions)) {
-			particlesOutsideDomain++;
+			particles_outside_domain++;
 			outsideParticles.push_back(each_particle);
 
 			auto it = particles.begin() + i;
