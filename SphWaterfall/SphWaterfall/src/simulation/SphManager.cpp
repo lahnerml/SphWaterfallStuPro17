@@ -60,6 +60,18 @@ void SphManager::exchangeParticles() {
 		}
 	}
 
+	std::vector<ISphParticle> all_new_particles;
+	std::vector<ISphParticle> incoming_particles;
+
+	// don't send to yourself
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	int count = target_map.count(rank);
+	if (count != 0) {
+		all_new_particles = target_map.at(rank);
+		target_map.erase(rank);
+	}
+
 	for (auto vector : target_map) {
 		MPI_Request request;
 		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(ISphParticle), MPI_BYTE, vector.first, 0, MPI_COMM_WORLD, &request);
@@ -68,12 +80,10 @@ void SphManager::exchangeParticles() {
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
+	// receive until there is nothing left
 	int flag;
 	MPI_Status status;
 	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-
-	std::vector<ISphParticle> all_new_particles;
-	std::vector<ISphParticle> incoming_particles;
 
 	while (flag) {
 		int source = status.MPI_SOURCE;
@@ -88,20 +98,35 @@ void SphManager::exchangeParticles() {
 		// next message
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	}
+
+	add_particles(all_new_particles);
+
+	MPI_Barrier(MPI_COMM_WORLD);
 }
 
-int SphManager::computeTargetDomain(const ISphParticle& particle) {
-	Vector3 targetDomainCoords = particle.position % domain_dimensions;
+int SphManager::hash(const Vector3& vector) const {
 	int x, y, z;
-	x = static_cast<int>(targetDomainCoords.x);
-	y = static_cast<int>(targetDomainCoords.y);
-	z = static_cast<int>(targetDomainCoords.z);
+	x = static_cast<int>(vector.x);
+	y = static_cast<int>(vector.y);
+	z = static_cast<int>(vector.z);
 	y = y << 10;
 	z = z << 20;
 	return (x + y + z);
 }
 
-int SphManager::computeTargetProcess(const ISphParticle& particle) {
+Vector3& SphManager::unhash(const int& unique_id) const {
+	int z = unique_id >> 20;
+	int y = (unique_id - (z << 20)) >> 10;
+	int x = unique_id - (z << 20) - (y << 10);
+	return Vector3(x, y, z);
+}
+
+int SphManager::computeTargetDomain(const ISphParticle& particle) const{
+	Vector3 targetDomainCoords = particle.position % domain_dimensions;
+	return hash(targetDomainCoords);
+}
+
+int SphManager::computeTargetProcess(const ISphParticle& particle) const {
 	return computeTargetDomain(particle) % worldSize;
 }
 
@@ -109,10 +134,7 @@ ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
 	int count = domains.count(unique_id);
 
 	if (count == 0) {
-		int z = unique_id >> 20;
-		int y = (unique_id - (z << 20)) >> 10;
-		int x = unique_id - (z << 20) - (y << 10);
-		domains.at(unique_id) = ParticleDomain(Vector3(x, y, z), domain_dimensions);
+		domains.at(unique_id) = ParticleDomain(unhash(unique_id), domain_dimensions);
 	}
 
 	return domains.at(unique_id);

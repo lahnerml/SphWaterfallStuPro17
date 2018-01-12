@@ -22,8 +22,10 @@ private:
 
 	void add_particles(const std::vector<ISphParticle>&);
 	void exchangeParticles();
-	int computeTargetProcess(const ISphParticle&);
-	int computeTargetDomain(const ISphParticle&);
+	int computeTargetProcess(const ISphParticle&) const;
+	int computeTargetDomain(const ISphParticle&) const;
+	int hash(const Vector3&) const;
+	Vector3& unhash(const int&) const;
 	ParticleDomain& getParticleDomain(const int&);
 
 	std::unordered_map<int, ParticleDomain> domains;
