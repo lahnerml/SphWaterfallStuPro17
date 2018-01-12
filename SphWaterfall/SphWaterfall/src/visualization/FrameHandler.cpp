@@ -1,4 +1,4 @@
-#include "ISphParticle.h"
+#include "../data/ISphParticle.h"
 #include "Camera.h"
 #include <map>
 #include <pair>
