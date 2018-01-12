@@ -11,14 +11,17 @@ class Vector3 {
 		friend Vector3 operator*(const double, const Vector3&);
 
 		friend Vector3 operator/(const Vector3&, const double);
+		friend Vector3 operator%(const Vector3&, const double);
+		friend Vector3 operator%(const Vector3&, const Vector3&);
 
 		friend Vector3 operator+(const Vector3&, const Vector3&);
 		friend Vector3 operator-(const Vector3&);
 		friend Vector3 operator-(const Vector3&, const Vector3&);
 
 		
-		bool all_dimensions_smaller_or_equal_then(const Vector3&) const;
+		bool in_range_of(const Vector3&) const;
 		double length() const;
 		Vector3 normalize() const;
+
 	private:
 };

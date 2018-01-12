@@ -79,7 +79,8 @@ void CUI::loadMesh(std::queue<std::string> &tokens)
 
 void CUI::simulate(std::queue<std::string> &tokens)
 {
-	SphManager sphManager = SphManager::SphManager();
+	// TODO add correct dimensions
+	SphManager sphManager = SphManager::SphManager(Vector3(10, 10, 10));
 }
 
 void CUI::showHelp()

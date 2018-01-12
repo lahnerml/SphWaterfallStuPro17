@@ -34,6 +34,14 @@ Vector3 operator/(const Vector3& vector, const double factor) {
 	return Vector3(vector.x / factor, vector.y / factor, vector.z / factor);
 }
 
+Vector3 operator%(const Vector3& vector, const double factor) {
+	return Vector3(fmod(vector.x, factor), fmod(vector.y, factor), fmod(vector.z, factor));
+}
+
+Vector3 operator%(const Vector3& a, const Vector3& b) {
+	return Vector3(fmod(a.x, b.x), fmod(a.y, b.y), fmod(a.z, b.z));
+}
+
 Vector3 operator+(const Vector3& a, const Vector3& b)
 {
 	return Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -49,9 +57,9 @@ Vector3 operator-(const Vector3& a, const Vector3& b)
 	return Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-bool Vector3::all_dimensions_smaller_or_equal_then(const Vector3& b) const
+bool Vector3::in_range_of(const Vector3& b) const
 {
-	return x <= b.x && y <= b.y && z <= b.z;
+	return x >= 0 && x < b.x && y >= 0 && y < b.y && z >= 0 && z <= b.z;
 }
 
 double Vector3::length() const {

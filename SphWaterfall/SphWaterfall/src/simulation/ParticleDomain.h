@@ -7,14 +7,18 @@
 class ParticleDomain {
 public:
 	ParticleDomain();
-	ParticleDomain(const ISphParticle* particles, const int& particle_count, const Vector3& center, const Vector3& size);
+	ParticleDomain(const Vector3&, const Vector3&);
 	~ParticleDomain();
 
-	void updateParticlesOutsideDomain();
+	std::vector<ISphParticle> removeParticlesOutsideDomain();
+
+	const Vector3& getDimensions() const;
+	void addParticle(const ISphParticle&);
 
 private:
 	std::vector<ISphParticle> particles;
-	std::vector<ParticleDomain> neighbourDomains;
+	std::vector<ISphParticle> static_particles;
+	std::vector<int> neighbourDomains;
 	int particlesOutsideDomain;
 	Vector3 origin;
 	Vector3 dimensions;

@@ -1,5 +1,6 @@
 #pragma once
 #include "ParticleDomain.h"
+#include <iterator>
 
 ParticleDomain::ParticleDomain() :
 	origin(Vector3()),
@@ -8,25 +9,39 @@ ParticleDomain::ParticleDomain() :
 	ParticleDomain::particles = std::vector<ISphParticle>(0);
 }
 
-ParticleDomain::ParticleDomain(const ISphParticle* particles, const int& particle_count, const Vector3& origin, const Vector3& size) : 
+ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& size) : 
 	origin(origin),
 	dimensions(size)
 {
-	ParticleDomain::particles = std::vector<ISphParticle>(particle_count);
-	for (int i = 0; i < particle_count; i++) {
-		ParticleDomain::particles.push_back(particles[i]);
-	}
+	ParticleDomain::particles = std::vector<ISphParticle>();
 }
 
 ParticleDomain::~ParticleDomain() {
 
 }
 
-void ParticleDomain::updateParticlesOutsideDomain() {
+std::vector<ISphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 	particlesOutsideDomain = 0;
-	for (auto each_particle : particles) {
-		if ((each_particle.position - origin).all_dimensions_smaller_or_equal_then(dimensions)) {
+	std::vector<ISphParticle> outsideParticles;
+	for (int i = 0; i < particles.size(); i++) {
+		ISphParticle each_particle = particles.at(i);
+		if (!(each_particle.position - origin).in_range_of(dimensions)) {
 			particlesOutsideDomain++;
+			outsideParticles.push_back(each_particle);
+
+			auto it = particles.begin() + i;
+			std::move(it, it + 1, std::inserter(outsideParticles, outsideParticles.end()));
+			particles.erase(it, it + 1);
 		}
 	}
+
+	return outsideParticles;
+}
+
+const Vector3& ParticleDomain::getDimensions() const {
+	return dimensions;
+}
+
+void ParticleDomain::addParticle(const ISphParticle& particle) {
+	particles.push_back(particle);
 }
