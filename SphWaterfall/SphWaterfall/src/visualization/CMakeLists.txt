@@ -6,7 +6,6 @@ target_sources(SphWaterfall
 		"${CMAKE_CURRENT_LIST_DIR}/DebugObject.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Frame.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Frame.h"
-		"${CMAKE_CURRENT_LIST_DIR}/FrameHandler.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Pixel.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Pixel.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Ray.cpp"
