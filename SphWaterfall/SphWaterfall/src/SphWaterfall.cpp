@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "mpi.h"
 
 #include "cui/CUI.h"
@@ -59,4 +57,6 @@ int main(int argc, char** argv)
 		MPI_Wait;
 	}
 	MPI_Finalize();
+
+
 }

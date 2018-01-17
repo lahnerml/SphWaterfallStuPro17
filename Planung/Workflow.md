@@ -23,3 +23,7 @@
 ## Weekly Meeting
 
 - There are weekly meetings of at least one member per team on Wednsday 8pm
+
+## Testing
+
+Boost Test

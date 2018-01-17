@@ -1,5 +1,6 @@
 #pragma once
 #include "CUI.h"
+#include "../visualization/VisualizationManager.h"
 
 CUI::CUI() {
 
@@ -83,12 +84,37 @@ void CUI::simulate(std::queue<std::string> &tokens)
 	SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10));
 }
 
+void render()
+{
+	init(Vector3(0, 0, -30), Vector3(0, 0, 1), 1920, 1080);
+
+	addCamera(Vector3(-30, 0, -30), normalizeVector(Vector3(1, 0, 1)), 1920, 1080);
+
+	std::vector<SphParticle> particles;
+	SphParticle particle = SphParticle(Vector3(0, 0, 0), Vector3(0, 0, 0));
+	SphParticle particle2 = SphParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));
+	SphParticle particle3 = SphParticle(Vector3(5, 5, 0), Vector3(0, 0, 0));
+	SphParticle particle4 = SphParticle(Vector3(-5, -5, -5), Vector3(0, 0, 0));
+
+	particles.emplace_back(particle);
+	particles.emplace_back(particle2);
+	particles.emplace_back(particle3);
+	particles.emplace_back(particle4);
+
+	std::cout << "Rendering, please wait..." << std::endl;
+
+	debugRenderFrame(particles);
+
+	std::cout << "Done!" << std::endl;
+}
+
 void CUI::showHelp()
 {
 	std::cout << "loadMesh -p" << std::endl;
 	std::cout << "particleGen [-w] [-f] [-e]" << std::endl;
 	std::cout << "moveShutter -t (-u/-d) [-l]" << std::endl;
 	std::cout << "simulate -s -e -r -g -m -t" << std::endl;
+	std::cout << "render" << std::endl;
 	std::cout << "help" << std::endl;
 	std::cout << "exit" << std::endl;
 }
@@ -118,7 +144,7 @@ void CUI::readCommands(int* buffer)
 
 			if (command == "loadMesh") {
 				buffer[0] = 1;
-				//loadMesh(tokens);
+				loadMesh(tokens);
 			}
 			else if (command == "particleGen") {
 				buffer[0] = 2;
@@ -129,6 +155,11 @@ void CUI::readCommands(int* buffer)
 			else if (command == "simulate") {
 				buffer[0] = 4;
 				//simulate(tokens);
+			}
+			else if (command == "render")
+			{
+				buffer[0] = 5;
+				render();
 			}
 			else if (command == "help" || command == "?") {
 				showHelp();
