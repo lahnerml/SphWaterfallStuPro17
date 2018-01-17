@@ -9,6 +9,4 @@ public:
 	StaticParticleGenerator();
 	std::vector<ISphParticle> generateStaticParticles(Terrain source);
 
-
-
 };
