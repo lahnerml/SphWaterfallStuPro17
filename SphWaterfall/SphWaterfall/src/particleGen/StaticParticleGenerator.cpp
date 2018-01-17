@@ -15,3 +15,7 @@ std::vector<ISphParticle> StaticParticleGenerator :: generateStaticParticles(Ter
 	return staticParticles;
 
 }
+
+
+
+
