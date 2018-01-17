@@ -14,6 +14,13 @@ Terrain::Terrain(std::vector<Vector3> &vertices, std::vector<Vector3> &normals, 
 	}
 }
 
+Terrain::Terrain()
+{
+	vertices = std::vector<Vector3>();
+	normals = std::vector<Vector3>();
+	faces = std::vector<Face>();
+}
+
 size_t Terrain::getVertexCount()
 {
 	return this->vertices.size();

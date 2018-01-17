@@ -8,6 +8,7 @@
 class Terrain{
 public:
 	Terrain(std::vector<Vector3> &vertices, std::vector<Vector3> &normals, std::vector<int> &faces);
+	Terrain();
 
 	size_t getVertexCount();
 	size_t getFaceCount();

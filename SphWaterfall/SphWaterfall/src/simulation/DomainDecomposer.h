@@ -10,4 +10,5 @@ public:
 	void decompose(ParticleDomain domains[]);
 private:
 	unsigned int totalDomains;
+	ParticleDomain domains[];
 };
