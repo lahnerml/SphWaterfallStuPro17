@@ -7,16 +7,11 @@ StaticParticleGenerator::StaticParticleGenerator() {
 }
 
 std::vector<ISphParticle> StaticParticleGenerator :: generateStaticParticles(Terrain source) {
-	std::vector<ISphParticle> staticParticle;
+	std::vector<ISphParticle> staticParticles;
 	for (int i = 0; i < source.getVertexCount(); i++) {
-		SphParticle(Vector3);
-		staticParticle.push_back(Vector3);
+		staticParticles.push_back(SphParticle(source.getVertexPosition(i)));
 		
 	}
-	return staticParticle;
+	return staticParticles;
 
 }
-
-
-
-
