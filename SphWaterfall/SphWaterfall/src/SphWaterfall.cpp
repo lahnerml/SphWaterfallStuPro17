@@ -33,8 +33,7 @@ int main(int argc, char** argv)
 
 
 	if (rank == 0) {
-		CUI cui = CUI::CUI();
-		cui.readCommands(buffer);
+		CUI::readCommands(buffer);
 	}
 
 	MPI_Bcast(buffer, 1, MPI_INT, 0, MPI_COMM_WORLD);
