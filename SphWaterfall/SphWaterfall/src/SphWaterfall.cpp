@@ -1,6 +1,7 @@
 #include "mpi.h"
 
 #include "cui/CUI.h"
+#include <thread>
 
 
 void loadMesh() {
@@ -23,6 +24,7 @@ int main(int argc, char** argv)
 {
 	MPI_Init(&argc, &argv);
 
+	std::thread cuiThread;
 	int *buffer;
 	buffer = (int*)malloc(sizeof(int));
 
@@ -33,7 +35,7 @@ int main(int argc, char** argv)
 
 
 	if (rank == 0) {
-		CUI::readCommands(buffer);
+		cuiThread = std::thread(CUI::readCommands, buffer);
 	}
 
 	MPI_Bcast(buffer, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -55,6 +57,10 @@ int main(int argc, char** argv)
 	if (rank == 0) {
 		system("pause");
 		MPI_Wait;
+	}
+
+	if (rank == 0) {
+		cuiThread.join();
 	}
 	MPI_Finalize();
 
