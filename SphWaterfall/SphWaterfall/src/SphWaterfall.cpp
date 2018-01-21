@@ -31,8 +31,9 @@ int main(int argc, char** argv)
 	int world_size;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-	CUI cui = CUI::CUI();
+
 	if (rank == 0) {
+		CUI cui = CUI::CUI();
 		cui.readCommands(buffer);
 	}
 
