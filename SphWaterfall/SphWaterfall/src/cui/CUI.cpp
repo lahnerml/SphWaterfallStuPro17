@@ -121,58 +121,55 @@ namespace CUI {
 	/* -_-_-_Comands End_-_-_- */
 
 
-	void readCommands(int* buffer)
+	void readCommand(int* command_buffer)
 	{
 		std::string inputLine, command;
 		std::queue<std::string> tokens;
 
-		while (true)
+		//Read command
+		std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
+		std::getline(std::cin, inputLine);
+		trim(inputLine);
+
+		//Tokenize command
+		std::istringstream tokenStream(inputLine);
+		tokens = std::queue<std::string>();
+		while (tokenStream >> command)
+			tokens.push(command);
+
+		//Execute command
+		if (!tokens.empty())
 		{
-			//Read command
-			std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
-			std::getline(std::cin, inputLine);
-			trim(inputLine);
+			command = tokens.front();
+			tokens.pop();
 
-			//Tokenize command
-			std::istringstream tokenStream(inputLine);
-			tokens = std::queue<std::string>();
-			while (tokenStream >> command)
-				tokens.push(command);
-
-			//Execute command
-			if (!tokens.empty())
+			if (command == "loadMesh") {
+				command_buffer[0] = 1;
+				loadMesh(tokens);
+			}
+			else if (command == "particleGen") {
+				command_buffer[0] = 2;
+			}
+			else if (command == "moveShutter") {
+				command_buffer[0] = 3;
+			}
+			else if (command == "simulate") {
+				command_buffer[0] = 4;
+				//simulate(tokens);
+			}
+			else if (command == "render")
 			{
-				command = tokens.front();
-				tokens.pop();
-
-				if (command == "loadMesh") {
-					buffer[0] = 1;
-					loadMesh(tokens);
-				}
-				else if (command == "particleGen") {
-					buffer[0] = 2;
-				}
-				else if (command == "moveShutter") {
-					buffer[0] = 3;
-				}
-				else if (command == "simulate") {
-					buffer[0] = 4;
-					//simulate(tokens);
-				}
-				else if (command == "render")
-				{
-					buffer[0] = 5;
-					render();
-				}
-				else if (command == "help" || command == "?") {
-					showHelp();
-				}
-				else if (command == "exit") {
-					break;
-				}
-				else {
-					std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
-				}
+				command_buffer[0] = 5;
+				render();
+			}
+			else if (command == "help" || command == "?") {
+				showHelp();
+			}
+			else if (command == "exit") {
+				command_buffer[0] = 0;
+			}
+			else {
+				std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
 			}
 		}
 	}

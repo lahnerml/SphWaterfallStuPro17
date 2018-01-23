@@ -10,5 +10,5 @@
 
 namespace CUI {
 	void trim(std::string &str);
-	void readCommands(int* buffer);
+	void readCommand(int* command_buffer);
 }
