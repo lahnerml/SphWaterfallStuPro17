@@ -7,6 +7,9 @@ class ISphParticle {
 		Vector3 velocity;
 		double mass;
 		double density;
+		double viscosity;
 
+		void setDensity(double);
+		void setViscosity(double);
 	private:
 };
