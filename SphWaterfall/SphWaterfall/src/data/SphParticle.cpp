@@ -25,10 +25,10 @@ SphParticle::~SphParticle() {
 }
 
 
-void SphParticle::setDensity(double density) {
+void ISphParticle::setDensity(double density) {
 	this->density = density;
 }
 
-void SphParticle::setViscosity(double viscosity) {
+void ISphParticle::setViscosity(double viscosity) {
 	this->viscosity = viscosity;
 }
