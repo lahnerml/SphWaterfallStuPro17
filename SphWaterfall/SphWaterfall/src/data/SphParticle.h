@@ -11,11 +11,13 @@ class SphParticle : public ISphParticle {
 
 		void setDensity(double);
 		void setViscosity(double);
-
+		
 		Vector3 position;
 		Vector3 velocity;
 		double mass;
 		double density;
 		double viscosity;
 	private:
+
+
 };
