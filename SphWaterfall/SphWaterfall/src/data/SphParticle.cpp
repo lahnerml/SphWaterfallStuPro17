@@ -14,6 +14,21 @@ SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
 	velocity(velocity) {
 }
 
+SphParticle::SphParticle(Vector3 position, Vector3 velocity, double mass) :
+	position(position),
+	velocity(velocity),
+	mass(mass){
+}
+
 SphParticle::~SphParticle() {
 
+}
+
+
+void SphParticle::setDensity(double density) {
+	this->density = density;
+}
+
+void SphParticle::setViscosity(double viscosity) {
+	this->viscosity = viscosity;
 }

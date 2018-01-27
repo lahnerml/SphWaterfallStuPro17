@@ -15,10 +15,10 @@ private:
 	std::unordered_map<int, ParticleDomain> domains;
 
 	void clearAccellerations();
-	void updateVelocity(ISphParticle);
-	void computeAccelleration(ISphParticle);
-	void computeDenity(ISphParticle);
-	void computeViscosity(ISphParticle);
+	void updateVelocity(ISphParticle& particle);
+	void computeAccelleration(ISphParticle& particle);
+	void computeDensity(ISphParticle&);
+	void computeViscosity(ISphParticle& particle);
 	void findNeighbourDomains(ParticleDomain);
 
 	void add_particles(const std::vector<ISphParticle>&);
