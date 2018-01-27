@@ -22,20 +22,24 @@ void SphManager::clearAccellerations() {
 
 }
 
-void SphManager::updateVelocity(ISphParticle) {
+void SphManager::updateVelocity(ISphParticle& particle) {
 
 }
 
-void SphManager::computeAccelleration(ISphParticle) {
+void SphManager::computeAccelleration(ISphParticle& particle) {
 
 }
 
-void SphManager::computeDenity(ISphParticle) {
-
+void SphManager::computeDensity(ISphParticle& particle) {
+	double density;
+	density = 0; // to be implemented
+	particle.setDensity(density);
 }
 
-void SphManager::computeViscosity(ISphParticle) {
-
+void SphManager::computeViscosity(ISphParticle& particle) {
+	double viscosity;
+	viscosity = 0; // to be implemented
+	particle.setViscosity(viscosity);
 }
 
 void SphManager::findNeighbourDomains(ParticleDomain) {
