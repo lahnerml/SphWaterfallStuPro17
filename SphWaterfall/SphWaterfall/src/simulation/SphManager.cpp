@@ -169,3 +169,12 @@ void SphManager::add_particles(const std::vector<ISphParticle>& new_particles) {
 		getParticleDomain(domain_id);
 	}
 }
+
+MPI_Request& SphManager::requestRimParticles(const Vector3& neighbourDomain, const Vector3& source) {
+	int domain_id = hash(neighbourDomain);
+	int request_id = hash(source);
+
+	MPI_Request request;
+	MPI_Isend(&request_id, 1, MPI_INT, domain_id, request_id % world_size, MPI_COMM_WORLD, &request);
+	return request;
+}
