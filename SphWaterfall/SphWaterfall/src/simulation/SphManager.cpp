@@ -30,15 +30,15 @@ void SphManager::clearAccellerations() {
 }
 
 void SphManager::updateVelocity(ISphParticle& particle) {
-
 	computeDensity(particle);
 	computeViscosity(particle);
-	computeAccelleration(particle);
+	Vector3 current_accelleration = computeAccelleration(particle);
+
 }
 
-void SphManager::computeAccelleration(ISphParticle& particle) {
-
-	
+Vector3 SphManager::computeAccelleration(ISphParticle& particle) {
+	Vector3 accelleration;
+	return accelleration;
 }
 
 void SphManager::computeDensity(ISphParticle& particle) {
