@@ -7,7 +7,6 @@
 
 #include "../geometry/TerrainParser.h"
 #include "../simulation/SphManager.h"
-#include "../visualization/VisualizationManager.h"
 
 namespace CUI {
 	void trim(std::string &str);
