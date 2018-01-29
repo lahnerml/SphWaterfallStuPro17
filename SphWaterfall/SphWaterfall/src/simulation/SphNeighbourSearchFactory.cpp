@@ -9,11 +9,11 @@ SphNeighbourSearchFactory::~SphNeighbourSearchFactory() {
 
 }
 
-static ISphNeighbourSearch* getInstance(int figureKey)
+static ISphNeighbourSearch* getInstance(int key)
 {
 	ISphNeighbourSearch* produced_neighbour_search;
 
-	switch (figureKey)
+	switch (key)
 	{
 	default:
 		produced_neighbour_search = new SphNeighbourSearch();

@@ -9,11 +9,11 @@ SphKernelFactory::~SphKernelFactory() {
 
 }
 
-static ISphKernel* getInstance(int figureKey)
+static ISphKernel* getInstance(int key)
 {
 	ISphKernel* produced_kernel;
 
-	switch (figureKey)
+	switch (key)
 	{
 	default:
 		produced_kernel = new WendlandKernel(0, 0);
