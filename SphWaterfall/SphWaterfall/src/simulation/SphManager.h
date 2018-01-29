@@ -1,14 +1,12 @@
 #pragma once
-#include <unordered_map>
-#include <vector>
-#include <iterator>
-
-#include "mpi.h"
-
-#include "ParticleDomain.h"
-
 #include "SphKernelFactory.h"
 #include "SphNeighbourSearchFactory.h"
+
+#include <vector>
+#include <unordered_map>
+#include <iterator>
+
+
 
 class SphManager {
 public:

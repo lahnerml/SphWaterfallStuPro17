@@ -2,6 +2,7 @@
 #include "../data/ISphParticle.h"
 #include "../data/Vector3.h"
 #include "../data/NullableWrapper.h"
+#include "../data/NullableWrapper.cpp"
 
 #include <vector>
 #include <iterator>

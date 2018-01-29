@@ -5,14 +5,14 @@ ParticleDomain::ParticleDomain() :
 	origin(Vector3()),
 	dimensions(Vector3())
 {
-	ParticleDomain::particles = std::vector<ISphParticle>(0);
+	particles = std::vector<ISphParticle>(0);
 }
 
 ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& size) : 
 	origin(origin),
 	dimensions(size)
 {
-	ParticleDomain::particles = std::vector<ISphParticle>();
+	particles = std::vector<ISphParticle>(0);
 }
 
 ParticleDomain::~ParticleDomain() {

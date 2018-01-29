@@ -6,7 +6,7 @@ class NullableWrapper {
 		NullableWrapper();
 		~NullableWrapper();
 
-		T& getInternal() const;
+		T getInternal() const;
 		bool isNull() const;
 		void reset();
 		void set(const T&);
