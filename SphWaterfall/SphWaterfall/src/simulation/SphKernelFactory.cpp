@@ -9,7 +9,7 @@ SphKernelFactory::~SphKernelFactory() {
 
 }
 
-static ISphKernel* getInstance(int key)
+ISphKernel* SphKernelFactory::getInstance(int key)
 {
 	ISphKernel* produced_kernel;
 
