@@ -15,19 +15,31 @@ SphManager::~SphManager() {
 }
 
 void SphManager::update(double) {
-
+	for (auto each_domain : domains) {
+		for (auto each_particle : each_domain.second.getParticles()) {
+			updateVelocity(each_particle);
+		}
+	}
 }
 
 void SphManager::clearAccellerations() {
-
+	for (auto each_domain: domains) {
+		for (auto each_particle: each_domain.second.getParticles()) {
+			//each_particle.velocity = Vector3(0,0,0);
+		}
+	}
 }
 
 void SphManager::updateVelocity(ISphParticle& particle) {
 
+	double current_density = computeDenity(current_particle);
+	double current_viscosity = computeViscosity(current_particle);
+	Vector3 current_accelleration = computeAccelleration(current_particle);
 }
 
 void SphManager::computeAccelleration(ISphParticle& particle) {
 
+	return Vector3(0, 0, 0);
 }
 
 void SphManager::computeDensity(ISphParticle& particle) {

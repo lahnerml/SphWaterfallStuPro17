@@ -14,6 +14,7 @@ public:
 
 	const Vector3& getDimensions() const;
 	void addParticle(const ISphParticle&);
+	std::vector<ISphParticle> getParticles();
 
 private:
 	std::vector<ISphParticle> particles;

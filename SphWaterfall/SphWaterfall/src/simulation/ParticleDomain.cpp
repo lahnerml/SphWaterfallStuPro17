@@ -45,3 +45,7 @@ const Vector3& ParticleDomain::getDimensions() const {
 void ParticleDomain::addParticle(const ISphParticle& particle) {
 	particles.push_back(particle);
 }
+
+std::vector<ISphParticle> ParticleDomain::getParticles() {
+	return particles;
+}
