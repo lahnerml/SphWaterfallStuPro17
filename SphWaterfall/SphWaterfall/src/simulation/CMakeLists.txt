@@ -12,5 +12,8 @@ target_sources(SphWaterfall
 		"${CMAKE_CURRENT_LIST_DIR}/SphNeighbourSearch.h"
 		"${CMAKE_CURRENT_LIST_DIR}/WendlandKernel.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/WendlandKernel.h"
-
+		"${CMAKE_CURRENT_LIST_DIR}/SphKernelFactory.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/SphKernelFactory.h"
+		"${CMAKE_CURRENT_LIST_DIR}/SphNeighbourSearchFactory.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/SphNeighbourSearchFactory.h"
 )

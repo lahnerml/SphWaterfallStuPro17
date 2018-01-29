@@ -1,10 +1,15 @@
 #pragma once
-#include "ParticleDomain.h"
-#include "mpi.h"
 #include <unordered_map>
 #include <vector>
 #include <unordered_map>
 #include <iterator>
+
+#include "mpi.h"
+
+#include "ParticleDomain.h"
+
+#include "SphKernelFactory.h"
+#include "SphNeighbourSearchFactory.h"
 
 class SphManager {
 public:
@@ -17,6 +22,12 @@ private:
 	Vector3 domain_dimensions;
 	std::unordered_map<int, ParticleDomain> domains;
 	std::vector<ISphParticle> neighbour_particles;
+
+	ISphKernel* kernel;
+	ISphNeighbourSearch* neighbour_search;
+
+	SphKernelFactory kernel_factory;
+	SphNeighbourSearchFactory neighbour_search_factory;
 
 	void clearAccellerations();
 	void updateVelocity(ISphParticle& particle);
