@@ -58,6 +58,17 @@ Vector3 SphManager::computeDensityAccelleration(ISphParticle& particle) {
 	return Vector3(0, 0, 0);
 }
 
+double SphManager::computePressure(ISphParticle& particle) {
+	double pressure = 0.0;
+	double refrenceDensityOfWater = 1.0;
+	double pressureConstant = 1.0; //to be evaluated, is chosen arbitrarily at the moment
+
+	pressure = pressureConstant *(particle.density - refrenceDensityOfWater);
+
+	return pressure;
+}
+
+
 void SphManager::computeViscosity(ISphParticle& particle) {
 	double viscosity;
 	viscosity = 0; // to be implemented

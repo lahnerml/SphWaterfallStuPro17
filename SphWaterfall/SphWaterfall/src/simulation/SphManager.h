@@ -33,6 +33,7 @@ private:
 	Vector3 computeDensityAccelleration(ISphParticle& particle);
 	Vector3 computeViscosityAccelleration(ISphParticle& particle);
 	void computeDensity(ISphParticle&);
+	double computePressure(ISphParticle&);
 	void computeViscosity(ISphParticle& particle);
 	void findNeighbourDomains(ParticleDomain);
 
