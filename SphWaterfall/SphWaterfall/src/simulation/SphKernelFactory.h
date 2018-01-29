@@ -6,6 +6,6 @@ public:
 	SphKernelFactory();
 	~SphKernelFactory();
 	
-	static ISphKernel* getInstance(int figureKey);
+	static ISphKernel* getInstance(int key);
 private:
 };
