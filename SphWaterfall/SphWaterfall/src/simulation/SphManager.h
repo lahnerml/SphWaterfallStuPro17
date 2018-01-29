@@ -13,6 +13,7 @@ private:
 	int world_size;
 	Vector3 domain_dimensions;
 	std::unordered_map<int, ParticleDomain> domains;
+	std::vector<ISphParticle> neighbour_particles;
 
 	void clearAccellerations();
 	void updateVelocity(ISphParticle& particle);
