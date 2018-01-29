@@ -43,7 +43,15 @@ Vector3 SphManager::computeAccelleration(ISphParticle& particle) {
 
 void SphManager::computeDensity(ISphParticle& particle) {
 	double density;
-	density = 0; // to be implemented
+	density = 0;
+
+	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+
+	for each (ISphParticle p in neighbours)
+	{
+		density += p.mass * kernel->computeKernelValue(particle.position - p.position);
+	}
+
 	particle.setDensity(density);
 }
 
