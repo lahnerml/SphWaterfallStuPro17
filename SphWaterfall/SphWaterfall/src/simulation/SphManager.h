@@ -43,4 +43,5 @@ private:
 	int hash(const Vector3&) const;
 	Vector3& unhash(const int&) const;
 	ParticleDomain& getParticleDomain(const int&);
+	void sendRimParticles(const int&, const int&);
 };

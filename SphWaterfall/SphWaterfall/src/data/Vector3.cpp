@@ -30,6 +30,10 @@ Vector3 operator*(const double factor, const Vector3& vector) {
 	return vector * factor;
 }
 
+Vector3 operator*(const Vector3& a, const Vector3& b) {
+	return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
+}
+
 Vector3 operator/(const Vector3& vector, const double factor) {
 	return Vector3(vector.x / factor, vector.y / factor, vector.z / factor);
 }

@@ -157,7 +157,7 @@ ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
 	int count = domains.count(unique_id);
 
 	if (count == 0) {
-		domains.at(unique_id) = ParticleDomain(unhash(unique_id), domain_dimensions);
+		domains.at(unique_id) = ParticleDomain(unhash(unique_id) * domain_dimensions, domain_dimensions);
 	}
 
 	return domains.at(unique_id);
@@ -177,4 +177,39 @@ MPI_Request& SphManager::requestRimParticles(const Vector3& neighbourDomain, con
 	MPI_Request request;
 	MPI_Isend(&request_id, 1, MPI_INT, domain_id, request_id % world_size, MPI_COMM_WORLD, &request);
 	return request;
+}
+
+void SphManager::sendRimParticles(const int& destination, const int& requester) {
+	Vector3 request_coords = unhash(requester);
+	Vector3 target_coords = unhash(destination);
+	ParticleDomain destination_domain = getParticleDomain(destination);
+
+
+	// TODO Kantenanliegen und Eckenanliegen, bisher nur Flächen funktional.
+
+	std::vector<ISphParticle> rim_particles;
+	if (request_coords.x > target_coords.x) {
+		rim_particles = destination_domain.getFrontRimParticles();
+	}
+	else if (request_coords.x < target_coords.x) {
+		rim_particles = destination_domain.getBackRimParticles();
+	}
+
+	if (request_coords.y > target_coords.y) {
+		rim_particles = destination_domain.getRightRimParticles();
+	}
+	else if (request_coords.y < target_coords.y) {
+		rim_particles = destination_domain.getLeftRimParticles();
+	}
+
+	if (request_coords.z > target_coords.z) {
+		rim_particles = destination_domain.getTopRimParticles();
+	}
+	else if (request_coords.z < target_coords.z) {
+		rim_particles = destination_domain.getBottomRimParticles();
+	}
+
+	MPI_Request request;
+	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(ISphParticle), MPI_BYTE, requester & world_size, 0, MPI_COMM_WORLD, &request);
+	MPI_Request_free(&request);
 }
