@@ -139,3 +139,5 @@ void ParticleDomain::resetRimParticles() {
 	left_rim_particles.reset();
 	right_rim_particles.reset();
 }
+
+
