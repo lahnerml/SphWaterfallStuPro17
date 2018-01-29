@@ -2,6 +2,9 @@
 #include "ParticleDomain.h"
 #include "mpi.h"
 #include <unordered_map>
+#include <vector>
+#include <unordered_map>
+#include <iterator>
 
 class SphManager {
 public:

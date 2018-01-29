@@ -1,6 +1,5 @@
 #pragma once
 #include "CUI.h"
-#include "../visualization/VisualizationManager.h"
 
 CUI::CUI() {
 
