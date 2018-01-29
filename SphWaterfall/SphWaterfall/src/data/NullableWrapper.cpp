@@ -13,8 +13,8 @@ NullableWrapper<T>::~NullableWrapper(){
 }
 
 template<class T>
-T& NullableWrapper<T>::getInternal() const {
-	return &internal;
+T NullableWrapper<T>::getInternal() const {
+	return internal;
 }
 
 template<class T>
