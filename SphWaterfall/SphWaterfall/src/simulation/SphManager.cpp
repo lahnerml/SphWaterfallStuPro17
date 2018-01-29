@@ -5,6 +5,8 @@ SphManager::SphManager(const Vector3& domain_dimensions) :
 	domain_dimensions(domain_dimensions)
 {
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+	kernel = kernel_factory.getInstance(1);
+	neighbour_search = neighbour_search_factory.getInstance(1);
 }
 
 SphManager::~SphManager() {
