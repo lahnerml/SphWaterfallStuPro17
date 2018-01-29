@@ -30,14 +30,13 @@ void SphManager::clearAccellerations() {
 }
 
 void SphManager::updateVelocity(ISphParticle& particle) {
-	computeDensity(particle);
-	computeViscosity(particle);
 	Vector3 current_accelleration = computeAccelleration(particle);
 
 }
 
 Vector3 SphManager::computeAccelleration(ISphParticle& particle) {
-	Vector3 accelleration;
+	Vector3 accelleration = Vector3(0, -9.81, 0);
+	accelleration = accelleration + computeDensityAccelleration(particle) + computeViscosityAccelleration(particle);
 	return accelleration;
 }
 
@@ -55,10 +54,18 @@ void SphManager::computeDensity(ISphParticle& particle) {
 	particle.setDensity(density);
 }
 
+Vector3 SphManager::computeDensityAccelleration(ISphParticle& particle) {
+	return Vector3(0, 0, 0);
+}
+
 void SphManager::computeViscosity(ISphParticle& particle) {
 	double viscosity;
 	viscosity = 0; // to be implemented
 	particle.setViscosity(viscosity);
+}
+
+Vector3 SphManager::computeViscosityAccelleration(ISphParticle& particle) {
+	return Vector3(0, 0, 0);
 }
 
 void SphManager::findNeighbourDomains(ParticleDomain) {
