@@ -1,6 +1,5 @@
 #pragma once
 #include "ParticleDomain.h"
-#include <iterator>
 
 ParticleDomain::ParticleDomain() :
 	origin(Vector3()),

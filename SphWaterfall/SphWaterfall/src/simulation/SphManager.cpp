@@ -1,8 +1,5 @@
 #pragma once
 #include "SphManager.h"
-#include <vector>
-#include <unordered_map>
-#include <iterator>
 
 SphManager::SphManager(const Vector3& domain_dimensions) :
 	domain_dimensions(domain_dimensions)

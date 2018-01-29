@@ -3,6 +3,7 @@
 #include "../data/Vector3.h"
 
 #include <vector>
+#include <iterator>
 
 class ParticleDomain {
 public:
