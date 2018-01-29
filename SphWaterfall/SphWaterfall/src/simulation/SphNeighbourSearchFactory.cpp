@@ -9,7 +9,7 @@ SphNeighbourSearchFactory::~SphNeighbourSearchFactory() {
 
 }
 
-static ISphNeighbourSearch* getInstance(int key)
+ISphNeighbourSearch* SphNeighbourSearchFactory::getInstance(int key)
 {
 	ISphNeighbourSearch* produced_neighbour_search;
 
