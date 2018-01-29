@@ -1,6 +1,6 @@
 #pragma once
 #include "CUI.h"
-
+#include "../visualization/VisualizationManager.h"
 namespace CUI {
 
 	void trim(std::string &str) {
