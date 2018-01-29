@@ -53,7 +53,7 @@ std::vector<ISphParticle> ParticleDomain::getParticles() {
 	return particles;
 }
 
-std::vector<ISphParticle>& ParticleDomain::getTopRimParticles() {
+std::vector<ISphParticle> ParticleDomain::getTopRimParticles() {
 	if (top_rim_particles.isNull()) {
 		std::vector<ISphParticle> rim_particles;
 		for (ISphParticle particle : particles) {
@@ -66,7 +66,7 @@ std::vector<ISphParticle>& ParticleDomain::getTopRimParticles() {
 	return top_rim_particles.getInternal();
 }
 
-std::vector<ISphParticle>& ParticleDomain::getBottomRimParticles() {
+std::vector<ISphParticle> ParticleDomain::getBottomRimParticles() {
 	if (bottom_rim_particles.isNull()) {
 		std::vector<ISphParticle> rim_particles;
 		for (ISphParticle particle : particles) {
@@ -79,7 +79,7 @@ std::vector<ISphParticle>& ParticleDomain::getBottomRimParticles() {
 	return bottom_rim_particles.getInternal();
 }
 
-std::vector<ISphParticle>& ParticleDomain::getFrontRimParticles() {
+std::vector<ISphParticle> ParticleDomain::getFrontRimParticles() {
 	if (front_rim_particles.isNull()) {
 		std::vector<ISphParticle> rim_particles;
 		for (ISphParticle particle : particles) {
@@ -92,7 +92,7 @@ std::vector<ISphParticle>& ParticleDomain::getFrontRimParticles() {
 	return front_rim_particles.getInternal();
 }
 
-std::vector<ISphParticle>& ParticleDomain::getBackRimParticles() {
+std::vector<ISphParticle> ParticleDomain::getBackRimParticles() {
 	if (back_rim_particles.isNull()) {
 		std::vector<ISphParticle> rim_particles;
 		for (ISphParticle particle : particles) {
@@ -105,7 +105,7 @@ std::vector<ISphParticle>& ParticleDomain::getBackRimParticles() {
 	return back_rim_particles.getInternal();
 }
 
-std::vector<ISphParticle>& ParticleDomain::getLeftRimParticles() {
+std::vector<ISphParticle> ParticleDomain::getLeftRimParticles() {
 	if (left_rim_particles.isNull()) {
 		std::vector<ISphParticle> rim_particles;
 		for (ISphParticle particle : particles) {
@@ -118,7 +118,7 @@ std::vector<ISphParticle>& ParticleDomain::getLeftRimParticles() {
 	return left_rim_particles.getInternal();
 }
 
-std::vector<ISphParticle>& ParticleDomain::getRightRimParticles() {
+std::vector<ISphParticle> ParticleDomain::getRightRimParticles() {
 	if (right_rim_particles.isNull()) {
 		std::vector<ISphParticle> rim_particles;
 		for (ISphParticle particle : particles) {
