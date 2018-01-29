@@ -181,7 +181,7 @@ int SphManager::hash(const Vector3& vector) const {
 	return (x + y + z);
 }
 
-Vector3& SphManager::unhash(const int& unique_id) const {
+Vector3 SphManager::unhash(const int& unique_id) const {
 	int z = unique_id >> 20;
 	int y = (unique_id - (z << 20)) >> 10;
 	int x = unique_id - (z << 20) - (y << 10);
@@ -214,7 +214,7 @@ void SphManager::add_particles(const std::vector<ISphParticle>& new_particles) {
 	}
 }
 
-MPI_Request& SphManager::requestRimParticles(const Vector3& neighbourDomain, const Vector3& source) {
+MPI_Request SphManager::requestRimParticles(const Vector3& neighbourDomain, const Vector3& source) {
 	int domain_id = hash(neighbourDomain);
 	int request_id = hash(source);
 

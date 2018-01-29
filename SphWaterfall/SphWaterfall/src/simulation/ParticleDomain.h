@@ -20,12 +20,12 @@ public:
 	void addParticle(const ISphParticle&);
 	std::vector<ISphParticle> getParticles();
 
-	std::vector<ISphParticle>& getTopRimParticles();
-	std::vector<ISphParticle>& getBottomRimParticles();
-	std::vector<ISphParticle>& getLeftRimParticles();
-	std::vector<ISphParticle>& getRightRimParticles();
-	std::vector<ISphParticle>& getFrontRimParticles();
-	std::vector<ISphParticle>& getBackRimParticles();
+	std::vector<ISphParticle> getTopRimParticles();
+	std::vector<ISphParticle> getBottomRimParticles();
+	std::vector<ISphParticle> getLeftRimParticles();
+	std::vector<ISphParticle> getRightRimParticles();
+	std::vector<ISphParticle> getFrontRimParticles();
+	std::vector<ISphParticle> getBackRimParticles();
 	void resetRimParticles();
 
 private:

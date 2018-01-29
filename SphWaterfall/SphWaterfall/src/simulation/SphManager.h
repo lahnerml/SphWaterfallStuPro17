@@ -38,12 +38,12 @@ private:
 	void findNeighbourDomains(ParticleDomain);
 
 	void add_particles(const std::vector<ISphParticle>&);
-	MPI_Request& requestRimParticles(const Vector3&, const Vector3&);
+	MPI_Request requestRimParticles(const Vector3&, const Vector3&);
 	void exchangeParticles();
 	int computeTargetProcess(const ISphParticle&) const;
 	int computeTargetDomain(const ISphParticle&) const;
 	int hash(const Vector3&) const;
-	Vector3& unhash(const int&) const;
+	Vector3 unhash(const int&) const;
 	ParticleDomain& getParticleDomain(const int&);
 	void sendRimParticles(const int&, const int&);
 };
