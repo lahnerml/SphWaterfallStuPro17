@@ -27,11 +27,11 @@ private:
 	SphKernelFactory kernel_factory;
 	SphNeighbourSearchFactory neighbour_search_factory;
 
-	void clearAccellerations();
+	void clearAccelerations();
 	void updateVelocity(ISphParticle& particle);
-	Vector3 computeAccelleration(ISphParticle& particle);
-	Vector3 computeDensityAccelleration(ISphParticle& particle);
-	Vector3 computeViscosityAccelleration(ISphParticle& particle);
+	Vector3 computeAcceleration(ISphParticle& particle);
+	Vector3 computeDensityAcceleration(ISphParticle& particle);
+	Vector3 computeViscosityAcceleration(ISphParticle& particle);
 	void computeDensity(ISphParticle&);
 	double computePressure(ISphParticle&);
 	void computeViscosity(ISphParticle& particle);
