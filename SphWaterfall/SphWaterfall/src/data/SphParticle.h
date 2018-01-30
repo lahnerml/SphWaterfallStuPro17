@@ -3,6 +3,13 @@
 
 class SphParticle {
 	public:
+		enum ParticleType
+		{
+			FLUID,
+			STATIC,
+			MIRRORED
+		};
+
 		SphParticle();
 		SphParticle(Vector3);
 		SphParticle(Vector3, Vector3);
