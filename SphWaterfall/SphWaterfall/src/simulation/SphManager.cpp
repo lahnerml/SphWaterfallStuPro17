@@ -56,18 +56,17 @@ void SphManager::computeDensity(ISphParticle& particle) {
 }
 
 Vector3 SphManager::computeDensityAcceleration(ISphParticle& particle) {
-	double densityAcceleration;
+	Vector3 densityAcceleration;
 
 	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 
 	for each (ISphParticle p in neighbours)
 	{
 		densityAcceleration = (p.mass * ((computePressure(p) / (p.density*p.density)) + (computePressure(particle) / (particle.density*particle.density)))
-			* kernel->computeKernelValue(particle.position - p.position)); //nach Folie 12 SPH Algorithmus Praesentation
+			* kernel->computeKernelGradientValue(particle.position - p.position));
 	}
-	// Leider noch keine Ahnung wie die Formel einen Vector zurueckliefern koennte
 
-	return Vector3(0, 0, 0);
+	return densityAcceleration;
 }
 
 double SphManager::computePressure(ISphParticle& particle) {
@@ -92,13 +91,13 @@ Vector3 SphManager::computeViscosityAcceleration(ISphParticle& particle) {
 	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 
 	double mu = 1.0;
-	Vector3 sum;
+	Vector3 sum = Vector3(0, 0, 0);
 
 	for each (ISphParticle p in neighbours)
 	{
 		Vector3 rij = p.position - particle.position;
 		double value = rij.length();
-		sum = (p.mass *  (((4 * mu*rij) * kernel->computeKernelValue(rij)) / ((particle.density + p.density) * (value*value)))
+		sum = sum + (p.mass *  (((4 * mu*rij) * kernel->computeKernelGradientValue(rij)) / ((particle.density + p.density) * (value*value)))
 			* (particle.velocity - p.velocity));
 	}
 	Vector3 viscosityAcceleration = ((1 / particle.density) * sum);
