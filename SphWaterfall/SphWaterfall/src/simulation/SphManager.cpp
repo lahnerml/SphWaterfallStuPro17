@@ -13,25 +13,34 @@ SphManager::~SphManager() {
 
 }
 
-void SphManager::update(double) {
+void SphManager::update(double timestep) {
+	setLocalDensities();
 	for (auto each_domain : domains) {
 		for (auto each_particle : each_domain.second.getParticles()) {
-			updateVelocity(each_particle);
+			updateVelocity(each_particle, timestep);
+
 		}
 	}
 }
 
-void SphManager::clearAccelerations() {
-	for (auto each_domain: domains) {
-		for (auto each_particle: each_domain.second.getParticles()) {
-			//each_particle.velocity = Vector3(0,0,0);
+void SphManager::setLocalDensities() {
+	for (auto each_domain : domains) {
+		for (auto each_particle : each_domain.second.getParticles()) {
+			computeLocalDensity(each_particle);
 		}
 	}
 }
 
-void SphManager::updateVelocity(ISphParticle& particle) {
-	Vector3 current_accelleration = computeAcceleration(particle);
+void SphManager::updateVelocity(ISphParticle& particle, double timestep) {
+	Vector3 accelleration_timestep_start = computeAcceleration(particle);
 
+	particle.velocity = particle.velocity + ((timestep / 2) * accelleration_timestep_start);
+	Vector3 position_timestep_half = particle.position + ((timestep / 2) * particle.velocity);
+
+	Vector3 accelleration_timestep_half = computeAcceleration(particle);
+
+	Vector3 velocity_timestep_end = particle.velocity + (timestep * accelleration_timestep_half);
+	particle.position = position_timestep_half + ((timestep / 2) * velocity_timestep_end);
 }
 
 Vector3 SphManager::computeAcceleration(ISphParticle& particle) {
