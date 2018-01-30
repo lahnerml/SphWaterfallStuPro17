@@ -34,7 +34,6 @@ private:
 	Vector3 computeViscosityAcceleration(ISphParticle& particle);
 	void computeLocalDensity(ISphParticle&);
 	double computeLocalPressure(ISphParticle&);
-	void computeViscosity(ISphParticle& particle);
 	void findNeighbourDomains(ParticleDomain);
 
 	void add_particles(const std::vector<ISphParticle>&);

@@ -36,8 +36,8 @@ void SphManager::updateVelocity(ISphParticle& particle) {
 
 Vector3 SphManager::computeAcceleration(ISphParticle& particle) {
 	Vector3 acceleration;
-	Vector3 gravityAcceleration = Vector3(0, -9.81, 0);
-	acceleration = gravityAcceleration + computeDensityAcceleration(particle) + computeViscosityAcceleration(particle);
+	Vector3 gravity_acceleration = Vector3(0, -9.81, 0);
+	acceleration = gravity_acceleration + computeDensityAcceleration(particle) + computeViscosityAcceleration(particle);
 	return acceleration;
 }
 
@@ -55,17 +55,18 @@ void SphManager::computeLocalDensity(ISphParticle& particle) {
 }
 
 Vector3 SphManager::computeDensityAcceleration(ISphParticle& particle) {
-	Vector3 densityAcceleration;
-
 	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+	Vector3 density_acceleration = Vector3();
+	double particle_local_pressure = computeLocalPressure(particle);
 
-	for each (ISphParticle p in neighbours)
+	for each (ISphParticle neighbour_particle in neighbours)
 	{
-		densityAcceleration = densityAcceleration + (p.mass * ((computeLocalPressure(p) / (p.local_density*p.local_density)) + (computeLocalPressure(particle) / (particle.local_density*particle.local_density)))
-			* kernel->computeKernelGradientValue(particle.position - p.position));
+		density_acceleration += neighbour_particle.mass * 
+			((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density*neighbour_particle.local_density)) + (particle_local_pressure / (particle.local_density*particle.local_density))) * 
+			kernel->computeKernelGradientValue(particle.position - neighbour_particle.position);
 	}
 
-	return densityAcceleration;
+	return density_acceleration;
 }
 
 double SphManager::computeLocalPressure(ISphParticle& particle) {
@@ -80,28 +81,19 @@ double SphManager::computeLocalPressure(ISphParticle& particle) {
 	return local_pressure;
 }
 
-void SphManager::computeViscosity(ISphParticle& particle) {
-	double viscosity;
-	viscosity = 0; // to be implemented
-	particle.setViscosity(viscosity);
-}
-
 Vector3 SphManager::computeViscosityAcceleration(ISphParticle& particle) {
-
 	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
-
-	double mu = 1.0;
 	Vector3 sum = Vector3();
 
-	for each (ISphParticle p in neighbours)
+	for each (ISphParticle neighbour_particle in neighbours)
 	{
-		Vector3 rij = p.position - particle.position;
-		double value = rij.length();
-		sum += p.mass *  (((4 * mu*rij) * kernel->computeKernelGradientValue(rij)) / ((particle.local_density + p.local_density) * (value*value)) * (particle.velocity - p.velocity));
+		Vector3 rij = neighbour_particle.position - particle.position;
+		sum += neighbour_particle.mass *  ((4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) / 
+			((particle.local_density + neighbour_particle.local_density) * (rij.length()*rij.length()))) * 
+			(particle.velocity - neighbour_particle.velocity);
 	}
-	Vector3 viscosityAcceleration = ((1 / particle.local_density) * sum);
 
-	return viscosityAcceleration;
+	return ((1 / particle.local_density) * sum);
 }
 
 void SphManager::findNeighbourDomains(ParticleDomain) {
