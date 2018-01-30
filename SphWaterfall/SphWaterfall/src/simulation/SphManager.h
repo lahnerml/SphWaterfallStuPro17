@@ -11,13 +11,19 @@
 
 class SphManager {
 public:
-	SphManager(const Vector3&);
+	SphManager(const Vector3&, double simulation_time, double timestep_duration);
+	SphManager();
 	~SphManager();
 
+	void simulate();
 	void update(double timestep);
+
+	void add_particles(const std::vector<ISphParticle>&);
 private:
 	int world_size;
 	Vector3 domain_dimensions;
+	double simulation_time;
+	double timestep_duration;
 	std::unordered_map<int, ParticleDomain> domains;
 	std::vector<ISphParticle> neighbour_particles;
 	ISphKernel* kernel;
@@ -34,7 +40,6 @@ private:
 	double computeLocalPressure(ISphParticle&);
 	void findNeighbourDomains(ParticleDomain);
 
-	void add_particles(const std::vector<ISphParticle>&);
 	MPI_Request requestRimParticles(const Vector3&, const Vector3&);
 	void exchangeParticles();
 	int computeTargetProcess(const ISphParticle&) const;

@@ -79,7 +79,7 @@ namespace CUI {
 	void simulate(std::queue<std::string> &tokens)
 	{
 		// TODO add correct dimensions
-		SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10));
+		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
 	}
 
 	void render()
