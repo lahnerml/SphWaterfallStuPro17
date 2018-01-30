@@ -51,6 +51,14 @@ Vector3 operator+(const Vector3& a, const Vector3& b)
 	return Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
+Vector3& operator+=(Vector3& a, const Vector3& b)
+{
+	a.x += b.x;
+	a.y += b.y;
+	a.z += b.z;
+	return a;
+}
+
 Vector3 operator-(const Vector3& a)
 {
 	return Vector3(-a.x, -a.y, -a.z);

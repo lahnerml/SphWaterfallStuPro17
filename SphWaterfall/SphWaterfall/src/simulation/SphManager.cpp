@@ -91,14 +91,13 @@ Vector3 SphManager::computeViscosityAcceleration(ISphParticle& particle) {
 	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 
 	double mu = 1.0;
-	Vector3 sum = Vector3(0, 0, 0);
+	Vector3 sum = Vector3();
 
 	for each (ISphParticle p in neighbours)
 	{
 		Vector3 rij = p.position - particle.position;
 		double value = rij.length();
-		sum = sum + (p.mass *  (((4 * mu*rij) * kernel->computeKernelGradientValue(rij)) / ((particle.density + p.density) * (value*value)))
-			* (particle.velocity - p.velocity));
+		sum += p.mass *  (((4 * mu*rij) * kernel->computeKernelGradientValue(rij)) / ((particle.density + p.density) * (value*value)) * (particle.velocity - p.velocity));
 	}
 	Vector3 viscosityAcceleration = ((1 / particle.density) * sum);
 
@@ -229,7 +228,8 @@ void SphManager::sendRimParticles(const int& destination, const int& requester) 
 	ParticleDomain destination_domain = getParticleDomain(destination);
 
 
-	// TODO Kantenanliegen und Eckenanliegen, bisher nur Flächen funktional.
+	std::vector<std::vector<ISphParticle>> set;
+
 
 	std::vector<ISphParticle> rim_particles;
 	if (request_coords.x > target_coords.x) {
