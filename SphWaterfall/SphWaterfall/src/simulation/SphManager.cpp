@@ -1,24 +1,39 @@
 #pragma once
 #include "SphManager.h"
 
-SphManager::SphManager(const Vector3& domain_dimensions) :
-	domain_dimensions(domain_dimensions)
+SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time, double timestep_duration) :
+	domain_dimensions(domain_dimensions),
+	simulation_time(simulation_time),
+	timestep_duration(timestep_duration)
 {
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 	kernel = kernel_factory.getInstance(1);
 	neighbour_search = neighbour_search_factory.getInstance(1);
 }
 
+SphManager::SphManager() {
+
+}
+
 SphManager::~SphManager() {
 
 }
 
-void SphManager::update(double timestep) {
+void SphManager::simulate() {
+	double remaining_simulation_time = simulation_time;
+	while (remaining_simulation_time > 0) {
+		update(timestep_duration);
+		remaining_simulation_time -= timestep_duration;
+	}
+}
+
+void SphManager::update(double timestep_duration) {
+	printf("in_update\n");
 	setLocalDensities();
 	for (auto each_domain : domains) {
 		for (auto each_particle : each_domain.second.getParticles()) {
-			updateVelocity(each_particle, timestep);
-
+			updateVelocity(each_particle, timestep_duration);
+	
 		}
 	}
 }
@@ -31,16 +46,16 @@ void SphManager::setLocalDensities() {
 	}
 }
 
-void SphManager::updateVelocity(ISphParticle& particle, double timestep) {
+void SphManager::updateVelocity(ISphParticle& particle, double timestep_duration) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle);
 
-	particle.velocity = particle.velocity + ((timestep / 2) * accelleration_timestep_start);
-	Vector3 position_timestep_half = particle.position + ((timestep / 2) * particle.velocity);
+	particle.velocity = particle.velocity + ((timestep_duration / 2) * accelleration_timestep_start);
+	Vector3 position_timestep_half = particle.position + ((timestep_duration / 2) * particle.velocity);
 
 	Vector3 accelleration_timestep_half = computeAcceleration(particle);
 
-	Vector3 velocity_timestep_end = particle.velocity + (timestep * accelleration_timestep_half);
-	particle.position = position_timestep_half + ((timestep / 2) * velocity_timestep_end);
+	Vector3 velocity_timestep_end = particle.velocity + (timestep_duration * accelleration_timestep_half);
+	particle.position = position_timestep_half + ((timestep_duration / 2) * velocity_timestep_end);
 }
 
 Vector3 SphManager::computeAcceleration(ISphParticle& particle) {
