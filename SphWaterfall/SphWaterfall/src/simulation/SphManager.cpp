@@ -219,26 +219,103 @@ void SphManager::sendRimParticles(const int& destination, const int& requester) 
 	Vector3 target_coords = unhash(destination);
 	ParticleDomain destination_domain = getParticleDomain(destination);
 
-
-	std::vector<std::vector<ISphParticle>> set;
-
-
 	std::vector<ISphParticle> rim_particles;
+
+	// if you know how to do better ... do it, cause this sucks
+
 	if (request_coords.x > target_coords.x) {
-		rim_particles = destination_domain.getFrontRimParticles();
+		if (request_coords.y > target_coords.y) {
+			if (request_coords.z > target_coords.z) {
+				rim_particles = destination_domain.getFrontRightTopRimParticles();
+			}
+			else if (request_coords.z < target_coords.z) {
+				rim_particles = destination_domain.getFrontRightBottomRimParticles();
+			}
+			else {
+				rim_particles = destination_domain.getFrontRightRimParticles();
+			}
+		}
+		else if (request_coords.y < target_coords.y) {
+			if (request_coords.z > target_coords.z) {
+				rim_particles = destination_domain.getFrontLeftTopRimParticles();
+			}
+			else if (request_coords.z < target_coords.z) {
+				rim_particles = destination_domain.getFrontLeftBottomRimParticles();
+			}
+			else {
+				rim_particles = destination_domain.getFrontLeftRimParticles();
+			}
+		}
+		else {
+			if (request_coords.z > target_coords.z) {
+				rim_particles = destination_domain.getFrontTopRimParticles();
+			}
+			else if (request_coords.z < target_coords.z) {
+				rim_particles = destination_domain.getFrontBottomRimParticles();
+			}
+			else {
+				rim_particles = destination_domain.getFrontRimParticles();
+			}
+		}
 	}
 	else if (request_coords.x < target_coords.x) {
-		rim_particles = destination_domain.getBackRimParticles();
-	}
-
-	if (request_coords.y > target_coords.y) {
-		rim_particles = destination_domain.getRightRimParticles();
+		if (request_coords.y > target_coords.y) {
+			if (request_coords.z > target_coords.z) {
+				rim_particles = destination_domain.getBackRightTopRimParticles();
+			}
+			else if (request_coords.z < target_coords.z) {
+				rim_particles = destination_domain.getBackRightBottomRimParticles();
+			}
+			else {
+				rim_particles = destination_domain.getBackRightRimParticles();
+			}
+		}
+		else if (request_coords.y < target_coords.y) {
+			if (request_coords.z > target_coords.z) {
+				rim_particles = destination_domain.getBackLeftTopRimParticles();
+			}
+			else if (request_coords.z < target_coords.z) {
+				rim_particles = destination_domain.getBackLeftBottomRimParticles();
+			}
+			else {
+				rim_particles = destination_domain.getBackLeftRimParticles();
+			}
+		}
+		else {
+			if (request_coords.z > target_coords.z) {
+				rim_particles = destination_domain.getBackTopRimParticles();
+			}
+			else if (request_coords.z < target_coords.z) {
+				rim_particles = destination_domain.getBackBottomRimParticles();
+			}
+			else {
+				rim_particles = destination_domain.getBackRimParticles();
+			}
+		}
+	} 
+	else if (request_coords.y > target_coords.y) {
+		if (request_coords.z > target_coords.z) {
+			rim_particles = destination_domain.getRightTopRimParticles();
+		}
+		else if (request_coords.z < target_coords.z) {
+			rim_particles = destination_domain.getRightBottomRimParticles();
+		}
+		else {
+			rim_particles = destination_domain.getRightRimParticles();
+		}
 	}
 	else if (request_coords.y < target_coords.y) {
-		rim_particles = destination_domain.getLeftRimParticles();
-	}
-
-	if (request_coords.z > target_coords.z) {
+		if (request_coords.z > target_coords.z) {
+			rim_particles = destination_domain.getLeftTopRimParticles();
+		}
+		else if (request_coords.z < target_coords.z) {
+			rim_particles = destination_domain.getLeftBottomRimParticles();
+		}
+		else {
+			rim_particles = destination_domain.getLeftRimParticles();
+		}
+	} 
+	else if (request_coords.z > target_coords.z) {
 		rim_particles = destination_domain.getTopRimParticles();
 	}
 	else if (request_coords.z < target_coords.z) {
@@ -246,6 +323,6 @@ void SphManager::sendRimParticles(const int& destination, const int& requester) 
 	}
 
 	MPI_Request request;
-	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(ISphParticle), MPI_BYTE, requester & world_size, 0, MPI_COMM_WORLD, &request);
+	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(ISphParticle), MPI_BYTE, requester % world_size, 0, MPI_COMM_WORLD, &request);
 	MPI_Request_free(&request);
 }
