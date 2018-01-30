@@ -2,29 +2,20 @@
 #include "SphParticle.h"
 
 SphParticle::SphParticle() :
-	position(Vector3()),
-	velocity(Vector3()),
-	pType(ParticleType::FLUID)
+	pos(Vector3()),
+	vel(Vector3())
 {
 }
 
 SphParticle::SphParticle(Vector3 position) :
-	position(position),
-	pType(ParticleType::FLUID)
+	pos(position),
+	vel(Vector3())
 {
 }
 
 SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
-	position(position),
-	velocity(velocity),
-	pType(ParticleType::FLUID)
-{
-}
-
-SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType pType) :
-	position(position),
-	velocity(Vector3()),
-	pType(pType)
+	pos(position),
+	vel(velocity)
 {
 }
 
@@ -32,7 +23,28 @@ SphParticle::~SphParticle() {
 
 }
 
-SphParticle::ParticleType SphParticle::getParticleType()
+
+Vector3 SphParticle::position()
 {
-	return this->pType;
+	return this->position;
+}
+
+void SphParticle::position(Vector3 position)
+{
+	this->position = position;
+}
+
+Vector3 SphParticle::velocity()
+{
+	return this->velocity;
+}
+
+void SphParticle::velocity(Vector3 velocity)
+{
+	this->velocity = velocity;
+}
+
+ISphParticle::ParticleType SphParticle::getParticleType()
+{
+	return ISphParticle::ParticleType::FLUID;
 }
