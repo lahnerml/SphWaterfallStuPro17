@@ -24,11 +24,7 @@ SphParticle::~SphParticle() {
 
 }
 
-
 void ISphParticle::setDensity(double local_density) {
 	this->local_density = local_density;
 }
 
-void ISphParticle::setViscosity(double viscosity) {
-	this->viscosity = viscosity;
-}
