@@ -14,24 +14,22 @@ public:
 	SphManager(const Vector3&);
 	~SphManager();
 
-	void update(double);
+	void update(double timestep);
 private:
 	int world_size;
 	Vector3 domain_dimensions;
 	std::unordered_map<int, ParticleDomain> domains;
 	std::vector<ISphParticle> neighbour_particles;
-
 	ISphKernel* kernel;
 	ISphNeighbourSearch* neighbour_search;
-
 	SphKernelFactory kernel_factory;
 	SphNeighbourSearchFactory neighbour_search_factory;
 
-	void clearAccelerations();
-	void updateVelocity(ISphParticle& particle);
+	void updateVelocity(ISphParticle& particle, double timestep);
 	Vector3 computeAcceleration(ISphParticle& particle);
 	Vector3 computeDensityAcceleration(ISphParticle& particle);
 	Vector3 computeViscosityAcceleration(ISphParticle& particle);
+	void setLocalDensities();
 	void computeLocalDensity(ISphParticle&);
 	double computeLocalPressure(ISphParticle&);
 	void findNeighbourDomains(ParticleDomain);
