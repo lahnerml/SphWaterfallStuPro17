@@ -12,7 +12,7 @@ class SphParticle : public ISphParticle {
 		Vector3 position;
 		Vector3 velocity;
 		double mass;
-		double density;
+		double local_density;
 		double viscosity;
 	private:
 
