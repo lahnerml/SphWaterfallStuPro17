@@ -3,23 +3,19 @@
 
 class SphParticle : public ISphParticle {
 	public:
-		enum ParticleType
-		{
-			FLUID,
-			STATIC,
-			MIRRORED
-		};
-
 		SphParticle();
 		SphParticle(Vector3);
 		SphParticle(Vector3, Vector3);
-		SphParticle(Vector3, SphParticle::ParticleType);
 		~SphParticle();
 
-		Vector3 position;
-		Vector3 velocity;
+		virtual Vector3 position();
+		virtual void position(Vector3 position);
 
-		ParticleType getParticleType();
+		virtual Vector3 velocity();
+		virtual void velocity(Vector3 velocity);
+
+		virtual ISphParticle::ParticleType getParticleType();
 	private:
-		const ParticleType pType;
+		Vector3 pos;
+		Vector3 vel;
 };
