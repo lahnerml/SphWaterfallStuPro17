@@ -3,6 +3,8 @@ target_sources(
 	PUBLIC
 		"${CMAKE_CURRENT_LIST_DIR}/SphParticle.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/SphParticle.h"
+		"${CMAKE_CURRENT_LIST_DIR}/StaticParticle.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/StaticParticle.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Vector3.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Vector3.h"
 )
