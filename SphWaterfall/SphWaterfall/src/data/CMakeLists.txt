@@ -7,6 +7,7 @@ target_sources(
 		"${CMAKE_CURRENT_LIST_DIR}/NullableWrapper.h"
 		"${CMAKE_CURRENT_LIST_DIR}/SphParticle.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/SphParticle.h"
+		"${CMAKE_CURRENT_LIST_DIR}/ISphParticle.h"
 		"${CMAKE_CURRENT_LIST_DIR}/StaticParticle.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/StaticParticle.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Vector3.cpp"
