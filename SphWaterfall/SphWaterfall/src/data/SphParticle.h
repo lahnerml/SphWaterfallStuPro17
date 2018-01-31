@@ -6,6 +6,7 @@ class SphParticle : public ISphParticle {
 		SphParticle();
 		SphParticle(Vector3);
 		SphParticle(Vector3, Vector3);
+		SphParticle(Vector3, ISphParticle::ParticleType);
 		~SphParticle();
 
 		virtual ISphParticle::ParticleType getParticleType();
@@ -13,4 +14,5 @@ class SphParticle : public ISphParticle {
 		Vector3 position;
 		Vector3 velocity;
 	private:
+		ISphParticle::ParticleType pType;
 };
