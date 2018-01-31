@@ -94,3 +94,6 @@ Vector3 Vector3::normalize() const {
 Vector3 Vector3::roundDownward() const{
 	return Vector3(floor(x), floor(y), floor(z));
 }
+Vector3 Vector3::distanceTo(const Vector3& v, const Vector3& v1) {
+	abs(v.x - v1.x), abs(v.y - v1.y), abs(v.z - v1.z);
+}
