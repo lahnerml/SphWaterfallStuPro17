@@ -7,6 +7,6 @@
 class StaticParticleGenerator {
 public:
 	StaticParticleGenerator();
-	std::vector<SphParticle> generateStaticParticles(Terrain source);
+	std::vector<ISphParticle> generateStaticParticles(Face face, float particleDistance);
 
 };
