@@ -39,12 +39,20 @@ Vector3 Terrain::getVertexPosition(int index)
 	return this->vertices[index];
 }
 
-int Terrain::getFaceVertexId(int index, int vertexNr)
+int Terrain::getFaceVertexId(int faceId, int vertexNr)
 {
-	if (index < 0 || index >= this->faces.size()
+	if (faceId < 0 || faceId >= this->faces.size()
 		|| vertexNr < 0 || vertexNr > 2)
 		return -1;
 
 	return 0; //this->faces[index].vertices[vertexNr];
 	//TODO Implement .vertices[]
+}
+
+Face Terrain::getFace(int faceId)
+{
+	if (faceId < 0 || faceId >= this->faces.size())
+		return Face(0, 0, 0);
+
+	return this->faces[faceId];
 }
