@@ -69,3 +69,7 @@ double Vector3::length() const {
 Vector3 Vector3::normalize() const {
 	return *this / length();
 }
+
+Vector3 Vector3::distanceTo(const Vector3& v, const Vector3& v1) {
+	abs(v.x - v1.x), abs(v.y - v1.y), abs(v.z - v1.z);
+}
