@@ -41,4 +41,14 @@ std::vector<ISphParticle> StaticParticleGenerator::generateStaticParticles(Terra
 			particlePosition = vertexA + (vertexB * x) + (vertexC * y);
 		}
 	}
+
+}
+
+
+StaticParticleGenerator StaticParticleGenerator::detectDuplicate(ISphParticle a, ISphParticle b) {
+	double distance = 1.00;
+	
+}
+StaticParticleGenerator StaticParticleGenerator::removeDuplicate(ISphParticle a, ISphParticle b) {
+	
 }
