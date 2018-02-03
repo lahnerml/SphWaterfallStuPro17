@@ -10,7 +10,6 @@
 class SphManager {
 public:
 	SphManager(const Vector3&, double simulation_time, double timestep_duration);
-	SphManager();
 	~SphManager();
 
 	void simulate();

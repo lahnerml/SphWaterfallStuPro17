@@ -11,10 +11,6 @@ SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time,
 	neighbour_search = neighbour_search_factory.getInstance(1);
 }
 
-SphManager::SphManager() {
-
-}
-
 SphManager::~SphManager() {
 
 }
@@ -98,7 +94,7 @@ double SphManager::computeLocalPressure(SphParticle& particle) {
 
 	//local_pressure = pressure_constant *(particle.local_density - refrence_density_of_water); //old version meight be better
 	local_pressure = reference_pressure *(std::pow((particle.local_density/refrence_density_of_water), 7.0) - 1); //other implementation of local pressure
-
+	std::cout << local_pressure << std::endl;
 	return local_pressure;
 }
 
