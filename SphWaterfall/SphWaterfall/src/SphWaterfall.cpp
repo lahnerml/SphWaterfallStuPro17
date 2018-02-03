@@ -25,6 +25,7 @@ void simulate() {
 			for (int k = 0; k < 10; k++) {
 				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
 				particles.push_back(particle);
+				std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl;
 			}
 		}
 	}
