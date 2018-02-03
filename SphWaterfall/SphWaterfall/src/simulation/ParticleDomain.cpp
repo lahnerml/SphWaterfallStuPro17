@@ -53,7 +53,7 @@ void ParticleDomain::addParticle(const SphParticle& particle) {
 	particles.push_back(particle);
 }
 
-std::vector<SphParticle> ParticleDomain::getParticles() {
+std::vector<SphParticle>& ParticleDomain::getParticles() {
 	return particles;
 }
 

@@ -18,14 +18,14 @@ void moveShutter() {
 }
 
 void simulate() {
-	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 10, 1);
+	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 3, 1);
 	std::vector<SphParticle> particles;
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
-			for (int k = 0; k < 10; k++) {
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 2; j++) {
+			for (int k = 0; k < 2; k++) {
 				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
 				particles.push_back(particle);
-				//std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl;
+				//std::cout << particle.position << std::endl;
 			}
 		}
 	}
