@@ -46,7 +46,7 @@ void SphManager::setLocalDensities() {
 	}
 }
 
-void SphManager::updateVelocity(ISphParticle& particle, double timestep_duration) {
+void SphManager::updateVelocity(SphParticle& particle, double timestep_duration) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle);
 
 	particle.velocity = particle.velocity + ((timestep_duration / 2) * accelleration_timestep_start);
@@ -58,32 +58,32 @@ void SphManager::updateVelocity(ISphParticle& particle, double timestep_duration
 	particle.position = position_timestep_half + ((timestep_duration / 2) * velocity_timestep_end);
 }
 
-Vector3 SphManager::computeAcceleration(ISphParticle& particle) {
+Vector3 SphManager::computeAcceleration(SphParticle& particle) {
 	Vector3 acceleration;
 	Vector3 gravity_acceleration = Vector3(0, -9.81, 0);
 	acceleration = gravity_acceleration + computeDensityAcceleration(particle) + computeViscosityAcceleration(particle);
 	return acceleration;
 }
 
-void SphManager::computeLocalDensity(ISphParticle& particle) {
+void SphManager::computeLocalDensity(SphParticle& particle) {
 	double local_density = 0;
 
-	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 
-	for each (ISphParticle neighbour_particle in neighbours)
+	for each (SphParticle neighbour_particle in neighbours)
 	{
 		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
 	}
 
-	particle.setDensity(local_density);
+	particle.local_density = local_density;
 }
 
-Vector3 SphManager::computeDensityAcceleration(ISphParticle& particle) {
-	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
+	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 	Vector3 density_acceleration = Vector3();
 	double particle_local_pressure = computeLocalPressure(particle);
 
-	for each (ISphParticle neighbour_particle in neighbours)
+	for each (SphParticle neighbour_particle in neighbours)
 	{
 		density_acceleration += neighbour_particle.mass * 
 			((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density*neighbour_particle.local_density)) + (particle_local_pressure / (particle.local_density*particle.local_density))) * 
@@ -93,7 +93,7 @@ Vector3 SphManager::computeDensityAcceleration(ISphParticle& particle) {
 	return density_acceleration;
 }
 
-double SphManager::computeLocalPressure(ISphParticle& particle) {
+double SphManager::computeLocalPressure(SphParticle& particle) {
 	double local_pressure = 0.0;
 	double refrence_density_of_water = 1.0;
 	//double pressure_constant = 1.0; //to be evaluated, is chosen arbitrarily at the moment
@@ -105,11 +105,11 @@ double SphManager::computeLocalPressure(ISphParticle& particle) {
 	return local_pressure;
 }
 
-Vector3 SphManager::computeViscosityAcceleration(ISphParticle& particle) {
-	std::vector<ISphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
+	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 	Vector3 sum = Vector3();
 
-	for each (ISphParticle neighbour_particle in neighbours)
+	for each (SphParticle neighbour_particle in neighbours)
 	{
 		Vector3 rij = neighbour_particle.position - particle.position;
 		sum += neighbour_particle.mass *  ((4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) / 
@@ -125,25 +125,25 @@ void SphManager::findNeighbourDomains(ParticleDomain) {
 }
 
 void SphManager::exchangeParticles() {
-	std::unordered_map<int, std::vector<ISphParticle>> target_map;
+	std::unordered_map<int, std::vector<SphParticle>> target_map;
 
 	for (auto each_domain : domains) {
-		std::vector<ISphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
-		for (ISphParticle each_particle : outside_particles) {
+		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
+		for (SphParticle each_particle : outside_particles) {
 			int target_id = computeTargetProcess(each_particle);
 			int count = target_map.count(target_id);
 
 			if (count == 0) {
-				target_map.at(target_id) = std::vector<ISphParticle>();
+				target_map.at(target_id) = std::vector<SphParticle>();
 			}
 
-			std::vector<ISphParticle> list = target_map.at(target_id);
+			std::vector<SphParticle> list = target_map.at(target_id);
 			list.push_back(each_particle);
 		}
 	}
 
-	std::vector<ISphParticle> all_new_particles;
-	std::vector<ISphParticle> incoming_particles;
+	std::vector<SphParticle> all_new_particles;
+	std::vector<SphParticle> incoming_particles;
 
 	// don't send to yourself
 	int rank;
@@ -156,7 +156,7 @@ void SphManager::exchangeParticles() {
 
 	for (auto vector : target_map) {
 		MPI_Request request;
-		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(ISphParticle), MPI_BYTE, vector.first, 0, MPI_COMM_WORLD, &request);
+		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, MPI_COMM_WORLD, &request);
 		MPI_Request_free(&request);
 	}
 
@@ -203,29 +203,29 @@ Vector3 SphManager::unhash(const int& unique_id) const {
 	return Vector3(x, y, z);
 }
 
-int SphManager::computeTargetDomain(const ISphParticle& particle) const{
+int SphManager::computeTargetDomain(const SphParticle& particle) const{
 	Vector3 targetDomainCoords = particle.position % domain_dimensions;
 	return hash(targetDomainCoords);
 }
 
-int SphManager::computeTargetProcess(const ISphParticle& particle) const {
+int SphManager::computeTargetProcess(const SphParticle& particle) const {
 	return computeTargetDomain(particle) % world_size;
 }
 
 ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
 	int count = domains.count(unique_id);
-
 	if (count == 0) {
-		domains.at(unique_id) = ParticleDomain(unhash(unique_id) * domain_dimensions, domain_dimensions);
+		domains[unique_id] = ParticleDomain(unhash(unique_id) * domain_dimensions, domain_dimensions);
 	}
-
 	return domains.at(unique_id);
 }
 
-void SphManager::add_particles(const std::vector<ISphParticle>& new_particles) {
-	for (ISphParticle particle : new_particles) {
+void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
+	for (SphParticle particle : new_particles) {
 		int domain_id = computeTargetDomain(particle);
-		getParticleDomain(domain_id);
+		ParticleDomain domain = getParticleDomain(domain_id);
+		//std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl;
+		domain.addParticle(particle);
 	}
 }
 
@@ -243,7 +243,7 @@ void SphManager::sendRimParticles(const int& destination, const int& requester) 
 	Vector3 target_coords = unhash(destination);
 	ParticleDomain destination_domain = getParticleDomain(destination);
 
-	std::vector<ISphParticle> rim_particles;
+	std::vector<SphParticle> rim_particles;
 
 	// if you know how to do better ... do it, cause this sucks
 
@@ -347,6 +347,6 @@ void SphManager::sendRimParticles(const int& destination, const int& requester) 
 	}
 
 	MPI_Request request;
-	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(ISphParticle), MPI_BYTE, requester % world_size, 0, MPI_COMM_WORLD, &request);
+	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(SphParticle), MPI_BYTE, requester % world_size, 0, MPI_COMM_WORLD, &request);
 	MPI_Request_free(&request);
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "../data/ISphParticle.h"
+#include "../data/SphParticle.h"
 #include "../data/Vector3.h"
 #include "../data/NullableWrapper.h"
 #include "../data/NullableWrapper.cpp"
@@ -7,78 +7,80 @@
 #include <vector>
 #include <iterator>
 
+#include <iostream>
+
 class ParticleDomain {
 public:
 	ParticleDomain();
 	ParticleDomain(const Vector3&, const Vector3&);
 	~ParticleDomain();
 
-	std::vector<ISphParticle> removeParticlesOutsideDomain();
+	std::vector<SphParticle> removeParticlesOutsideDomain();
 
 	const Vector3& getDimensions() const;
 	const Vector3& getOrigin() const;
-	void addParticle(const ISphParticle&);
-	std::vector<ISphParticle> getParticles();
+	void addParticle(const SphParticle&);
+	std::vector<SphParticle> getParticles();
 
-	std::vector<ISphParticle> getTopRimParticles();
-	std::vector<ISphParticle> getBottomRimParticles();
-	std::vector<ISphParticle> getLeftRimParticles();
-	std::vector<ISphParticle> getRightRimParticles();
-	std::vector<ISphParticle> getFrontRimParticles();
-	std::vector<ISphParticle> getBackRimParticles();
-	std::vector<ISphParticle> getFrontBottomRimParticles();
-	std::vector<ISphParticle> getFrontTopRimParticles();
-	std::vector<ISphParticle> getBackBottomRimParticles();
-	std::vector<ISphParticle> getBackTopRimParticles();
-	std::vector<ISphParticle> getFrontLeftRimParticles();
-	std::vector<ISphParticle> getFrontRightRimParticles();
-	std::vector<ISphParticle> getBackLeftRimParticles();
-	std::vector<ISphParticle> getBackRightRimParticles();
-	std::vector<ISphParticle> getLeftBottomRimParticles();
-	std::vector<ISphParticle> getLeftTopRimParticles();
-	std::vector<ISphParticle> getRightBottomRimParticles();
-	std::vector<ISphParticle> getRightTopRimParticles();
-	std::vector<ISphParticle> getFrontLeftBottomRimParticles();
-	std::vector<ISphParticle> getFrontRightBottomRimParticles();
-	std::vector<ISphParticle> getFrontLeftTopRimParticles();
-	std::vector<ISphParticle> getFrontRightTopRimParticles();
-	std::vector<ISphParticle> getBackLeftBottomRimParticles();
-	std::vector<ISphParticle> getBackRightBottomRimParticles();
-	std::vector<ISphParticle> getBackLeftTopRimParticles();
-	std::vector<ISphParticle> getBackRightTopRimParticles();
+	std::vector<SphParticle> getTopRimParticles();
+	std::vector<SphParticle> getBottomRimParticles();
+	std::vector<SphParticle> getLeftRimParticles();
+	std::vector<SphParticle> getRightRimParticles();
+	std::vector<SphParticle> getFrontRimParticles();
+	std::vector<SphParticle> getBackRimParticles();
+	std::vector<SphParticle> getFrontBottomRimParticles();
+	std::vector<SphParticle> getFrontTopRimParticles();
+	std::vector<SphParticle> getBackBottomRimParticles();
+	std::vector<SphParticle> getBackTopRimParticles();
+	std::vector<SphParticle> getFrontLeftRimParticles();
+	std::vector<SphParticle> getFrontRightRimParticles();
+	std::vector<SphParticle> getBackLeftRimParticles();
+	std::vector<SphParticle> getBackRightRimParticles();
+	std::vector<SphParticle> getLeftBottomRimParticles();
+	std::vector<SphParticle> getLeftTopRimParticles();
+	std::vector<SphParticle> getRightBottomRimParticles();
+	std::vector<SphParticle> getRightTopRimParticles();
+	std::vector<SphParticle> getFrontLeftBottomRimParticles();
+	std::vector<SphParticle> getFrontRightBottomRimParticles();
+	std::vector<SphParticle> getFrontLeftTopRimParticles();
+	std::vector<SphParticle> getFrontRightTopRimParticles();
+	std::vector<SphParticle> getBackLeftBottomRimParticles();
+	std::vector<SphParticle> getBackRightBottomRimParticles();
+	std::vector<SphParticle> getBackLeftTopRimParticles();
+	std::vector<SphParticle> getBackRightTopRimParticles();
 	void resetRimParticles();
 
 private:
-	std::vector<ISphParticle> particles;
-	std::vector<ISphParticle> static_particles;
+	std::vector<SphParticle> particles;
+	std::vector<SphParticle> static_particles;
 	std::vector<int> neighbour_domains;
 
-	NullableWrapper<std::vector<ISphParticle>> front_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> left_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> right_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_left_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_right_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_left_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_right_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> left_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> left_top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> right_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> right_top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_left_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_right_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_left_top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> front_right_top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_left_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_right_bottom_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_left_top_rim_particles;
-	NullableWrapper<std::vector<ISphParticle>> back_right_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> left_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> right_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_left_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_right_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_left_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_right_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> left_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> left_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> right_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> right_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_left_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_right_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_left_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> front_right_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_left_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_right_bottom_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_left_top_rim_particles;
+	NullableWrapper<std::vector<SphParticle>> back_right_top_rim_particles;
 	
 	int particles_outside_domain;
 	double rim_distance = 2;
