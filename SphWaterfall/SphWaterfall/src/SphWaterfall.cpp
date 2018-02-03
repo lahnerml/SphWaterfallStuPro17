@@ -6,36 +6,36 @@
 #include "data\FluidParticle.h"
 
 void loadMesh() {
-	printf("Command is loadMesh\n");
+	cout << "Command is loadMesh" << endl;
 }
 
 void generateParticle() {
-	printf("command is particleGen\n");
+	cout << "command is particleGen" << endl;
 }
 
 void moveShutter() {
-	printf("command is moveShutter\n");
+	cout << "command is moveShutter" << endl;
 }
 
 void simulate() {
-	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 3, 1);
+	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 5, 1);
 	std::vector<SphParticle> particles;
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 2; j++) {
 			for (int k = 0; k < 2; k++) {
 				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
 				particles.push_back(particle);
-				//std::cout << particle.position << std::endl;
+				// cout << particle.position << endl;
 			}
 		}
 	}
 	sph_manager.add_particles(particles);
 	sph_manager.simulate();
-	printf("command is simulate\n");
+	cout << "command is simulate" << endl;
 }
 
 void render() {
-	printf("command is render\n");
+	cout << "command is render" << endl;
 }
 
 int main(int argc, char** argv)
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 			exit_programm = true;
 		} 
 		else if (rank != 0) {
-			printf("Hello world from processor rank %d out of %d processors, buffer is %d\n", rank, world_size, command_buffer[0]);
+			cout << "Hello world from processor rank " << rank << " out of " << world_size << " processors, buffer is " << command_buffer[0] << endl;
 
 			if (*command_buffer == 1) {
 				loadMesh();

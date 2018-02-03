@@ -28,23 +28,19 @@ void SphManager::simulate() {
 }
 
 void SphManager::update(double timestep_duration) {
-	std::cout << "in_update  ";
-
-	//sets local densities
+	// compute and set local densities
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			computeLocalDensity(each_particle);
 		}
 	}
-	std::cout << "set_densities_finished" << std::endl;
+	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
-		// std::cout << "domain_id: " <<domains.size() << " number_of_particles: " << each_domain.second.size() << std::endl;
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			std::cout << each_particle.position << std::endl;
 			updateVelocity(each_particle, timestep_duration);
 		}
 	}
-	std::cout << "update_velocity_finished" << std::endl;
 }
 
 void SphManager::updateVelocity(SphParticle& particle, double timestep_duration) {
