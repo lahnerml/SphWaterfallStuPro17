@@ -224,7 +224,6 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	for (SphParticle particle : new_particles) {
 		int domain_id = computeTargetDomain(particle);
 		ParticleDomain domain = getParticleDomain(domain_id);
-		//std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl;
 		domain.addParticle(particle);
 	}
 }
