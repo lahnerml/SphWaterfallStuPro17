@@ -21,7 +21,7 @@ public:
 	const Vector3& getDimensions() const;
 	const Vector3& getOrigin() const;
 	void addParticle(const SphParticle&);
-	std::vector<SphParticle> getParticles();
+	std::vector<SphParticle>& getParticles();
 
 	std::vector<SphParticle> getTopRimParticles();
 	std::vector<SphParticle> getBottomRimParticles();

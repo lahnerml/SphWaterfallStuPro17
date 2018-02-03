@@ -7,8 +7,6 @@
 #include <unordered_map>
 #include <iterator>
 
-#include <iostream>
-
 class SphManager {
 public:
 	SphManager(const Vector3&, double simulation_time, double timestep_duration);
@@ -34,7 +32,6 @@ private:
 	Vector3 computeAcceleration(SphParticle& particle);
 	Vector3 computeDensityAcceleration(SphParticle& particle);
 	Vector3 computeViscosityAcceleration(SphParticle& particle);
-	void setLocalDensities();
 	void computeLocalDensity(SphParticle&);
 	double computeLocalPressure(SphParticle&);
 	void findNeighbourDomains(ParticleDomain);

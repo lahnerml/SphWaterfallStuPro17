@@ -29,24 +29,22 @@ void SphManager::simulate() {
 
 void SphManager::update(double timestep_duration) {
 	std::cout << "in_update  ";
-	setLocalDensities();
-	std::cout << "set_densities_finished" << std::endl;
-	for (auto each_domain : domains) {
-		std::cout << "domain_id: " <<domains.size() << " number_of_particles: " << each_domain.second.size() << std::endl;
-		for (auto each_particle : each_domain.second.getParticles()) {
-			updateVelocity(each_particle, timestep_duration);
-			std::cout << "x:" <<  each_particle.position.x << " y:" << each_particle.position.y << " z:" << each_particle.position.z << std::endl;
-		}
-	}
-	std::cout << "update_velocity_finished" << std::endl;
-}
 
-void SphManager::setLocalDensities() {
-	for (auto each_domain : domains) {
-		for (auto each_particle : each_domain.second.getParticles()) {
+	//sets local densities
+	for (auto& each_domain : domains) {
+		for (auto& each_particle : each_domain.second.getParticles()) {
 			computeLocalDensity(each_particle);
 		}
 	}
+	std::cout << "set_densities_finished" << std::endl;
+	for (auto& each_domain : domains) {
+		// std::cout << "domain_id: " <<domains.size() << " number_of_particles: " << each_domain.second.size() << std::endl;
+		for (auto& each_particle : each_domain.second.getParticles()) {
+			std::cout << each_particle.position << std::endl;
+			updateVelocity(each_particle, timestep_duration);
+		}
+	}
+	std::cout << "update_velocity_finished" << std::endl;
 }
 
 void SphManager::updateVelocity(SphParticle& particle, double timestep_duration) {
@@ -110,17 +108,19 @@ double SphManager::computeLocalPressure(SphParticle& particle) {
 
 Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
-	Vector3 sum = Vector3();
+	Vector3 viscosity_acceleration = Vector3();
 
 	for each (SphParticle neighbour_particle in neighbours)
 	{
 		Vector3 rij = neighbour_particle.position - particle.position;
-		sum += neighbour_particle.mass *  ((4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) / 
+		viscosity_acceleration += neighbour_particle.mass *  ((4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) / 
 			((particle.local_density + neighbour_particle.local_density) * (rij.length()*rij.length()))) * 
 			(particle.velocity - neighbour_particle.velocity);
 	}
-
-	return ((1 / particle.local_density) * sum);
+	if (particle.local_density == 0) {
+		return Vector3();
+	}
+	return ((1 / particle.local_density) * viscosity_acceleration);
 }
 
 void SphManager::findNeighbourDomains(ParticleDomain) {
