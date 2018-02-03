@@ -2,6 +2,7 @@
 
 class Vector3 {
 	public:
+		// x is right, y is up, z is back
 		double x, y, z;
 		Vector3();
 		Vector3(const double, const double, const double);

@@ -34,7 +34,6 @@ void SphManager::update(double timestep_duration) {
 	for (auto each_domain : domains) {
 		std::cout << "domain_id: " <<domains.size() << " number_of_particles: " << each_domain.second.size() << std::endl;
 		for (auto each_particle : each_domain.second.getParticles()) {
-			std::cout << "each_particle" << std::endl;
 			updateVelocity(each_particle, timestep_duration);
 			std::cout << "x:" <<  each_particle.position.x << " y:" << each_particle.position.y << " z:" << each_particle.position.z << std::endl;
 		}
@@ -229,9 +228,8 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	for (SphParticle particle : new_particles) {
 		int domain_id = computeTargetDomain(particle);
 		//std::cout << domain_id << std::endl; // Debug output
-		ParticleDomain domain = getParticleDomain(domain_id);
+		getParticleDomain(domain_id).addParticle(particle);
 		//std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl; // debug output
-		domain.addParticle(particle);
 	}
 }
 
