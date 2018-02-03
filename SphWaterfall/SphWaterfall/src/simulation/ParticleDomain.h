@@ -17,6 +17,7 @@ public:
 
 	std::vector<SphParticle> removeParticlesOutsideDomain();
 
+	int size() const;
 	const Vector3& getDimensions() const;
 	const Vector3& getOrigin() const;
 	void addParticle(const SphParticle&);

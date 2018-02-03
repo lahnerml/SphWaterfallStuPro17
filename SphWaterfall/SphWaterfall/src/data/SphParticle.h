@@ -13,6 +13,5 @@ class SphParticle {
 		Vector3 velocity;
 		double mass;
 		double local_density;
-		double viscosity;
 	private:
 };

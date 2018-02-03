@@ -38,6 +38,10 @@ Vector3 operator/(const Vector3& vector, const double factor) {
 	return Vector3(vector.x / factor, vector.y / factor, vector.z / factor);
 }
 
+Vector3 operator/(const Vector3& a, const Vector3 b) {
+	return Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+}
+
 Vector3 operator%(const Vector3& vector, const double factor) {
 	return Vector3(fmod(vector.x, factor), fmod(vector.y, factor), fmod(vector.z, factor));
 }
@@ -80,4 +84,8 @@ double Vector3::length() const {
 
 Vector3 Vector3::normalize() const {
 	return *this / length();
+}
+
+Vector3 Vector3::roundDownward() const{
+	return Vector3(floor(x), floor(y), floor(z));
 }
