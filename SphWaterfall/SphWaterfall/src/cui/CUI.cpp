@@ -88,11 +88,11 @@ namespace CUI {
 
 		addCamera(Vector3(-30, 0, -30), normalizeVector(Vector3(1, 0, 1)), 1920, 1080);
 
-		std::vector<SphParticle> particles;
-		SphParticle particle = SphParticle(Vector3(0, 0, 0), Vector3(0, 0, 0));
-		SphParticle particle2 = SphParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));
-		SphParticle particle3 = SphParticle(Vector3(5, 5, 0), Vector3(0, 0, 0));
-		SphParticle particle4 = SphParticle(Vector3(-5, -5, -5), Vector3(0, 0, 0));
+		std::vector<FluidParticle> particles;
+		FluidParticle particle = FluidParticle(Vector3(0, 0, 0), Vector3(0, 0, 0));
+		FluidParticle particle2 = FluidParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));
+		FluidParticle particle3 = FluidParticle(Vector3(5, 5, 0), Vector3(0, 0, 0));
+		FluidParticle particle4 = FluidParticle(Vector3(-5, -5, -5), Vector3(0, 0, 0));
 
 		particles.emplace_back(particle);
 		particles.emplace_back(particle2);

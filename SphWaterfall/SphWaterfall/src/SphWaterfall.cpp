@@ -3,7 +3,7 @@
 #include "mpi.h"
 
 #include "cui/CUI.h"
-#include "data\SphParticle.h"
+#include "data\FluidParticle.h"
 
 void loadMesh() {
 	printf("Command is loadMesh\n");
@@ -19,11 +19,13 @@ void moveShutter() {
 
 void simulate() {
 	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 10, 1);
-	std::vector<ISphParticle> particles;
+	std::vector<SphParticle> particles;
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
 			for (int k = 0; k < 10; k++) {
-				particles.push_back(SphParticle(Vector3(i, j, k), Vector3(), 1));
+				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
+				particles.push_back(particle);
+				std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl;
 			}
 		}
 	}

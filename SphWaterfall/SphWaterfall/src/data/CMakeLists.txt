@@ -1,7 +1,8 @@
 target_sources(
 	SphWaterfall
 	PUBLIC
-		"${CMAKE_CURRENT_LIST_DIR}/ISphParticle.h"
+		"${CMAKE_CURRENT_LIST_DIR}/FluidParticle.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/FluidParticle.h"
 		"${CMAKE_CURRENT_LIST_DIR}/NullableWrapper.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/NullableWrapper.h"
 		"${CMAKE_CURRENT_LIST_DIR}/SphParticle.cpp"

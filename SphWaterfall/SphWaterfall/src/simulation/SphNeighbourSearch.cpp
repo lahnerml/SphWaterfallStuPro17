@@ -9,12 +9,12 @@ SphNeighbourSearch::~SphNeighbourSearch() {
 
 }
 
-std::vector<ISphParticle> SphNeighbourSearch::findNeigbours(ISphParticle particle, std::unordered_map<int, ParticleDomain> domains) {
-	std::vector<ISphParticle> neighbours;
+std::vector<SphParticle> SphNeighbourSearch::findNeigbours(SphParticle particle, std::unordered_map<int, ParticleDomain> domains) {
+	std::vector<SphParticle> neighbours;
 	return neighbours;
 }
 
-std::vector<ParticleDomain> SphNeighbourSearch::findRelevantNeighbourDomains(ISphParticle particle, std::unordered_map<int, ParticleDomain> domains) {
+std::vector<ParticleDomain> SphNeighbourSearch::findRelevantNeighbourDomains(SphParticle particle, std::unordered_map<int, ParticleDomain> domains) {
 	std::vector<ParticleDomain> relevantNeighbourDomain;
 	return relevantNeighbourDomain;
 }

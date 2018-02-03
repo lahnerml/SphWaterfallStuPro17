@@ -1,7 +1,7 @@
 #pragma once
-#include "ISphParticle.h"
+#include "Vector3.h"
 
-class SphParticle : public ISphParticle {
+class SphParticle {
 	public:
 		SphParticle();
 		SphParticle(Vector3);
@@ -15,6 +15,4 @@ class SphParticle : public ISphParticle {
 		double local_density;
 		double viscosity;
 	private:
-
-
 };

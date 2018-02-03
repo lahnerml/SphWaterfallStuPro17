@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <iterator>
 
-
+#include <iostream>
 
 class SphManager {
 public:
@@ -18,32 +18,32 @@ public:
 	void simulate();
 	void update(double timestep);
 
-	void add_particles(const std::vector<ISphParticle>&);
+	void add_particles(const std::vector<SphParticle>&);
 private:
 	int world_size;
 	Vector3 domain_dimensions;
 	double simulation_time;
 	double timestep_duration;
 	std::unordered_map<int, ParticleDomain> domains;
-	std::vector<ISphParticle> neighbour_particles;
+	std::vector<SphParticle> neighbour_particles;
 	ISphKernel* kernel;
 	ISphNeighbourSearch* neighbour_search;
 	SphKernelFactory kernel_factory;
 	SphNeighbourSearchFactory neighbour_search_factory;
 
-	void updateVelocity(ISphParticle& particle, double timestep);
-	Vector3 computeAcceleration(ISphParticle& particle);
-	Vector3 computeDensityAcceleration(ISphParticle& particle);
-	Vector3 computeViscosityAcceleration(ISphParticle& particle);
+	void updateVelocity(SphParticle& particle, double timestep);
+	Vector3 computeAcceleration(SphParticle& particle);
+	Vector3 computeDensityAcceleration(SphParticle& particle);
+	Vector3 computeViscosityAcceleration(SphParticle& particle);
 	void setLocalDensities();
-	void computeLocalDensity(ISphParticle&);
-	double computeLocalPressure(ISphParticle&);
+	void computeLocalDensity(SphParticle&);
+	double computeLocalPressure(SphParticle&);
 	void findNeighbourDomains(ParticleDomain);
 
 	MPI_Request requestRimParticles(const Vector3&, const Vector3&);
 	void exchangeParticles();
-	int computeTargetProcess(const ISphParticle&) const;
-	int computeTargetDomain(const ISphParticle&) const;
+	int computeTargetProcess(const SphParticle&) const;
+	int computeTargetDomain(const SphParticle&) const;
 	int hash(const Vector3&) const;
 	Vector3 unhash(const int&) const;
 	ParticleDomain& getParticleDomain(const int&);

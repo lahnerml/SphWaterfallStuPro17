@@ -2,12 +2,12 @@
 #include <vector>
 
 #include "../geometry/Terrain.h"
-#include "../data/ISphParticle.h"
+#include "../data/SphParticle.h"
 
 class StaticParticleGenerator {
 public:
 	StaticParticleGenerator();
-	std::vector<ISphParticle> generateStaticParticles(Terrain source);
+	std::vector<SphParticle> generateStaticParticles(Terrain source);
 
 
 
