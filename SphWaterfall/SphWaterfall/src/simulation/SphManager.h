@@ -16,8 +16,6 @@ public:
 	~SphManager();
 
 	void simulate();
-	void update(double timestep);
-
 	void add_particles(const std::vector<SphParticle>&);
 private:
 	int world_size;
@@ -31,6 +29,7 @@ private:
 	SphKernelFactory kernel_factory;
 	SphNeighbourSearchFactory neighbour_search_factory;
 
+	void update(double timestep);
 	void updateVelocity(SphParticle& particle, double timestep);
 	Vector3 computeAcceleration(SphParticle& particle);
 	Vector3 computeDensityAcceleration(SphParticle& particle);

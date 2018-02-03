@@ -28,14 +28,18 @@ void SphManager::simulate() {
 }
 
 void SphManager::update(double timestep_duration) {
-	printf("in_update\n");
+	std::cout << "in_update  ";
 	setLocalDensities();
+	std::cout << "set_densities_finished" << std::endl;
 	for (auto each_domain : domains) {
+		std::cout << "domain_id: " <<domains.size() << " number_of_particles: " << each_domain.second.size() << std::endl;
 		for (auto each_particle : each_domain.second.getParticles()) {
+			std::cout << "each_particle" << std::endl;
 			updateVelocity(each_particle, timestep_duration);
-	
+			std::cout << "x:" <<  each_particle.position.x << " y:" << each_particle.position.y << " z:" << each_particle.position.z << std::endl;
 		}
 	}
+	std::cout << "update_velocity_finished" << std::endl;
 }
 
 void SphManager::setLocalDensities() {
@@ -204,7 +208,8 @@ Vector3 SphManager::unhash(const int& unique_id) const {
 }
 
 int SphManager::computeTargetDomain(const SphParticle& particle) const{
-	Vector3 targetDomainCoords = particle.position % domain_dimensions;
+	Vector3 targetDomainCoords = (particle.position / domain_dimensions).roundDownward();
+	//std::cout << "x:" << targetDomainCoords.x << " y:" << targetDomainCoords.y << " z:" << targetDomainCoords.z << std::endl; // debug output
 	return hash(targetDomainCoords);
 }
 
@@ -223,8 +228,9 @@ ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
 void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	for (SphParticle particle : new_particles) {
 		int domain_id = computeTargetDomain(particle);
+		//std::cout << domain_id << std::endl; // Debug output
 		ParticleDomain domain = getParticleDomain(domain_id);
-		//std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl;
+		//std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl; // debug output
 		domain.addParticle(particle);
 	}
 }

@@ -19,6 +19,10 @@ ParticleDomain::~ParticleDomain() {
 
 }
 
+int ParticleDomain::size() const {
+	return particles.size() + static_particles.size();
+}
+
 std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 	particles_outside_domain = 0;
 	std::vector<SphParticle> outsideParticles;

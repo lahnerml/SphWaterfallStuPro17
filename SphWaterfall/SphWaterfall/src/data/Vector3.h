@@ -12,6 +12,8 @@ class Vector3 {
 		friend Vector3 operator*(const Vector3&, const Vector3&);
 
 		friend Vector3 operator/(const Vector3&, const double);
+		friend Vector3 operator/(const Vector3&, const Vector3);
+
 		friend Vector3 operator%(const Vector3&, const double);
 		friend Vector3 operator%(const Vector3&, const Vector3&);
 
@@ -19,12 +21,11 @@ class Vector3 {
 		friend Vector3 operator-(const Vector3&);
 		friend Vector3 operator-(const Vector3&, const Vector3&);
 
-		
 		friend Vector3& operator+=(Vector3&, const Vector3&);
 
 		bool in_range_of(const Vector3&) const;
 		double length() const;
 		Vector3 normalize() const;
-
+		Vector3 roundDownward() const;
 	private:
 };
