@@ -2,13 +2,13 @@
 #include "mpi.h"
 #include "SphKernelFactory.h"
 #include "SphNeighbourSearchFactory.h"
-#include "DomainHash.h";
+#include "SimulationUtilities.h";
 
 #include <vector>
 #include <unordered_map>
 #include <iterator>
 
-using namespace DomainHash;
+using namespace SimulationUtilities;
 
 class SphManager {
 public:
