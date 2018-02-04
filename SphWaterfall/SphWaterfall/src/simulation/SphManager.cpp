@@ -17,6 +17,7 @@ SphManager::~SphManager() {
 void SphManager::simulate() {
 	double remaining_simulation_time = simulation_time;
 	while (remaining_simulation_time > 0) {
+		exchangeRimParticles();
 		update(timestep_duration);
 		std::cout << "after update" << std::endl;
 		exchangeParticles();
@@ -195,24 +196,24 @@ void SphManager::exchangeRimParticles() {
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> new_rim_particles;
 
 	int rank;
-	MPI_Comm_rank(used_communicator, &rank);
+	MPI_Comm_rank(slave_comm, &rank);
 	int count = 1;
 
 	for (auto target : target_map) {
 		for (auto rim_particles : target.second) {
-			int target_process_id = target.first % world_size;
+			int target_process_id = target.first % slave_comm_size;
 			if (target_process_id == rank) {
 				new_rim_particles[target.first][rim_particles.first] = rim_particles.second;
 			} else {
 				// target domain id, source domain id, tag der richtigen Nachricht
 				std::array<int, 3> meta = { target.first, rim_particles.first, count};
 				MPI_Request request;
-				MPI_Isend(meta.data(), meta.size() * sizeof(int), MPI_BYTE, target.first % world_size, 0, used_communicator, &request);
+				MPI_Isend(meta.data(), meta.size() * sizeof(int), MPI_BYTE, target.first % slave_comm_size, 0, slave_comm, &request);
 				MPI_Request_free(&request);
 
 				// send particles
 				request;
-				MPI_Isend(rim_particles.second.data(), rim_particles.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, used_communicator, &request);
+				MPI_Isend(rim_particles.second.data(), rim_particles.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm, &request);
 				MPI_Request_free(&request);
 
 				// increment unique tag
@@ -221,12 +222,12 @@ void SphManager::exchangeRimParticles() {
 		}	
 	}
 
-	MPI_Barrier(used_communicator);
+	MPI_Barrier(slave_comm);
 
 	// receive until there is nothing left
 	int flag;
 	MPI_Status status;
-	MPI_Iprobe(MPI_ANY_SOURCE, 0, used_communicator, &flag, &status);
+	MPI_Iprobe(MPI_ANY_SOURCE, 0, slave_comm, &flag, &status);
 
 	while (flag) {
 		int source = status.MPI_SOURCE;
@@ -235,21 +236,21 @@ void SphManager::exchangeRimParticles() {
 
 		MPI_Get_count(&status, MPI_BYTE, &count);
 		std::array<int, 3> meta;
-		MPI_Recv(meta.data(), count, MPI_BYTE, source, tag, used_communicator, &status);
+		MPI_Recv(meta.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 
-		MPI_Probe(source, meta[2], used_communicator, &status);
+		MPI_Probe(source, meta[2], slave_comm, &status);
 		MPI_Get_count(&status, MPI_BYTE, &count);
 
 		std::vector<SphParticle> incoming_rim_particles;
 		source = status.MPI_SOURCE;
 		tag = status.MPI_TAG;
 		count;
-		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, used_communicator, &status);
+		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 
 		new_rim_particles[meta[0]][meta[1]] = incoming_rim_particles;
 
 		// next message
-		MPI_Iprobe(MPI_ANY_SOURCE, 0, used_communicator, &flag, &status);
+		MPI_Iprobe(MPI_ANY_SOURCE, 0, slave_comm, &flag, &status);
 	}
 
 	for (auto target : new_rim_particles) {
@@ -258,7 +259,7 @@ void SphManager::exchangeRimParticles() {
 		}
 	}
 
-	MPI_Barrier(used_communicator);
+	MPI_Barrier(slave_comm);
 }
 
 
