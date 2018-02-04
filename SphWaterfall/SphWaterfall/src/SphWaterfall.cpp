@@ -17,10 +17,10 @@ void moveShutter() {
 	cout << "command is moveShutter" << endl;
 }
 
-void simulate() {
+void simulate(MPI_Comm communicator) {
 	cout << "command is simulate" << endl;
 
-	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 5, 1);
+	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 5, 1, communicator);
 	std::vector<SphParticle> particles;
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 2; j++) {
@@ -53,6 +53,14 @@ int main(int argc, char** argv)
 	int world_size;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
+	int color = 1337;
+	if (rank = 0) {
+		color = MPI_UNDEFINED;
+	}
+	MPI_Comm calc_comm;
+	MPI_Comm_split(MPI_COMM_WORLD, color, 0, &calc_comm);
+
+
 	while (!exit_programm) {
 		if (rank == 0) {
 			cuiThread = std::thread(CUI::readCommand, command_buffer);
@@ -80,7 +88,7 @@ int main(int argc, char** argv)
 				cout << "moveing shutter finished from processor " << rank << " out of " << world_size << " processors" << endl;
 			} 
 			else if (*command_buffer == 4) {
-				simulate();
+				simulate(calc_comm);
 				cout << "simulation finished from processor " << rank << " out of " << world_size << " processors" << endl;
 			} 
 			else if (*command_buffer == 5) {
