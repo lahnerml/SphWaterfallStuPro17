@@ -1,8 +1,9 @@
 #pragma once
 #include "SphNeighbourSearch.h"
 
-SphNeighbourSearch::SphNeighbourSearch(double q_max) :
-	q_max(q_max){
+SphNeighbourSearch::SphNeighbourSearch(double q_max, int slave_comm_size) :
+	q_max(q_max),
+	slave_comm_size(slave_comm_size){
 
 }
 
@@ -10,117 +11,113 @@ SphNeighbourSearch::~SphNeighbourSearch() {
 
 }
 
-std::vector<SphParticle> SphNeighbourSearch::findNeigbours(SphParticle particle, std::unordered_map<int, ParticleDomain> domains) {
+std::vector<SphParticle> SphNeighbourSearch::findNeigbours(SphParticle particle, std::vector<SphParticle> neighbour_particles) {
 	std::vector<SphParticle> neighbours = std::vector<SphParticle>();
-	std::vector<ParticleDomain> neighbour_domains = findRelevantNeighbourDomains(particle, domains);
 
-	for (auto neighbour_domain : neighbour_domains) {
-		for (auto each_particle : neighbour_domain.getParticles()) {
-			if (isInInfluentialRadius(particle.position, each_particle.position)) {
-				neighbours.push_back(each_particle);
-			}
+	std::cout << "find neigbours relevant neighbours found" << std::endl;
+
+	for (auto each_particle : neighbour_particles) {
+		if (isInInfluentialRadius(particle.position, each_particle.position)) {
+			neighbours.push_back(each_particle);
 		}
 	}
 
 	return neighbours;
 }
 
-std::vector<ParticleDomain> SphNeighbourSearch::findRelevantNeighbourDomains(SphParticle particle, std::unordered_map<int, ParticleDomain> domains) {
-	std::vector<ParticleDomain> relevant_neighbour_domains = std::vector<ParticleDomain>();
+std::set<int> SphNeighbourSearch::findRelevantNeighbourDomains(SphParticle particle, Vector3 dimension) {
 	std::set<int> neighbour_domain_ids = std::set<int>();
-	double dimension = (domains.begin()->second.getDimensions().x) / 2;
+
+	std::cout << "find relevant neighbours" << std::endl;
 
 	// center point
 	Vector3 testing_point = particle.position;
 	neighbour_domain_ids.insert(hash(testing_point));
 
+	computeDomainID(testing_point, dimension, slave_comm_size);
 	// front point
 	testing_point = particle.position + (Vector3(0, 0, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// back point
 	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// left point
-	testing_point = particle.position + (Vector3(1, 0, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// right point
 	testing_point = particle.position + (Vector3(-1, 0, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// right point
+	testing_point = particle.position + (Vector3(1, 0, 0) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// top point
 	testing_point = particle.position + (Vector3(0, 1, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// bottom point
 	testing_point = particle.position + (Vector3(0, -1, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 
 	// front bottom point
 	testing_point = particle.position + (Vector3(0, 1, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// front top point
 	testing_point = particle.position + (Vector3(0, -1, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// front left point
-	testing_point = particle.position + (Vector3(1, 0, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// front right point
 	testing_point = particle.position + (Vector3(-1, 0, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// front right point
+	testing_point = particle.position + (Vector3(1, 0, 1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// front left bottom point
-	testing_point = particle.position + (Vector3(1, -1, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// front right bottom point
 	testing_point = particle.position + (Vector3(-1, -1, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// front right bottom point
+	testing_point = particle.position + (Vector3(1, -1, 1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// front left top point
-	testing_point = particle.position + (Vector3(1, 1, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// front right top point
 	testing_point = particle.position + (Vector3(-1, 1, 1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// front right top point
+	testing_point = particle.position + (Vector3(1, 1, 1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 
 	// back top point
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	testing_point = particle.position + (Vector3(0, 1, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// back bottom point
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// back leftpoint
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	testing_point = particle.position + (Vector3(0, -1, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// back left point
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	testing_point = particle.position + (Vector3(-1, 0, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// back right point
+	testing_point = particle.position + (Vector3(1, 0, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// back left bottom point
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	testing_point = particle.position + (Vector3(-1, -1, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// back right bottom point
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	testing_point = particle.position + (Vector3(1, -1, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// back left top point
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	testing_point = particle.position + (Vector3(-1, 1, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 	// back right top point
-	testing_point = particle.position + (Vector3(0, 0, -1) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
+	testing_point = particle.position + (Vector3(1, 1, -1) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
 
 	// left top point
-	testing_point = particle.position + (Vector3(1, 1, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// left bottom point
-	testing_point = particle.position + (Vector3(1, -1, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// right top point
 	testing_point = particle.position + (Vector3(-1, 1, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	// right bottom point
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// left bottom point
 	testing_point = particle.position + (Vector3(-1, -1, 0) * q_max);
-	neighbour_domain_ids.insert(hash(testing_point));
-	
-	for (int neighbout_domain_id : neighbour_domain_ids) {
-		relevant_neighbour_domains.push_back(domains.at(neighbout_domain_id));
-	}
-
-	return relevant_neighbour_domains;
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// right top point
+	testing_point = particle.position + (Vector3(1, 1, 0) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+	// right bottom point
+	testing_point = particle.position + (Vector3(1, -1, 0) * q_max);
+	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension, slave_comm_size));
+		
+	return neighbour_domain_ids;
 }
 
 bool SphNeighbourSearch::isInInfluentialRadius(Vector3 particle, Vector3 potential_neighbour) {

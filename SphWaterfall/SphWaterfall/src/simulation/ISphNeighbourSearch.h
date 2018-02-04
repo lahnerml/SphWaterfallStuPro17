@@ -10,8 +10,8 @@ using namespace SimulationUtilities;
 
 class ISphNeighbourSearch {
 public:
-	virtual std::vector<SphParticle> findNeigbours(SphParticle, std::unordered_map<int, ParticleDomain> domains) = 0;
-	virtual std::vector<ParticleDomain> findRelevantNeighbourDomains(SphParticle, std::unordered_map<int, ParticleDomain> domains) = 0;
+	virtual std::vector<SphParticle> findNeigbours(SphParticle particle, std::vector<SphParticle> neighbour_particles) = 0;
+	virtual std::set<int> findRelevantNeighbourDomains(SphParticle particle, Vector3 dimension) = 0;
 
 private:
 };
