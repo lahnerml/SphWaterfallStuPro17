@@ -12,7 +12,7 @@ SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time,
 {
 	MPI_Comm_size(used_communicator, &world_size);
 	kernel = kernel_factory.getInstance(1, H, Q_MAX);
-	neighbour_search = neighbour_search_factory.getInstance(1);
+	neighbour_search = neighbour_search_factory.getInstance(1, Q_MAX);
 }
 
 SphManager::~SphManager() {
@@ -186,7 +186,7 @@ void SphManager::exchangeParticles() {
 
 int SphManager::computeTargetDomain(const SphParticle& particle) const{
 	Vector3 targetDomainCoords = (particle.position / domain_dimensions).roundDownward();
-	//std::cout << "x:" << targetDomainCoords.x << " y:" << targetDomainCoords.y << " z:" << targetDomainCoords.z << std::endl; // debug output
+	//std::cout << targetDomainCoords << std::endl; // debug output
 	return hash(targetDomainCoords);
 }
 
@@ -207,7 +207,7 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 		int domain_id = computeTargetDomain(particle);
 		//std::cout << domain_id << std::endl; // Debug output
 		getParticleDomain(domain_id).addParticle(particle);
-		//std::cout << particle.position.x << particle.position.y << particle.position.z << std::endl; // debug output
+		//std::cout << particle.position << std::endl; // debug output
 	}
 }
 

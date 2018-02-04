@@ -1,9 +1,9 @@
 #pragma once
-#include "DomainHash.h"
+#include "SimulationUtilities.h"
 
-namespace DomainHash {
+namespace SimulationUtilities {
 
-	int DomainHash::hash(const Vector3& vector) {
+	int SimulationUtilities::hash(const Vector3& vector) {
 		int x, y, z;
 		x = static_cast<int>(vector.x);
 		y = static_cast<int>(vector.y);
@@ -13,7 +13,7 @@ namespace DomainHash {
 		return (x + y + z);
 	}
 
-	Vector3 DomainHash::unhash(const int& unique_id) {
+	Vector3 SimulationUtilities::unhash(const int& unique_id) {
 		int z = unique_id >> 20;
 		int y = (unique_id - (z << 20)) >> 10;
 		int x = unique_id - (z << 20) - (y << 10);

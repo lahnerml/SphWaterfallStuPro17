@@ -6,6 +6,6 @@ public:
 	SphNeighbourSearchFactory();
 	~SphNeighbourSearchFactory();
 
-	static ISphNeighbourSearch* getInstance(int key);
+	static ISphNeighbourSearch* getInstance(int key, double q_max);
 private:
 };
