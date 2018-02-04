@@ -22,11 +22,11 @@ void moveShutter() {
 void simulate() {
 	cout << "command is simulate" << endl;
 
-	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 5, 1);
+	SphManager sph_manager = SphManager(Vector3(2, 2, 2), 5, 1);
 	std::vector<SphParticle> particles;
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < 2; j++) {
-			for (int k = 0; k < 2; k++) {
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			for (int k = 0; k < 5; k++) {
 				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
 				particles.push_back(particle);
 				//cout << particle.position << endl;
