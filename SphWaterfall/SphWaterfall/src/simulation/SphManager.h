@@ -8,18 +8,14 @@
 #include <unordered_map>
 #include <iterator>
 
-using namespace SimulationUtilities;
-
 class SphManager {
 public:
-	SphManager(const Vector3&, double simulation_time, double timestep_duration, MPI_Comm used_communicator);
+	SphManager(const Vector3&, double simulation_time, double timestep_duration);
 	~SphManager();
 
 	void simulate();
 	void add_particles(const std::vector<SphParticle>&);
 private:
-	MPI_Comm used_communicator;
-	int world_size;
 	Vector3 domain_dimensions;
 	double simulation_time;
 	double timestep_duration;
