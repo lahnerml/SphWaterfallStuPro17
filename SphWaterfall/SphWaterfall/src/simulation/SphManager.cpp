@@ -1,18 +1,13 @@
 #pragma once
 #include "SphManager.h"
 
-#define H 1.0
-#define Q_MAX 2.0
-
-SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time, double timestep_duration, MPI_Comm used_communicator) :
+SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
 	simulation_time(simulation_time),
-	timestep_duration(timestep_duration),
-	used_communicator(used_communicator)
+	timestep_duration(timestep_duration) 
 {
-	MPI_Comm_size(used_communicator, &world_size);
-	kernel = kernel_factory.getInstance(1, H, Q_MAX);
-	neighbour_search = neighbour_search_factory.getInstance(1, Q_MAX, world_size);
+	kernel = kernel_factory.getInstance(1);
+	neighbour_search = neighbour_search_factory.getInstance(1);
 }
 
 SphManager::~SphManager() {
@@ -141,7 +136,7 @@ void SphManager::exchangeParticles() {
 	for (auto each_domain : domains) {
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 		for (SphParticle each_particle : outside_particles) {
-			int target_id = computeProcessID(each_particle.position, domain_dimensions, world_size);
+			int target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);
 			int count = target_map.count(target_id);
 
 			if (count == 0) {
@@ -158,7 +153,7 @@ void SphManager::exchangeParticles() {
 
 	// don't send to yourself
 	int rank;
-	MPI_Comm_rank(used_communicator, &rank);
+	MPI_Comm_rank(slave_comm, &rank);
 
 	int count = target_map.count(rank);
 	if (count != 0) {
@@ -168,16 +163,16 @@ void SphManager::exchangeParticles() {
 
 	for (auto vector : target_map) {
 		MPI_Request request;
-		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, used_communicator, &request);
+		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, slave_comm, &request);
 		MPI_Request_free(&request);
 	}
 
-	MPI_Barrier(used_communicator);
+	MPI_Barrier(slave_comm);
 
 	// receive until there is nothing left
 	int flag;
 	MPI_Status status;
-	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, used_communicator, &flag, &status);
+	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
 
 	while (flag) {
 		int source = status.MPI_SOURCE;
@@ -186,16 +181,16 @@ void SphManager::exchangeParticles() {
 
 		MPI_Get_count(&status, MPI_BYTE, &count);
 
-		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, tag, used_communicator, &status);
+		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 		std::move(incoming_particles.begin(), incoming_particles.end(), std::inserter(all_new_particles, all_new_particles.end()));
 
 		// next message
-		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, used_communicator, &flag, &status);
+		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
 	}
 
 	add_particles(all_new_particles);
 
-	MPI_Barrier(used_communicator);
+	MPI_Barrier(slave_comm);
 }
 
 ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
@@ -220,7 +215,7 @@ MPI_Request SphManager::requestRimParticles(const Vector3& neighbourDomain, cons
 	int request_id = hash(source);
 
 	MPI_Request request;
-	MPI_Isend(&request_id, 1, MPI_INT, domain_id, request_id % world_size, used_communicator, &request);
+	MPI_Isend(&request_id, 1, MPI_INT, domain_id, request_id % slave_comm_size, slave_comm, &request);
 	return request;
 }
 
@@ -333,6 +328,6 @@ void SphManager::sendRimParticles(const int& destination, const int& requester) 
 	}
 
 	MPI_Request request;
-	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(SphParticle), MPI_BYTE, requester % world_size, 0, used_communicator, &request);
+	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(SphParticle), MPI_BYTE, requester % slave_comm_size, 0, slave_comm, &request);
 	MPI_Request_free(&request);
 }

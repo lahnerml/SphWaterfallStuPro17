@@ -2,6 +2,8 @@
 #include "SimulationUtilities.h"
 
 namespace SimulationUtilities {
+	MPI_Comm slave_comm;
+	int slave_comm_size;
 
 	int SimulationUtilities::hash(const Vector3& vector) {
 		int x, y, z;
@@ -27,4 +29,5 @@ namespace SimulationUtilities {
 	int SimulationUtilities::computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int comm_size) {
 		return abs(computeDomainID(position, domain_dimension) % comm_size);
 	}
+
 }

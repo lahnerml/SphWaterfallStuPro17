@@ -1,11 +1,12 @@
 #pragma once
 #include "SphNeighbourSearch.h"
+#include "SimulationUtilities.h";
 
 class SphNeighbourSearchFactory {
 public:
 	SphNeighbourSearchFactory();
 	~SphNeighbourSearchFactory();
 
-	static ISphNeighbourSearch* getInstance(int key, double q_max, int slave_comm_size);
+	static ISphNeighbourSearch* getInstance(int key);
 private:
 };

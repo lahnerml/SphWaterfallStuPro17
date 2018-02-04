@@ -1,8 +1,10 @@
+#pragma once
 #include <thread>
 
 #include "mpi.h"
 
 #include "cui/CUI.h"
+//#include "simulation/SimulationUtilities.h"
 #include "data\FluidParticle.h"
 
 void loadMesh() {
@@ -17,10 +19,10 @@ void moveShutter() {
 	cout << "command is moveShutter" << endl;
 }
 
-void simulate(MPI_Comm communicator) {
+void simulate() {
 	cout << "command is simulate" << endl;
 
-	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 5, 1, communicator);
+	SphManager sph_manager = SphManager(Vector3(10, 10, 10), 5, 1);
 	std::vector<SphParticle> particles;
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 2; j++) {
@@ -57,9 +59,11 @@ int main(int argc, char** argv)
 	if (rank == 0) {
 		color = MPI_UNDEFINED;
 	}
-	//MPI_Comm calc_comm;
-	MPI_Comm calc_comm;
-	MPI_Comm_split(MPI_COMM_WORLD, color, 0, &calc_comm);
+
+	MPI_Comm_split(MPI_COMM_WORLD, color, 0, &slave_comm);
+	if (rank != 0) {
+		MPI_Comm_size(slave_comm, &slave_comm_size);
+	}
 
 	while (!exit_programm) {
 		if (rank == 0) {
@@ -77,23 +81,23 @@ int main(int argc, char** argv)
 
 			if (*command_buffer == 1) {
 				loadMesh();
-				cout << "mesh loading finished from processor " << rank << " out of " << world_size << " processors" << endl;
+				cout << "mesh loading finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
 			} 
 			else if (*command_buffer == 2) {
 				generateParticle();
-				cout << "particle generation finished from processor " << rank << " out of " << world_size << " processors" << endl;
+				cout << "particle generation finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
 			} 
 			else if (*command_buffer == 3) {
 				moveShutter();
-				cout << "moveing shutter finished from processor " << rank << " out of " << world_size << " processors" << endl;
+				cout << "moveing shutter finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
 			} 
 			else if (*command_buffer == 4) {
-				simulate(calc_comm);
-				cout << "simulation finished from processor " << rank << " out of " << world_size << " processors" << endl;
+				simulate();
+				cout << "simulation finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
 			} 
 			else if (*command_buffer == 5) {
 				render();
-				cout << "rendering finished from processor " << rank << " out of " << world_size << " processors" << endl;
+				cout << "rendering finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
 			}
 		}
 	}
