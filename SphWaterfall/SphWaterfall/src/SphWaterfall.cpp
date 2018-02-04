@@ -27,7 +27,7 @@ void simulate(MPI_Comm communicator) {
 			for (int k = 0; k < 2; k++) {
 				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
 				particles.push_back(particle);
-				// cout << particle.position << endl;
+				//cout << particle.position << endl;
 			}
 		}
 	}
@@ -54,12 +54,12 @@ int main(int argc, char** argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 	int color = 1337;
-	if (rank = 0) {
+	if (rank == 0) {
 		color = MPI_UNDEFINED;
 	}
+	//MPI_Comm calc_comm;
 	MPI_Comm calc_comm;
 	MPI_Comm_split(MPI_COMM_WORLD, color, 0, &calc_comm);
-
 
 	while (!exit_programm) {
 		if (rank == 0) {

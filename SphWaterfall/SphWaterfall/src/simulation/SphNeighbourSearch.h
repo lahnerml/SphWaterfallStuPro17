@@ -3,14 +3,15 @@
 
 class SphNeighbourSearch : public ISphNeighbourSearch {
 public:
-	SphNeighbourSearch(double q_max);
+	SphNeighbourSearch(double q_max, int slave_comm_size);
 	~SphNeighbourSearch();
 
-	std::vector<SphParticle> findNeigbours(SphParticle particle, std::unordered_map<int, ParticleDomain> domains);
-	std::vector<ParticleDomain> findRelevantNeighbourDomains(SphParticle particle, std::unordered_map<int, ParticleDomain> domains);
+	std::vector<SphParticle> findNeigbours(SphParticle particle, std::vector<SphParticle> neighbour_particles);
+	std::set<int> findRelevantNeighbourDomains(SphParticle particle, Vector3 dimension);
 
 private:
 	double q_max;
+	int slave_comm_size;
 
 	bool isInInfluentialRadius(Vector3 particle, Vector3 potential_neighbour);
 };

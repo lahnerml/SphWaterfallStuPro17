@@ -41,8 +41,6 @@ private:
 
 	MPI_Request requestRimParticles(const Vector3&, const Vector3&);
 	void exchangeParticles();
-	int computeTargetProcess(const SphParticle&) const;
-	int computeTargetDomain(const SphParticle&) const;
 	ParticleDomain& getParticleDomain(const int&);
 	void sendRimParticles(const int&, const int&);
 };

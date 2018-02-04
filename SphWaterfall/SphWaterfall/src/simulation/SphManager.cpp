@@ -12,7 +12,7 @@ SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time,
 {
 	MPI_Comm_size(used_communicator, &world_size);
 	kernel = kernel_factory.getInstance(1, H, Q_MAX);
-	neighbour_search = neighbour_search_factory.getInstance(1, Q_MAX);
+	neighbour_search = neighbour_search_factory.getInstance(1, Q_MAX, world_size);
 }
 
 SphManager::~SphManager() {
@@ -23,6 +23,9 @@ void SphManager::simulate() {
 	double remaining_simulation_time = simulation_time;
 	while (remaining_simulation_time > 0) {
 		update(timestep_duration);
+		std::cout << "after update" << std::endl;
+		exchangeParticles();
+		std::cout << "after exchange particles" << std::endl;
 		remaining_simulation_time -= timestep_duration;
 	}
 }
@@ -46,10 +49,14 @@ void SphManager::update(double timestep_duration) {
 void SphManager::updateVelocity(SphParticle& particle, double timestep_duration) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle);
 
+	//std::cout << "after compute first acceleration" << std::endl; //debug
+
 	particle.velocity = particle.velocity + ((timestep_duration / 2) * accelleration_timestep_start);
 	Vector3 position_timestep_half = particle.position + ((timestep_duration / 2) * particle.velocity);
 
 	Vector3 accelleration_timestep_half = computeAcceleration(particle);
+
+	//std::cout << "after compute second acceleration" << std::endl; //debug
 
 	Vector3 velocity_timestep_end = particle.velocity + (timestep_duration * accelleration_timestep_half);
 	particle.position = position_timestep_half + ((timestep_duration / 2) * velocity_timestep_end);
@@ -65,7 +72,7 @@ Vector3 SphManager::computeAcceleration(SphParticle& particle) {
 void SphManager::computeLocalDensity(SphParticle& particle) {
 	double local_density = 0;
 
-	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, neighbour_particles);
 
 	for (SphParticle neighbour_particle : neighbours) {
 		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
@@ -75,7 +82,8 @@ void SphManager::computeLocalDensity(SphParticle& particle) {
 }
 
 Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
-	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, neighbour_particles);
+
 	Vector3 density_acceleration = Vector3();
 	double particle_local_pressure = computeLocalPressure(particle);
 
@@ -85,6 +93,8 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 			(particle_local_pressure / (particle.local_density * particle.local_density))) * 
 			kernel->computeKernelGradientValue(particle.position - neighbour_particle.position);
 	}
+
+	//std::cout << "after compute density acceleration" << std::endl; //debug
 
 	return density_acceleration;
 }
@@ -102,7 +112,7 @@ double SphManager::computeLocalPressure(SphParticle& particle) {
 }
 
 Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
-	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
+	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, neighbour_particles);
 	Vector3 viscosity_acceleration = Vector3();
 
 	for (SphParticle neighbour_particle : neighbours)
@@ -112,6 +122,9 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 			((particle.local_density + neighbour_particle.local_density) * (rij.length() * rij.length()))) * 
 			(particle.velocity - neighbour_particle.velocity);
 	}
+
+	//std::cout << "after compute viscosity acceleration" << std::endl; //debug
+
 	if (particle.local_density == 0) {
 		return Vector3();
 	}
@@ -128,11 +141,11 @@ void SphManager::exchangeParticles() {
 	for (auto each_domain : domains) {
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 		for (SphParticle each_particle : outside_particles) {
-			int target_id = computeTargetProcess(each_particle);
+			int target_id = computeProcessID(each_particle.position, domain_dimensions);
 			int count = target_map.count(target_id);
 
 			if (count == 0) {
-				target_map.at(target_id) = std::vector<SphParticle>();
+				target_map[target_id] = std::vector<SphParticle>();
 			}
 
 			std::vector<SphParticle> list = target_map.at(target_id);
@@ -184,16 +197,6 @@ void SphManager::exchangeParticles() {
 	MPI_Barrier(used_communicator);
 }
 
-int SphManager::computeTargetDomain(const SphParticle& particle) const{
-	Vector3 targetDomainCoords = (particle.position / domain_dimensions).roundDownward();
-	//std::cout << targetDomainCoords << std::endl; // debug output
-	return hash(targetDomainCoords);
-}
-
-int SphManager::computeTargetProcess(const SphParticle& particle) const {
-	return computeTargetDomain(particle) % world_size;
-}
-
 ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
 	int count = domains.count(unique_id);
 	if (count == 0) {
@@ -204,7 +207,7 @@ ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
 
 void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	for (SphParticle particle : new_particles) {
-		int domain_id = computeTargetDomain(particle);
+		int domain_id = computeDomainID(particle.position, domain_dimensions, world_size);
 		//std::cout << domain_id << std::endl; // Debug output
 		getParticleDomain(domain_id).addParticle(particle);
 		//std::cout << particle.position << std::endl; // debug output
