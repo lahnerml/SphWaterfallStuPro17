@@ -1,13 +1,16 @@
 #pragma once
 #include "SphManager.h"
 
+#define H 1.0
+#define Q_MAX 2.0
+
 SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
 	simulation_time(simulation_time),
 	timestep_duration(timestep_duration)
 {
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-	kernel = kernel_factory.getInstance(1);
+	kernel = kernel_factory.getInstance(1, H, Q_MAX);
 	neighbour_search = neighbour_search_factory.getInstance(1);
 }
 
