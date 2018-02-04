@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <iterator>
-
+#include <unordered_map>
 #include <iostream>
 
 class ParticleDomain {
@@ -50,11 +50,14 @@ public:
 	std::vector<SphParticle> getBackLeftTopRimParticles();
 	std::vector<SphParticle> getBackRightTopRimParticles();
 	void resetRimParticles();
+	void setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
 
 private:
 	std::vector<SphParticle> particles;
 	std::vector<SphParticle> static_particles;
 	std::vector<int> neighbour_domains;
+
+	std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_particles;
 
 	NullableWrapper<std::vector<SphParticle>> front_rim_particles;
 	NullableWrapper<std::vector<SphParticle>> back_rim_particles;

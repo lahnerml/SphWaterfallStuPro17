@@ -5,6 +5,7 @@
 #include "SimulationUtilities.h";
 
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include <iterator>
 
@@ -37,6 +38,6 @@ private:
 
 	MPI_Request requestRimParticles(const Vector3&, const Vector3&);
 	void exchangeParticles();
-	ParticleDomain& getParticleDomain(const int&);
+	void exchangeRimParticles();	ParticleDomain& getParticleDomain(const int&);
 	void sendRimParticles(const int&, const int&);
 };
