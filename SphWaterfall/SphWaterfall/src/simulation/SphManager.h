@@ -2,10 +2,13 @@
 #include "mpi.h"
 #include "SphKernelFactory.h"
 #include "SphNeighbourSearchFactory.h"
+#include "DomainHash.h";
 
 #include <vector>
 #include <unordered_map>
 #include <iterator>
+
+using namespace DomainHash;
 
 class SphManager {
 public:
@@ -39,8 +42,6 @@ private:
 	void exchangeParticles();
 	int computeTargetProcess(const SphParticle&) const;
 	int computeTargetDomain(const SphParticle&) const;
-	int hash(const Vector3&) const;
-	Vector3 unhash(const int&) const;
 	ParticleDomain& getParticleDomain(const int&);
 	void sendRimParticles(const int&, const int&);
 };
