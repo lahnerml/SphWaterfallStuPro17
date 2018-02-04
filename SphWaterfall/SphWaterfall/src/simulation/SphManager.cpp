@@ -63,8 +63,7 @@ void SphManager::computeLocalDensity(SphParticle& particle) {
 
 	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 
-	for each (SphParticle neighbour_particle in neighbours)
-	{
+	for (SphParticle neighbour_particle : neighbours) {
 		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
 	}
 
@@ -76,10 +75,10 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 	Vector3 density_acceleration = Vector3();
 	double particle_local_pressure = computeLocalPressure(particle);
 
-	for each (SphParticle neighbour_particle in neighbours)
-	{
+	for (SphParticle neighbour_particle : neighbours) {
 		density_acceleration += neighbour_particle.mass * 
-			((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density*neighbour_particle.local_density)) + (particle_local_pressure / (particle.local_density*particle.local_density))) * 
+			((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density * neighbour_particle.local_density)) + 
+			(particle_local_pressure / (particle.local_density * particle.local_density))) * 
 			kernel->computeKernelGradientValue(particle.position - neighbour_particle.position);
 	}
 
@@ -93,8 +92,8 @@ double SphManager::computeLocalPressure(SphParticle& particle) {
 	double reference_pressure = 101300.0; //not sure atm
 
 	//local_pressure = pressure_constant *(particle.local_density - refrence_density_of_water); //old version meight be better
-	local_pressure = reference_pressure *(std::pow((particle.local_density/refrence_density_of_water), 7.0) - 1); //other implementation of local pressure
-	std::cout << local_pressure << std::endl;
+	local_pressure = reference_pressure * (std::pow((particle.local_density / refrence_density_of_water), 7.0) - 1); //other implementation of local pressure
+	//std::cout << local_pressure << " " << (std::pow((particle.local_density / refrence_density_of_water), 7.0) - 1) << std::endl; //debug
 	return local_pressure;
 }
 
@@ -102,11 +101,11 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 	std::vector<SphParticle> neighbours = neighbour_search->findNeigbours(particle, domains);
 	Vector3 viscosity_acceleration = Vector3();
 
-	for each (SphParticle neighbour_particle in neighbours)
+	for (SphParticle neighbour_particle : neighbours)
 	{
 		Vector3 rij = neighbour_particle.position - particle.position;
-		viscosity_acceleration += neighbour_particle.mass *  ((4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) / 
-			((particle.local_density + neighbour_particle.local_density) * (rij.length()*rij.length()))) * 
+		viscosity_acceleration += neighbour_particle.mass * ((4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) / 
+			((particle.local_density + neighbour_particle.local_density) * (rij.length() * rij.length()))) * 
 			(particle.velocity - neighbour_particle.velocity);
 	}
 	if (particle.local_density == 0) {
