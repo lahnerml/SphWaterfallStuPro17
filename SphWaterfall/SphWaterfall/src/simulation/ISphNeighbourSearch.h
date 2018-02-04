@@ -1,7 +1,11 @@
 #pragma once
 #include "../data/SphParticle.h"
 #include "ParticleDomain.h"
+#include "DomainHash.h";
+
 #include <unordered_map>
+
+using namespace DomainHash;
 
 class ISphNeighbourSearch {
 public:

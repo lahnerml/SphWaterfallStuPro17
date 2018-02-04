@@ -183,23 +183,6 @@ void SphManager::exchangeParticles() {
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 
-int SphManager::hash(const Vector3& vector) const {
-	int x, y, z;
-	x = static_cast<int>(vector.x);
-	y = static_cast<int>(vector.y);
-	z = static_cast<int>(vector.z);
-	y = y << 10;
-	z = z << 20;
-	return (x + y + z);
-}
-
-Vector3 SphManager::unhash(const int& unique_id) const {
-	int z = unique_id >> 20;
-	int y = (unique_id - (z << 20)) >> 10;
-	int x = unique_id - (z << 20) - (y << 10);
-	return Vector3(x, y, z);
-}
-
 int SphManager::computeTargetDomain(const SphParticle& particle) const{
 	Vector3 targetDomainCoords = (particle.position / domain_dimensions).roundDownward();
 	//std::cout << "x:" << targetDomainCoords.x << " y:" << targetDomainCoords.y << " z:" << targetDomainCoords.z << std::endl; // debug output
