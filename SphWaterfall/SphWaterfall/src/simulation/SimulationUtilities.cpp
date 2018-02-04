@@ -20,13 +20,11 @@ namespace SimulationUtilities {
 		return Vector3(x, y, z);
 	}
 
-	int SimulationUtilities::computeProcessID(const Vector3 position, const Vector3 domain_dimension) {
-		Vector3 targetDomainCoords = (position / domain_dimension).roundDownward();
-		//std::cout << targetDomainCoords << std::endl; // debug output
-		return hash(targetDomainCoords);
+	int SimulationUtilities::computeDomainID(const Vector3 position, const Vector3 domain_dimension) {
+		return hash((position / domain_dimension).roundDownward());
 	}
 
-	int SimulationUtilities::computeDomainID(const Vector3 position, const Vector3 domain_dimension, const int comm_size) {
-		return abs(computeProcessID(position, domain_dimension) % comm_size);
+	int SimulationUtilities::computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int comm_size) {
+		return abs(computeDomainID(position, domain_dimension) % comm_size);
 	}
 }

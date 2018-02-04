@@ -141,7 +141,7 @@ void SphManager::exchangeParticles() {
 	for (auto each_domain : domains) {
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 		for (SphParticle each_particle : outside_particles) {
-			int target_id = computeProcessID(each_particle.position, domain_dimensions);
+			int target_id = computeProcessID(each_particle.position, domain_dimensions, world_size);
 			int count = target_map.count(target_id);
 
 			if (count == 0) {
@@ -159,6 +159,7 @@ void SphManager::exchangeParticles() {
 	// don't send to yourself
 	int rank;
 	MPI_Comm_rank(used_communicator, &rank);
+
 	int count = target_map.count(rank);
 	if (count != 0) {
 		all_new_particles = target_map.at(rank);
@@ -200,14 +201,14 @@ void SphManager::exchangeParticles() {
 ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
 	int count = domains.count(unique_id);
 	if (count == 0) {
-		domains[unique_id] = ParticleDomain(unhash(unique_id) * domain_dimensions, domain_dimensions);
+		domains[unique_id] = ParticleDomain(unhash(unique_id), domain_dimensions);
 	}
 	return domains.at(unique_id);
 }
 
 void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	for (SphParticle particle : new_particles) {
-		int domain_id = computeDomainID(particle.position, domain_dimensions, world_size);
+		int domain_id = computeDomainID(particle.position, domain_dimensions);
 		//std::cout << domain_id << std::endl; // Debug output
 		getParticleDomain(domain_id).addParticle(particle);
 		//std::cout << particle.position << std::endl; // debug output
