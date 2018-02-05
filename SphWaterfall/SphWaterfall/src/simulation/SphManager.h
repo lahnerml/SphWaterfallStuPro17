@@ -21,7 +21,7 @@ private:
 	double simulation_time;
 	double timestep_duration;
 	std::unordered_map<int, ParticleDomain> domains;
-	std::vector<SphParticle> neighbour_particles;
+	std::unordered_map<int, std::pair<SphParticle, std::vector<SphParticle>>> neighbour_particles;
 	ISphKernel* kernel;
 	ISphNeighbourSearch* neighbour_search;
 	SphKernelFactory kernel_factory;
