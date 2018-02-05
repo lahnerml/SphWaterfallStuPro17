@@ -241,10 +241,10 @@ void SphManager::exchangeRimParticles() {
 		MPI_Probe(source, meta[2], slave_comm, &status);
 		MPI_Get_count(&status, MPI_BYTE, &count);
 
-		std::vector<SphParticle> incoming_rim_particles;
+		std::vector<SphParticle> incoming_rim_particles = std::vector<SphParticle>(count);
 		source = status.MPI_SOURCE;
 		tag = status.MPI_TAG;
-		count;
+
 		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 
 		new_rim_particles[meta[0]][meta[1]] = incoming_rim_particles;
