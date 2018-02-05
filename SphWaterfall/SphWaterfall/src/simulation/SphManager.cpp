@@ -201,14 +201,14 @@ void SphManager::exchangeRimParticles() {
 
 	for (auto target : target_map) {
 		for (auto rim_particles : target.second) {
-			int target_process_id = target.first % slave_comm_size;
+			int target_process_id = computeProcessID(target.first, slave_comm_size);
 			if (target_process_id == rank) {
 				new_rim_particles[target.first][rim_particles.first] = rim_particles.second;
 			} else {
 				// target domain id, source domain id, tag der richtigen Nachricht
 				std::array<int, 3> meta = { target.first, rim_particles.first, count};
 				MPI_Request request;
-				MPI_Isend(meta.data(), meta.size() * sizeof(int), MPI_BYTE, target.first % slave_comm_size, 0, slave_comm, &request);
+				MPI_Isend(meta.data(), meta.size() * sizeof(int), MPI_BYTE, target_process_id, 0, slave_comm, &request);
 				MPI_Request_free(&request);
 
 				// send particles
@@ -235,7 +235,7 @@ void SphManager::exchangeRimParticles() {
 		int count;
 
 		MPI_Get_count(&status, MPI_BYTE, &count);
-		std::array<int, 3> meta;
+		std::array<int, 3> meta = std::array<int, 3>();
 		MPI_Recv(meta.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 
 		MPI_Probe(source, meta[2], slave_comm, &status);
@@ -265,6 +265,8 @@ void SphManager::exchangeRimParticles() {
 
 void SphManager::exchangeParticles() {
 	std::unordered_map<int, std::vector<SphParticle>> target_map;
+	std::vector<SphParticle> all_new_particles;
+	std::vector<SphParticle> incoming_particles;
 
 	for (auto each_domain : domains) {
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
@@ -281,13 +283,9 @@ void SphManager::exchangeParticles() {
 		}
 	}
 
-	std::vector<SphParticle> all_new_particles;
-	std::vector<SphParticle> incoming_particles;
-
 	// don't send to yourself
 	int rank;
 	MPI_Comm_rank(slave_comm, &rank);
-
 	int count = target_map.count(rank);
 	if (count != 0) {
 		all_new_particles = target_map.at(rank);
@@ -313,6 +311,8 @@ void SphManager::exchangeParticles() {
 		int count;
 
 		MPI_Get_count(&status, MPI_BYTE, &count);
+
+		incoming_particles = std::vector<SphParticle>(count);
 
 		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 		std::move(incoming_particles.begin(), incoming_particles.end(), std::inserter(all_new_particles, all_new_particles.end()));
