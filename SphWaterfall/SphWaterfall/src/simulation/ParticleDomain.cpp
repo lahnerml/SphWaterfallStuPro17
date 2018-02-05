@@ -23,6 +23,11 @@ int ParticleDomain::size() const {
 	return particles.size() + static_particles.size();
 }
 
+
+void ParticleDomain::clearRimParticles() {
+	neighbour_rim_particles = std::unordered_map<int, std::vector<SphParticle>>();
+}
+
 std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 	particles_outside_domain = 0;
 	std::vector<SphParticle> outsideParticles;
@@ -43,6 +48,10 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 
 void ParticleDomain::setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_map) {
 	neighbour_rim_particles = neighbour_rim_map;
+}
+
+std::unordered_map<int, std::vector<SphParticle>>& ParticleDomain::getNeighbourRimParticles() {
+	return neighbour_rim_particles;
 }
 
 const Vector3& ParticleDomain::getDimensions() const {
@@ -426,5 +435,3 @@ void ParticleDomain::resetRimParticles() {
 	back_left_top_rim_particles.reset();
 	back_right_top_rim_particles.reset();
 }
-
-

@@ -22,6 +22,10 @@ public:
 	const Vector3& getOrigin() const;
 	void addParticle(const SphParticle&);
 	std::vector<SphParticle>& getParticles();
+	void resetRimParticles();
+	void clearRimParticles();
+	void setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
+	std::unordered_map<int, std::vector<SphParticle>>& getNeighbourRimParticles();
 
 	std::vector<SphParticle> getTopRimParticles();
 	std::vector<SphParticle> getBottomRimParticles();
@@ -49,15 +53,13 @@ public:
 	std::vector<SphParticle> getBackRightBottomRimParticles();
 	std::vector<SphParticle> getBackLeftTopRimParticles();
 	std::vector<SphParticle> getBackRightTopRimParticles();
-	void resetRimParticles();
-	void setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
 
 private:
 	std::vector<SphParticle> particles;
 	std::vector<SphParticle> static_particles;
-	std::vector<int> neighbour_domains;
-
 	std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_particles;
+
+	std::vector<int> neighbour_domains;
 
 	NullableWrapper<std::vector<SphParticle>> front_rim_particles;
 	NullableWrapper<std::vector<SphParticle>> back_rim_particles;

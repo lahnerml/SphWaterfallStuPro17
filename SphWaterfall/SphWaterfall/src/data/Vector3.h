@@ -20,6 +20,7 @@ class Vector3 {
 		friend Vector3 operator%(const Vector3&, const Vector3&);
 
 		friend Vector3 operator+(const Vector3&, const Vector3&);
+
 		friend Vector3 operator-(const Vector3&);
 		friend Vector3 operator-(const Vector3&, const Vector3&);
 
