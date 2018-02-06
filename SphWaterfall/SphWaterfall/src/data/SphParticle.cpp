@@ -1,33 +1,39 @@
 #pragma once
 #include "SphParticle.h"
 
-SphParticle::SphParticle() {
-
+SphParticle::SphParticle() :
+	position(Vector3()),
+	velocity(Vector3()),
+	pType(ISphParticle::ParticleType::FLUID)
+{
 }
 
 SphParticle::SphParticle(Vector3 position) :
-	position(position){
-	this->velocity = Vector3();
-	this->mass = 0.0;
+	position(position),
+	velocity(Vector3()),
+	pType(ISphParticle::ParticleType::FLUID)
+{
 }
 
 SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
 	position(position),
-	velocity(velocity) {
-	this->mass = 0.0;
+	velocity(velocity),
+	pType(ISphParticle::ParticleType::FLUID)
+{
 }
 
-SphParticle::SphParticle(Vector3 position, Vector3 velocity, double mass) :
+SphParticle::SphParticle(Vector3 position, ISphParticle::ParticleType particleType) :
 	position(position),
-	velocity(velocity),
-	mass(mass){
+	velocity(Vector3()),
+	pType(particleType)
+{
 }
 
 SphParticle::~SphParticle() {
 
 }
 
-bool operator==(const SphParticle a, const SphParticle b)
+ISphParticle::ParticleType SphParticle::getParticleType()
 {
-	return ((a.position == b.position) && (a.velocity == b.velocity) && (a.mass == b.mass) && (a.local_density == b.local_density));
+	return this->pType;
 }
