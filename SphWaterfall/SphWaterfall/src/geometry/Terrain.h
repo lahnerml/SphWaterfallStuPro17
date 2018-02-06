@@ -12,12 +12,11 @@ public:
 
 	size_t getVertexCount();
 	size_t getFaceCount();
-	Vector3 getVertexPosition(int);
-	int getFaceVertexId(int, int);
+
+	Vector3 getVertex(int);
 	Face getFace(int);
 
 private:
 	std::vector<Vector3> vertices;
-	std::vector<Vector3> normals;
 	std::vector<Face> faces;
 };
