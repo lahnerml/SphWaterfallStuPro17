@@ -30,18 +30,18 @@ void SphManager::simulate() {
 void SphManager::update(double timestep_duration) {
 	// neighbour search
 	std::vector<SphParticle> each_neighbour_particles;
+	std::unordered_map <int, std::vector<SphParticle>> each_neighbour_rim_particles;
 	int i = 0;
 	for (auto& each_domain : domains) {
+		std::cout << "before get neighbour rim particles" << std::endl;
+		each_neighbour_rim_particles = each_domain.second.getNeighbourRimParticles();
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			each_neighbour_particles = each_domain.second.getParticles();
 			for (auto domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
-				std::cout << "after find relevant neighbour domain" << std::endl;
-				if (!each_domain.second.getNeighbourRimParticles().at(domain_id).empty()) {
-					std::cout << "after find relevant neighbour domain121" << std::endl;
-					each_neighbour_particles.insert(each_neighbour_particles.end(),
-						each_domain.second.getNeighbourRimParticles().at(domain_id).begin(),
-						each_domain.second.getNeighbourRimParticles().at(domain_id).end());
-				}
+				std::cout << domain_id << std::endl;
+				each_neighbour_particles.insert(each_neighbour_particles.end(),
+					each_neighbour_rim_particles.at(domain_id).begin(),
+					each_neighbour_rim_particles.at(domain_id).end());
 				std::cout << "after find relevant neighbour domain222222" << std::endl;
 			}
 			each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
@@ -181,57 +181,57 @@ void SphManager::exchangeRimParticles() {
 
 		each_domain.second.clearRimParticles();
 
-		int target_id = computeDomainID(index_coords + Vector3(-1, -1, -1), domain_dimensions);
+		int target_id = hash(index_coords + Vector3(-1, -1, -1));
 		target_map[target_id][source_id] = each_domain.second.getFrontLeftBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, -1, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, -1, 0)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getLeftBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, -1, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, -1, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackLeftBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, 0, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, 0, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontLeftRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, 0, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, 0, 0) * domain_dimensions));
 		target_map[target_id][source_id] = each_domain.second.getLeftRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, 0, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, 0, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackLeftRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, 1, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, 1, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontLeftTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, 1, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, 1, 0)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getLeftTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(-1, 1, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(-1, 1, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackLeftTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, -1, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, -1, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, -1, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, -1, 0)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, -1, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, -1, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, 0, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, 0, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, 0, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, 0, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, 1, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, 1, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, 1, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, 1, 0)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(0, 1, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(0, 1, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, -1, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, -1, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontRightBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, -1, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, -1, 0)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getRightBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, -1, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, -1, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackRightBottomRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, 0, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, 0, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontRightRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, 0, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, 0, 0)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getRightRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, 0, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, 0, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackRightRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, 1, -1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, 1, -1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getFrontRightTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, 1, 0), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, 1, 0)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getRightTopRimParticles();
-		target_id = computeDomainID(index_coords + Vector3(1, 1, 1), domain_dimensions);
+		target_id = hash(index_coords + (Vector3(1, 1, 1)) * domain_dimensions);
 		target_map[target_id][source_id] = each_domain.second.getBackRightTopRimParticles();
 	}
 
@@ -254,7 +254,7 @@ void SphManager::exchangeRimParticles() {
 					MPI_Request request;
 					MPI_Isend(meta.data(), meta.size() * sizeof(int), MPI_BYTE, target_process_id, 0, slave_comm, &request);
 					MPI_Request_free(&request);
-
+					std::cout << rim_particles.second.data() << std::endl; // debug
 					// send particles
 					request;
 					MPI_Isend(rim_particles.second.data(), rim_particles.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm, &request);
@@ -291,7 +291,7 @@ void SphManager::exchangeRimParticles() {
 		incoming_rim_particles = std::vector<SphParticle>(count);
 		source = status.MPI_SOURCE;
 		tag = status.MPI_TAG;
-
+		std::cout << count << std::endl; //debug
 		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 
 		new_rim_particles[meta[0]][meta[1]] = incoming_rim_particles;

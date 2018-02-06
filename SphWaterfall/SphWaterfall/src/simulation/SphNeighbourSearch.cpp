@@ -113,7 +113,11 @@ std::set<int> SphNeighbourSearch::findRelevantNeighbourDomains(SphParticle parti
 	// right bottom point
 	testing_point = particle.position + (Vector3(1, -1, 0) * Q_MAX);
 	neighbour_domain_ids.insert(computeDomainID(testing_point, dimension));
-		
+	
+	//for (auto neighbour : neighbour_domain_ids) {
+	//	std::cout << "neighbour domain id:" << neighbour << std::endl;
+	//}
+
 	return neighbour_domain_ids;
 }
 
