@@ -23,7 +23,7 @@ namespace CUI {
 	}
 
 	bool readNextCombinedToken(std::queue<std::string> &tokens, std::string &nextToken) {
-		std::string tempToken = "", resultToken = "";
+		string tempToken = "", resultToken = "";
 
 		//Read first token
 		if (!readNextToken(tokens, tempToken))
@@ -60,27 +60,27 @@ namespace CUI {
 
 	void loadMesh(std::queue<std::string> &tokens)
 	{
-		std::string paramName, fileName;
+		string paramName, fileName;
 
 		//Read fileName Parameter
 		if (readNextToken(tokens, paramName) && paramName == "-p") {
 			fileName = "";
 			readNextCombinedToken(tokens, fileName);
-			std::cout << fileName << std::endl;
+			cout << fileName << endl;
 
 			Terrain loadedFile = TerrainParser::loadFromFile(fileName);
-			std::cout << "Vertices: " << loadedFile.getVertexCount() << " Faces: " << loadedFile.getFaceCount() << std::endl;
+			cout << "Vertices: " << loadedFile.getVertexCount() << " Faces: " << loadedFile.getFaceCount() << endl;
 		}
 		else
 		{
-			std::cout << "Missing path parameter '-p'" << std::endl;
+			cout << "Missing path parameter '-p'" << endl;
 		}
 	}
 
 	void simulate(std::queue<std::string> &tokens)
 	{
 		// TODO add correct dimensions
-		SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10));
+		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
 	}
 
 	void render()
@@ -89,33 +89,33 @@ namespace CUI {
 
 		addCamera(Vector3(-30, 0, -30), normalizeVector(Vector3(1, 0, 1)), 1920, 1080);
 
-		std::vector<SphParticle> particles;
-		SphParticle particle = SphParticle(Vector3(0, 0, 0), Vector3(0, 0, 0));
-		SphParticle particle2 = SphParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));
-		SphParticle particle3 = SphParticle(Vector3(5, 5, 0), Vector3(0, 0, 0));
-		SphParticle particle4 = SphParticle(Vector3(-5, -5, -5), Vector3(0, 0, 0));
+		vector<FluidParticle> particles;
+		FluidParticle particle = FluidParticle(Vector3(0, 0, 0), Vector3(0, 0, 0));
+		FluidParticle particle2 = FluidParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));
+		FluidParticle particle3 = FluidParticle(Vector3(5, 5, 0), Vector3(0, 0, 0));
+		FluidParticle particle4 = FluidParticle(Vector3(-5, -5, -5), Vector3(0, 0, 0));
 
 		particles.emplace_back(particle);
 		particles.emplace_back(particle2);
 		particles.emplace_back(particle3);
 		particles.emplace_back(particle4);
 
-		std::cout << "Rendering, please wait..." << std::endl;
+		cout << "Rendering, please wait..." << endl;
 
 		debugRenderFrame(particles);
 
-		std::cout << "Done!" << std::endl;
+		cout << "Done!" << endl;
 	}
 
 	void showHelp()
 	{
-		std::cout << "loadMesh -p" << std::endl;
-		std::cout << "particleGen [-w] [-f] [-e]" << std::endl;
-		std::cout << "moveShutter -t (-u/-d) [-l]" << std::endl;
-		std::cout << "simulate -s -e -r -g -m -t" << std::endl;
-		std::cout << "render" << std::endl;
-		std::cout << "help" << std::endl;
-		std::cout << "exit" << std::endl;
+		cout << "loadMesh -p" << endl
+			<< "particleGen [-w] [-f] [-e]" << endl
+			<< "moveShutter -t (-u/-d) [-l]" << endl
+			<< "simulate -s -e -r -g -m -t" << endl
+			<< "render" << endl
+			<< "help" << endl
+			<< "exit" << endl;
 	}
 
 	/* -_-_-_Comands End_-_-_- */
@@ -123,17 +123,17 @@ namespace CUI {
 
 	void readCommand(int* command_buffer)
 	{
-		std::string inputLine, command;
-		std::queue<std::string> tokens;
+		string inputLine, command;
+		queue<string> tokens;
 
 		//Read command
-		std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
-		std::getline(std::cin, inputLine);
+		cout << endl << "Please enter a command or enter 'help' to show a list of all commands" << endl;
+		getline(cin, inputLine);
 		trim(inputLine);
 
 		//Tokenize command
-		std::istringstream tokenStream(inputLine);
-		tokens = std::queue<std::string>();
+		istringstream tokenStream(inputLine);
+		tokens = queue<string>();
 		while (tokenStream >> command)
 			tokens.push(command);
 
@@ -169,9 +169,8 @@ namespace CUI {
 				command_buffer[0] = 0;
 			}
 			else {
-				std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
+				cout << "Unknown command. Enter 'help' to view a list of all available commands." << endl;
 			}
 		}
 	}
-
 }

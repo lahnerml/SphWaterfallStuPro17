@@ -8,6 +8,8 @@
 #include "../geometry/TerrainParser.h"
 #include "../simulation/SphManager.h"
 
+using namespace std;
+
 namespace CUI {
 	void trim(std::string &str);
 	void readCommand(int* command_buffer);
