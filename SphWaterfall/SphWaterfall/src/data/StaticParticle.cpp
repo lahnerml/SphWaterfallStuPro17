@@ -2,40 +2,15 @@
 #include "StaticParticle.h"
 
 StaticParticle::StaticParticle() :
-	pos(Vector3())
+	SphParticle(Vector3(), SphParticle::ParticleType::STATIC)
 {
 }
 
 StaticParticle::StaticParticle(Vector3 position) :
-	pos(position)
+	SphParticle(position, SphParticle::ParticleType::STATIC)
 {
 }
 
-StaticParticle::~StaticParticle() {
-
-}
-
-
-Vector3 StaticParticle::position()
+StaticParticle::~StaticParticle()
 {
-	return this->position;
-}
-
-void StaticParticle::position(Vector3 position)
-{
-	this->position = position;
-}
-
-Vector3 StaticParticle::velocity()
-{
-	return this->velocity;
-}
-
-void StaticParticle::velocity(Vector3 velocity)
-{
-}
-
-ISphParticle::ParticleType StaticParticle::getParticleType()
-{
-	return ISphParticle::ParticleType::STATIC;
 }

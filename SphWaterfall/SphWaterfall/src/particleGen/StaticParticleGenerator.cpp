@@ -1,14 +1,15 @@
 #pragma once
 #include "StaticParticleGenerator.h"
 
-StaticParticleGenerator::StaticParticleGenerator() {
-
-}
+std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrain source)
+{	
+	std::vector<SphParticle> staticParticles = std::vector<SphParticle>();
 
 	for (int i = 0; i < source.getVertexCount(); i++) {
 		staticParticles.push_back(SphParticle(source.getVertex(i)));
 		
 	}
+
 	return staticParticles;
 
 }
@@ -18,7 +19,7 @@ StaticParticleGenerator::StaticParticleGenerator() {
  * face: The face to genrate the particles on
  * particleDensity: How much space lies between 2 particles 0.0 < density <= 1.0
  */
-std::vector<ISphParticle> StaticParticleGenerator::generateStaticParticles(Terrain terrain, int faceId, float particleDensity)
+std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Face face, float particleDensity)
 {
 	std::vector<ISphParticle> result = std::vector<ISphParticle>();
 	Vector3 particlePosition = Vector3();
@@ -42,10 +43,10 @@ std::vector<ISphParticle> StaticParticleGenerator::generateStaticParticles(Terra
 }
 
 
-StaticParticleGenerator StaticParticleGenerator::detectDuplicate(ISphParticle a, ISphParticle b) {
+StaticParticleGenerator StaticParticleGenerator::detectDuplicate(SphParticle a, SphParticle b) {
 	
 }
 
-StaticParticleGenerator StaticParticleGenerator::removeDuplicate(ISphParticle a, ISphParticle b) {
+StaticParticleGenerator StaticParticleGenerator::removeDuplicate(SphParticle a, SphParticle b) {
 	
 }
