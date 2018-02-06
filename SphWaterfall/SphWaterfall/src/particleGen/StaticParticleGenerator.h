@@ -8,6 +8,7 @@
 class StaticParticleGenerator {
 public:
 	StaticParticleGenerator();
+	std::vector<ISphParticle> generateStaticParticles(Terrain source);
 	std::vector<ISphParticle> generateStaticParticles(Face face, float particleDistance);
 
 	StaticParticleGenerator detectDuplicate(ISphParticle a, ISphParticle b);
