@@ -44,10 +44,10 @@ std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Face f
 }
 
 
-StaticParticleGenerator StaticParticleGenerator::detectDuplicate(SphParticle a, SphParticle b) {
+void StaticParticleGenerator::detectDuplicate(SphParticle a, SphParticle b) {
 	
 }
 
-StaticParticleGenerator StaticParticleGenerator::removeDuplicate(SphParticle a, SphParticle b) {
+void StaticParticleGenerator::removeDuplicate(SphParticle a, SphParticle b) {
 	
 }

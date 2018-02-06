@@ -11,7 +11,7 @@ public:
 	static std::vector<SphParticle> generateStaticParticles(Terrain source);
 	static std::vector<SphParticle> generateStaticParticles(Face face, float particleDistance);
 
-	static StaticParticleGenerator detectDuplicate(SphParticle a, SphParticle b);
-	static StaticParticleGenerator removeDuplicate(SphParticle a, SphParticle b);
+	static void detectDuplicate(SphParticle a, SphParticle b);
+	static void removeDuplicate(SphParticle a, SphParticle b);
 };
 
