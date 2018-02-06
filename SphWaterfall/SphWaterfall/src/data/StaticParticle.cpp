@@ -35,7 +35,7 @@ void StaticParticle::velocity(Vector3 velocity)
 {
 }
 
-IStaticParticle::ParticleType StaticParticle::getParticleType()
+ISphParticle::ParticleType StaticParticle::getParticleType()
 {
-	return IStaticParticle::ParticleType::STATIC;
+	return ISphParticle::ParticleType::STATIC;
 }

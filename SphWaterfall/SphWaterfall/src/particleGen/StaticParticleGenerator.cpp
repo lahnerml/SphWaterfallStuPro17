@@ -1,6 +1,5 @@
 #pragma once
 #include "StaticParticleGenerator.h"
-#include "../data/SphParticle.h"
 
 StaticParticleGenerator::StaticParticleGenerator() {
 
@@ -35,7 +34,7 @@ std::vector<ISphParticle> StaticParticleGenerator::generateStaticParticles(Face 
 				continue;
 
 			particlePosition = face.a + (face.b * x) + (face.c * y);
-			result.push_back(SphParticle(particlePosition));
+			result.push_back(StaticParticle(particlePosition));
 		}
 	}
 

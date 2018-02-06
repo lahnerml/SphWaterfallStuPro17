@@ -3,6 +3,8 @@
 
 #include "../geometry/Terrain.h"
 #include "../data/ISphParticle.h"
+#include "../data/SphParticle.h"
+#include "../data/StaticParticle.h"
 #include "../data/Vector3.h"
 
 class StaticParticleGenerator {
