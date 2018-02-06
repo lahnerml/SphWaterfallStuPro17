@@ -7,7 +7,6 @@ Vector3::Vector3() :
 	y(0.0),
 	z(0.0)
 {
-
 }
 
 Vector3::Vector3(const double x, const double y, const double z) :
@@ -15,11 +14,10 @@ Vector3::Vector3(const double x, const double y, const double z) :
 	y(y),
 	z(z) 
 {
-
 }
 
-Vector3::~Vector3() {
-
+Vector3::~Vector3()
+{
 }
 
 Vector3 operator*(const Vector3& vector, const double factor) {
@@ -78,6 +76,7 @@ std::ostream& operator<<(std::ostream & out, const Vector3& vector)
 	return out << "x:" << vector.x << " y:" << vector.y << " z:" << vector.z;
 }
 
+
 bool Vector3::in_range_of(const Vector3& b) const
 {
 	return x >= 0 && x < b.x && y >= 0 && y < b.y && z >= 0 && z <= b.z;
@@ -93,4 +92,8 @@ Vector3 Vector3::normalize() const {
 
 Vector3 Vector3::roundDownward() const{
 	return Vector3(floor(x), floor(y), floor(z));
+}
+
+Vector3 Vector3::distanceTo(const Vector3& v, const Vector3& v1) {
+	abs(v.x - v1.x), abs(v.y - v1.y), abs(v.z - v1.z);
 }
