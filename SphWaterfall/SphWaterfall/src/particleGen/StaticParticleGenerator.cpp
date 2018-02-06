@@ -18,14 +18,15 @@ std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrai
  * Generates static particles uniformly on a given face
  * face: The face to genrate the particles on
  * particleDensity: How much space lies between 2 particles 0.0 < density <= 1.0
+ * A particleDenisty of 1.0 means that there will only be particles on the corners of the Face
  */
 std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Face face, float particleDensity)
 {
-	std::vector<ISphParticle> result = std::vector<ISphParticle>();
+	std::vector<SphParticle> result = std::vector<SphParticle>();
 	Vector3 particlePosition = Vector3();
 
 	if (0.0 >= particleDensity || 1.0 < particleDensity)
-		return std::vector<ISphParticle>();
+		return std::vector<SphParticle>();
 
 	//Create uniform grid of particles
 	for (double x = 0.0; x <= 1.0; x += particleDensity)
