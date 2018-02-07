@@ -30,8 +30,8 @@ private:
 	ParticleDomain& getParticleDomain(const int&);
 	ParticleDomain& getParticleDomain(const Vector3&);
 
-	void update(double timestep);
-	void updateVelocity(SphParticle& particle, double timestep);
+	void update();
+	void updateVelocity(SphParticle& particle);
 	Vector3 computeAcceleration(SphParticle& particle);
 	Vector3 computeDensityAcceleration(SphParticle& particle);
 	Vector3 computeViscosityAcceleration(SphParticle& particle);

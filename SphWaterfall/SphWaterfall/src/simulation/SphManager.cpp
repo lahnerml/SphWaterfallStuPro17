@@ -21,17 +21,17 @@ void SphManager::simulate() {
 	while (remaining_simulation_time > 0) {
 		exchangeRimParticles();
 		//std::cout << "after exchange rim particles" << std::endl; //debug
-		update(timestep_duration);
+		update();
 		//std::cout << "after update" << std::endl; //debug
 		exchangeParticles();
 		//std::cout << "after exchange particles" << std::endl; //debug
-		std::cout << "simulation of timestep" << timestep << "finished" << std::endl;
+		std::cout << "simulation of timestep " << timestep << " finished" << std::endl;
 		remaining_simulation_time -= timestep_duration;
 		timestep++;
 	}
 }
 
-void SphManager::update(double timestep_duration) {
+void SphManager::update() {
 	// neighbour search
 	std::vector<SphParticle> each_neighbour_particles;
 	std::unordered_map <int, std::vector<SphParticle>> each_neighbour_rim_particles;
@@ -64,27 +64,31 @@ void SphManager::update(double timestep_duration) {
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			//std::cout << each_particle.position << std::endl;
-			updateVelocity(each_particle, timestep_duration);
+			std::cout << each_particle << std::endl; //debug
+			updateVelocity(each_particle);
 		}
 	}
 	std::cout << "after update velocity" << std::endl;
 }
 
-void SphManager::updateVelocity(SphParticle& particle, double timestep_duration) {
+void SphManager::updateVelocity(SphParticle& particle) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle);
+	//std::cout << "accelleration timestep start:" << accelleration_timestep_start << std::endl; //debug
 
-	//std::cout << "after compute first acceleration" << std::endl; //debug
+	//std::cout << "start position:" << particle.position << std::endl;
+	particle.velocity += ((timestep_duration / 2) * accelleration_timestep_start);
+	//std::cout << "particle velocity:" << particle.velocity << std::endl;
 
-	particle.velocity = particle.velocity + ((timestep_duration / 2) * accelleration_timestep_start);
 	Vector3 position_timestep_half = particle.position + ((timestep_duration / 2) * particle.velocity);
+	//std::cout << "particle position timestep half:" << position_timestep_half << std::endl;
 
 	Vector3 accelleration_timestep_half = computeAcceleration(particle);
-
-	//std::cout << "after compute second acceleration" << std::endl; //debug
+	//std::cout << "accelleration timestep half:" << accelleration_timestep_half << std::endl; //debug
 
 	Vector3 velocity_timestep_end = particle.velocity + (timestep_duration * accelleration_timestep_half);
+	//std::cout << "velocity timestep end:" << velocity_timestep_end << std::endl;
 	particle.position = position_timestep_half + ((timestep_duration / 2) * velocity_timestep_end);
+	//std::cout << "particle position:" << particle.position << std::endl;
 }
 
 Vector3 SphManager::computeAcceleration(SphParticle& particle) {
@@ -124,14 +128,14 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 	double particle_local_pressure = computeLocalPressure(particle);
 
 	for (SphParticle neighbour_particle : neighbours) {
-		density_acceleration += neighbour_particle.mass * 
-			((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density * neighbour_particle.local_density)) + 
-			(particle_local_pressure / (particle.local_density * particle.local_density))) * 
-			kernel->computeKernelGradientValue(particle.position - neighbour_particle.position);
+		if (neighbour_particle.local_density == 0) {
+			density_acceleration += neighbour_particle.mass *
+				((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density * neighbour_particle.local_density)) +
+				(particle_local_pressure / (particle.local_density * particle.local_density))) *
+				kernel->computeKernelGradientValue(particle.position - neighbour_particle.position);
+		}
 	}
-
-	//std::cout << "after compute density acceleration" << std::endl; //debug
-
+	//std::cout << "after density acceleration:" << density_acceleration << std::endl; //debug
 	return density_acceleration;
 }
 
@@ -155,21 +159,27 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 			neighbours = neighbour.second.second;
 		}
 	}
-	Vector3 viscosity_acceleration = Vector3();
 
+	Vector3 viscosity_acceleration = Vector3();
+	Vector3 rij;
 	for (SphParticle neighbour_particle : neighbours)
 	{
-		Vector3 rij = neighbour_particle.position - particle.position;
-		viscosity_acceleration += neighbour_particle.mass * ((4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) / 
-			((particle.local_density + neighbour_particle.local_density) * (rij.length() * rij.length()))) * 
-			(particle.velocity - neighbour_particle.velocity);
+		rij = neighbour_particle.position - particle.position;
+		if ( (rij.length() != 0.0) || (particle.local_density + neighbour_particle.local_density != 0.0) ) {
+			//std::cout << "during viscosity acceleration1:" << rij.length() * rij.length() << " " << particle.local_density + neighbour_particle.local_density << " " << 
+			// (particle.velocity - neighbour_particle.velocity) << neighbour_particle.mass << " " << rij << std::endl; //debug
+			viscosity_acceleration += neighbour_particle.mass * ( (4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) /
+				((particle.local_density + neighbour_particle.local_density) * (rij.length() * rij.length())) ) *
+				(particle.velocity - neighbour_particle.velocity);
+			//std::cout << "during viscosity acceleration end:" << viscosity_acceleration << std::endl; //debug
+		}
 	}
-
-	//std::cout << "after compute viscosity acceleration" << std::endl; //debug
-
+	
 	if (particle.local_density == 0) {
+		//std::cout << "after viscosity acceleration:" << Vector3() << std::endl; //debug
 		return Vector3();
 	}
+	//std::cout << "after viscosity acceleration:" << (1 / particle.local_density) << " " << viscosity_acceleration << std::endl; //debug
 	return ((1 / particle.local_density) * viscosity_acceleration);
 }
 
@@ -254,10 +264,10 @@ void SphManager::exchangeRimParticles() {
 	//	}
 	//}
 
-	for (auto target : target_map) {
+	for (auto& target : target_map) {
 		//std::cout << target.second.size() << std::endl;
 		//std::cout << unhash(target.first) << std::endl;
-		for (auto source : target.second) {
+		for (auto& source : target.second) {
 			//std::cout << unhash(source.first) << std::endl;
 			int target_process_id = computeProcessID(target.first, slave_comm_size);
 			if (!source.second.empty()) {
@@ -271,7 +281,11 @@ void SphManager::exchangeRimParticles() {
 					MPI_Isend(meta.data(), meta.size() * sizeof(int), MPI_BYTE, target_process_id, 0, slave_comm, &request);
 
 					MPI_Request_free(&request);
-					//std::cout << source.second.data() << std::endl; // debug
+					
+					for (auto particle : source.second) {
+						//std::cout << particle << std::endl; //debug
+					}
+					//std::cout << sizeof(SphParticle) << std::endl;
 					// send particles
 					MPI_Isend(source.second.data(), source.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm, &request);
 					MPI_Request_free(&request);
