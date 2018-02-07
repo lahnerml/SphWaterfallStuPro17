@@ -51,7 +51,7 @@ static Vector3 normalizeVector(Vector3 vec) {
 static std::vector<DebugObject> convertSphParticles(std::vector<FluidParticle> &particles) {
 	std::vector<DebugObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
-		output.emplace_back(DebugObject(particles[i].position, 1));
+		output.emplace_back(DebugObject(particles[i].position, 0.4f));
 	}
 
 	return output;

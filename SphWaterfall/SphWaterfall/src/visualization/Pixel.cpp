@@ -8,27 +8,27 @@ Pixel::Pixel() {
 }
 
 Pixel::Pixel(unsigned short red, unsigned short green, unsigned short blue) {
-	this->red = red;
-	this->green = green;
-	this->blue = blue;
+	this->red = red > 255 ? 255 : (red < 0 ? 0 : red);
+	this->green = green > 255 ? 255 : (green < 0 ? 0 : green);
+	this->blue = blue > 255 ? 255 : (blue < 0 ? 0 : blue);
 }
 
 void Pixel::setColor(unsigned short red, unsigned short green, unsigned short blue) {
-	this->red = red;
-	this->green = green;
-	this->blue = blue;
+	this->red = red > 255 ? 255 : (red < 0 ? 0 : red);
+	this->green = green > 255 ? 255 : (green < 0 ? 0 : green);
+	this->blue = blue > 255 ? 255 : (blue < 0 ? 0 : blue);
 }
 
 void Pixel::setRed(unsigned short red) {
-	this->red = red;
+	this->red = red > 255 ? 255 : (red < 0 ? 0 : red);
 }
 
 void Pixel::setGreen(unsigned short green) {
-	this->green = green;
+	this->green = green > 255 ? 255 : (green < 0 ? 0 : green);
 }
 
 void Pixel::setBlue(unsigned short blue) {
-	this->blue = blue;
+	this->blue = blue > 255 ? 255 : (blue < 0 ? 0 : blue);
 }
 
 unsigned short Pixel::getRedValue() {

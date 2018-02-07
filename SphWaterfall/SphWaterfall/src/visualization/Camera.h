@@ -11,6 +11,7 @@ public:
 	Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height, unsigned int ID);
 
 	void debugRenderFrame(std::vector<DebugObject> particles, int frameID);
+	void volumeRenderFrame(std::vector<DebugObject> particles, int frameID);
 
 	void renderFrame(std::vector<SphParticle> particles); //Vector is only a placeholder here as the data structure isnt decided yet
 
@@ -23,6 +24,7 @@ public:
 private:
 
 	Pixel castDebugRay(Ray ray, std::vector<DebugObject> particles);
+	Pixel castVolumeRay(Ray ray, std::vector<DebugObject> particles);
 
 	Vector3 location;
 	Vector3 direction;

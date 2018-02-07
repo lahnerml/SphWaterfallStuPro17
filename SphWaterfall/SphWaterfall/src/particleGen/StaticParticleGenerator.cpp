@@ -45,9 +45,9 @@ std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Face f
 
 
 StaticParticleGenerator StaticParticleGenerator::detectDuplicate(SphParticle a, SphParticle b) {
-	
+	return StaticParticleGenerator();
 }
 
 StaticParticleGenerator StaticParticleGenerator::removeDuplicate(SphParticle a, SphParticle b) {
-	
+	return StaticParticleGenerator();
 }

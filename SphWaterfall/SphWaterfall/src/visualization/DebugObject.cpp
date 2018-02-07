@@ -24,7 +24,7 @@ Pixel DebugObject::getColor() {
 	return Pixel(0, 255, 0);
 }
 
-bool DebugObject::intersects(Ray &ray, double &distance) {
+bool DebugObject::intersects(Ray &ray, double &distance, double &highestDist) {
 	distance = std::numeric_limits<double>::max();
 
 	Vector3 temp = Vector3(ray.origin.x - this->location.x, ray.origin.y - this->location.y, ray.origin.z - this->location.z);
@@ -39,6 +39,10 @@ bool DebugObject::intersects(Ray &ray, double &distance) {
 	else if ((b*b) - 4 * a*c > 0) {
 		float t1 = (-1 * b + sqrt((b*b) - 4 * a*c)) / (2 * a);
 		float t2 = (-1 * b - sqrt((b*b) - 4 * a*c)) / (2 * a);
+
+		double highDist = t1 > t2 ? t1 : t2;
+
+		if (highDist > highestDist) highestDist = highDist;
 
 		distance = t1 < t2 ? t1 : t2;
 	}

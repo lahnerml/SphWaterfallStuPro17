@@ -14,7 +14,7 @@ public:
 
 	Pixel getColor();
 
-	bool intersects(Ray &ray, double &distance);
+	bool intersects(Ray &ray, double &distance, double &highestDistance);
 
 private:
 	Vector3 location;
