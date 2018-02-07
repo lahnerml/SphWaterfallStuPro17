@@ -60,6 +60,7 @@ void SphManager::update(double timestep_duration) {
 			computeLocalDensity(each_particle);
 		}
 	}
+	std::cout << "after compute local densities" << std::endl;
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
@@ -67,6 +68,7 @@ void SphManager::update(double timestep_duration) {
 			updateVelocity(each_particle, timestep_duration);
 		}
 	}
+	std::cout << "after update velocity" << std::endl;
 }
 
 void SphManager::updateVelocity(SphParticle& particle, double timestep_duration) {
