@@ -77,6 +77,12 @@ namespace CUI {
 		}
 	}
 
+	void generateParticles(std::queue<std::string> &tokens)
+	{
+		// TODO add correct dimensions
+		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
+	}
+
 	void simulate(std::queue<std::string> &tokens)
 	{
 		// TODO add correct dimensions
@@ -149,6 +155,7 @@ namespace CUI {
 			}
 			else if (command == "particleGen") {
 				command_buffer[0] = 2;
+				generateParticles(tokens);
 			}
 			else if (command == "moveShutter") {
 				command_buffer[0] = 3;

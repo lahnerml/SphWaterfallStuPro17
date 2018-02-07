@@ -33,6 +33,5 @@ class Vector3 {
 		Vector3 normalize() const;
 		Vector3 roundDownward() const;
 		Vector3 distanceTo(const Vector3&, const Vector3&);
-
 	private:
 };

@@ -35,3 +35,8 @@ Face Face::MpiReceiveFace(int source)
 		Vector3(buf[3], buf[4], buf[5]),
 		Vector3(buf[6], buf[7], buf[8]));
 }
+
+std::ostream& operator<<(std::ostream &out, const Face& face)
+{
+	return out << "[" << face.a << ", " << face.b << ", " << face.c << "]";
+}
