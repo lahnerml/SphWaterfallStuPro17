@@ -27,6 +27,9 @@ private:
 	SphKernelFactory kernel_factory;
 	SphNeighbourSearchFactory neighbour_search_factory;
 
+	ParticleDomain& getParticleDomain(const int&);
+	ParticleDomain& getParticleDomain(const Vector3&);
+
 	void update(double timestep);
 	void updateVelocity(SphParticle& particle, double timestep);
 	Vector3 computeAcceleration(SphParticle& particle);
@@ -38,6 +41,6 @@ private:
 
 	MPI_Request requestRimParticles(const Vector3&, const Vector3&);
 	void exchangeParticles();
-	void exchangeRimParticles();	ParticleDomain& getParticleDomain(const int&);
+	void exchangeRimParticles();
 	void sendRimParticles(const int&, const int&);
 };

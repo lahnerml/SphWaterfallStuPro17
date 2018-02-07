@@ -9,7 +9,9 @@ class SphParticle {
 		SphParticle(Vector3, Vector3, double);
 		~SphParticle();
 
-		friend bool operator== (const SphParticle a, const SphParticle b);
+		friend bool operator== (const SphParticle, const SphParticle);
+
+		friend std::ostream& operator<<(std::ostream &, const SphParticle&);
 
 		Vector3 position;
 		Vector3 velocity;
