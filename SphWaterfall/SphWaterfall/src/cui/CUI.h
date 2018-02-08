@@ -28,17 +28,16 @@ namespace CUI {
 	{
 	public:
 		AsyncCommand();
-		~AsyncCommand();
-
-		std::mutex cmdLock;
-		ConsoleCommand command;
-		std::string param;
 
 		ConsoleCommand aReadCmd();
 		void aWriteCmd(ConsoleCommand cmd);
 
 		ConsoleCommand aReadCmd(std::string& param);
 		void aWriteCmd(ConsoleCommand cmd, std::string param);
+	private:
+		std::mutex cmdLock;
+		ConsoleCommand command;
+		std::string param;
 	};
 
 	extern AsyncCommand acmd;

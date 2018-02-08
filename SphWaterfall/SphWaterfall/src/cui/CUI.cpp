@@ -4,6 +4,8 @@
 
 namespace CUI {
 
+	AsyncCommand acmd;
+
 	void trim(std::string &str) {
 		int pos1 = str.find_first_not_of(" ");
 		int pos2 = str.find_last_not_of(" ");
@@ -125,8 +127,6 @@ namespace CUI {
 
 	/* -_-_-_Comands End_-_-_- */
 
-	AsyncCommand acmd;
-
 	void startCUI()
 	{
 		string inputLine, command;
@@ -182,10 +182,6 @@ namespace CUI {
 	//AsyncCommand
 	AsyncCommand::AsyncCommand() :
 		command(ConsoleCommand::NONE), param("")
-	{
-	}
-
-	AsyncCommand::~AsyncCommand()
 	{
 	}
 
