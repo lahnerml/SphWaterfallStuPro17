@@ -82,12 +82,13 @@ namespace CUI {
 	{
 		// TODO add correct dimensions
 		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
+		acmd.aWriteCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
 	}
 
 	void simulate(std::queue<std::string> &tokens)
 	{
 		// TODO add correct dimensions
-		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
+		acmd.aWriteCmd(CUI::ConsoleCommand::SIMULATE);
 	}
 
 	void render()

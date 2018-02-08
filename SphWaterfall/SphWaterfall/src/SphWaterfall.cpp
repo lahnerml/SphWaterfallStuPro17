@@ -6,6 +6,7 @@
 #include "cui/CUI.h"
 //#include "simulation/SimulationUtilities.h"
 #include "data\FluidParticle.h"
+#include "particleGen/StaticParticleGenerator.h"
 
 CUI::AsyncCommand acmd;
 
@@ -16,7 +17,12 @@ void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
-	cout << "command is particleGen" << endl;
+	StaticParticleGenerator gen(sphManager);
+
+	if (rank == 0)
+		gen.sendAndGenerate(loadedMesh);
+	else
+		gen.receiveAndGenerate();
 }
 
 void moveShutter(int rank) {

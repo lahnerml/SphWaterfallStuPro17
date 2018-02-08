@@ -1,7 +1,7 @@
 #pragma once
 #include "StaticParticleGenerator.h"
 
-const double PARTICLE_DENSITY = 0.1;
+const double PARTICLE_DENSITY = 0.01;
 
 
 
