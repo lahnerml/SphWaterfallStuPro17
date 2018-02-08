@@ -54,7 +54,9 @@ void TerrainParser::readObjFile(std::string fileName, std::vector<Vector3> &vert
 			int a, b, c;
 			s >> a; s >> b; s >> c;
 			a--; b--; c--;
-			//TODO Create Face object here
+			
+			//TODO remove debug
+			//std::cout << a << "," << b << "," << c << std::endl;
 			faces.push_back(a); faces.push_back(b); faces.push_back(c);
 		}
 		else if (line[0] == '#')
