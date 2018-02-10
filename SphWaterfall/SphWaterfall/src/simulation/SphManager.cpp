@@ -8,6 +8,12 @@ SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time,
 {
 	kernel = kernel_factory.getInstance(1);
 	neighbour_search = neighbour_search_factory.getInstance(1);
+
+	MPI_Comm_rank(slave_comm, &mpi_rank);
+
+	for (int i = 0; i < slave_comm_size + 1; i++) {
+		add_particles_map[i] = std::vector<SphParticle>();
+	}
 }
 
 SphManager::~SphManager() {
@@ -20,11 +26,11 @@ void SphManager::simulate() {
 	int timestep = 0;
 	while (remaining_simulation_time > 0) {
 		exchangeRimParticles();
-		//std::cout << "after exchange rim particles" << std::endl; //debug
+		std::cout << "after exchange rim particles" << std::endl; //debug
 		update();
-		//std::cout << "after update" << std::endl; //debug
+		std::cout << "after update" << std::endl; //debug
 		exchangeParticles();
-		//std::cout << "after exchange particles" << std::endl; //debug
+		std::cout << "after exchange particles" << std::endl; //debug
 		std::cout << "simulation of timestep " << timestep << " finished" << std::endl;
 		remaining_simulation_time -= timestep_duration;
 		timestep++;
@@ -64,7 +70,7 @@ void SphManager::update() {
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			std::cout << each_particle << std::endl; //debug
+			//std::cout << each_particle << std::endl; //debug
 			updateVelocity(each_particle);
 		}
 	}
@@ -253,8 +259,7 @@ void SphManager::exchangeRimParticles() {
 
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> new_rim_particles;
 	std::vector<SphParticle> incoming_rim_particles;
-	int rank;
-	MPI_Comm_rank(slave_comm, &rank);
+
 	int count = 1;
 	//std::cout << target_map.size() << std::endl;
 
@@ -271,7 +276,7 @@ void SphManager::exchangeRimParticles() {
 			//std::cout << unhash(source.first) << std::endl;
 			int target_process_id = computeProcessID(target.first, slave_comm_size);
 			if (!source.second.empty()) {
-				if (target_process_id == rank) {
+				if (target_process_id == mpi_rank) {
 					new_rim_particles[target.first][source.first] = source.second;
 				}
 				else {
@@ -282,9 +287,9 @@ void SphManager::exchangeRimParticles() {
 
 					MPI_Request_free(&request);
 					
-					for (auto particle : source.second) {
-						//std::cout << particle << std::endl; //debug
-					}
+					//for (auto particle : source.second) {
+					//	std::cout << particle << std::endl; //debug
+					//}
 					//std::cout << sizeof(SphParticle) << std::endl;
 					// send particles
 					MPI_Isend(source.second.data(), source.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm, &request);
@@ -318,7 +323,7 @@ void SphManager::exchangeRimParticles() {
 		MPI_Probe(source, meta[2], slave_comm, &status);
 		MPI_Get_count(&status, MPI_BYTE, &count);
 
-		incoming_rim_particles = std::vector<SphParticle>(count);
+		incoming_rim_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 		source = status.MPI_SOURCE;
 		tag = status.MPI_TAG;
 		
@@ -348,38 +353,43 @@ void SphManager::exchangeRimParticles() {
 	MPI_Barrier(slave_comm);
 }
 
-
 void SphManager::exchangeParticles() {
 	std::unordered_map<int, std::vector<SphParticle>> target_map;
 	std::vector<SphParticle> all_new_particles;
 	std::vector<SphParticle> incoming_particles;
+	int target_id;
 
+	// adds particles that are provided by the addParticles method
+	for (int i = 0; i < slave_comm_size; i++) {
+		target_map[i] = add_particles_map.at(i);
+		add_particles_map.at(i).clear();
+	}
+
+	// adds particles from domains
 	for (auto each_domain : domains) {
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
-		for (SphParticle each_particle : outside_particles) {
-			int target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);
-			int count = target_map.count(target_id);
 
-			if (count == 0) {
+		for (SphParticle each_particle : outside_particles) {
+			target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);
+
+			if (target_map.at(target_id).empty()) {
 				target_map[target_id] = std::vector<SphParticle>();
 			}
 
-			std::vector<SphParticle> list = target_map.at(target_id);
-			list.push_back(each_particle);
+			target_map[target_id].push_back(each_particle);
 		}
 	}
 
 	// don't send to yourself
-	int rank;
-	MPI_Comm_rank(slave_comm, &rank);
-	int count = target_map.count(rank);
+	int count = target_map.count(mpi_rank);
 	if (count != 0) {
-		all_new_particles = target_map.at(rank);
-		target_map.erase(rank);
+		all_new_particles = target_map.at(mpi_rank);
+		target_map.erase(mpi_rank);
 	}
-
+	MPI_Request request;
 	for (auto vector : target_map) {
-		MPI_Request request;
+		// for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
+		std::cout << vector.second.data() << " " << vector.second.size() << std::endl;
 		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, slave_comm, &request);
 		MPI_Request_free(&request);
 	}
@@ -391,15 +401,13 @@ void SphManager::exchangeParticles() {
 	MPI_Status status;
 	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
 
+	int source, tag;
 	while (flag) {
-		int source = status.MPI_SOURCE;
-		int tag = status.MPI_TAG;
-		int count;
-
+		source = status.MPI_SOURCE;
+		tag = status.MPI_TAG;
 		MPI_Get_count(&status, MPI_BYTE, &count);
+		incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
-		incoming_particles = std::vector<SphParticle>(count);
-		//std::cout << count << std::endl;
 		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 		std::move(incoming_particles.begin(), incoming_particles.end(), std::inserter(all_new_particles, all_new_particles.end()));
 
@@ -407,35 +415,40 @@ void SphManager::exchangeParticles() {
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
 	}
 
-	add_particles(all_new_particles);
+	// for (auto particle : all_new_particles) { std::cout << "all new: " << particle << std::endl; } // debug
 
+	add_particles(all_new_particles);
 	MPI_Barrier(slave_comm);
 }
 
-ParticleDomain& SphManager::getParticleDomain(const int& unique_id) {
-	int count = domains.count(unique_id);
-
-	if (count == 0) {
-		domains[unique_id] = ParticleDomain((unhash(unique_id)), domain_dimensions);
-	}
-	return domains.at(unique_id);
-}
-
-ParticleDomain& SphManager::getParticleDomain(const Vector3& particle_position) {
-	int domain_id = computeDomainID(particle_position, domain_dimensions);
-
+ParticleDomain& SphManager::getParticleDomain(const int& domain_id) {
 	int count = domains.count(domain_id);
+
 	if (count == 0) {
 		domains[domain_id] = ParticleDomain((unhash(domain_id)), domain_dimensions);
 	}
 	return domains.at(domain_id);
 }
 
+ParticleDomain& SphManager::getParticleDomain(const Vector3& particle_position) {
+	int domain_id = computeDomainID(particle_position, domain_dimensions);
+
+	return getParticleDomain(domain_id);
+}
+
 void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	for (SphParticle particle : new_particles) {
-		//std::cout << domain_id << std::endl; // Debug output
-		getParticleDomain(particle.position).addParticle(particle);
-		//std::cout << particle.position << std::endl; // debug output
+		//std::cout << domain_id << std::endl; // debug
+		int domain_id = computeDomainID(particle.position, domain_dimensions);
+		int process_id = computeProcessID(domain_id, slave_comm_size);
+
+		if (process_id == mpi_rank) {
+			getParticleDomain(domain_id).addParticle(particle);
+		}
+		else {
+			add_particles_map[process_id].push_back(particle);
+		}
+		//std::cout << particle.position << std::endl; // debug
 	}
 }
 
