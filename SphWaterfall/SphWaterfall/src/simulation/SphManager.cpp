@@ -89,13 +89,13 @@ void SphManager::updateVelocity(SphParticle& particle) {
 
 Vector3 SphManager::computeAcceleration(SphParticle& particle) {
 	Vector3 acceleration;
-	Vector3 gravity_acceleration = Vector3(0, -9.81, 0);
+	Vector3 gravity_acceleration = Vector3(0.0, -9.81, 0.0);
 	acceleration = gravity_acceleration + computeDensityAcceleration(particle) + computeViscosityAcceleration(particle);
 	return acceleration;
 }
 
 void SphManager::computeLocalDensity(SphParticle& particle) {
-	double local_density = 0;
+	double local_density = 0.0;
 	// std::vector<SphParticle> neighbours = neighbour_particles.at(particle); TODO: implement Hash for SphParticle (operator())
 	std::vector<SphParticle> neighbours;
 	for (auto neighbour : neighbour_particles) {
@@ -124,7 +124,7 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 	double particle_local_pressure = computeLocalPressure(particle);
 
 	for (SphParticle neighbour_particle : neighbours) {
-		if (neighbour_particle.local_density == 0) {
+		if ( (neighbour_particle.local_density != 0.0) && (particle.local_density != 0.0) ) {
 			density_acceleration += neighbour_particle.mass *
 				((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density * neighbour_particle.local_density)) +
 				(particle_local_pressure / (particle.local_density * particle.local_density))) *
@@ -161,7 +161,7 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 	{
 		rij = neighbour_particle.position - particle.position;
 		if ( (rij.length() != 0.0) && (particle.local_density + neighbour_particle.local_density != 0.0) ) {
-			viscosity_acceleration += neighbour_particle.mass * ( (4 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) /
+			viscosity_acceleration += neighbour_particle.mass * ( (4.0 * 1.0 * rij * kernel->computeKernelGradientValue(rij)) /
 				((particle.local_density + neighbour_particle.local_density) * (rij.length() * rij.length())) ) *
 				(particle.velocity - neighbour_particle.velocity);
 		}
@@ -377,7 +377,7 @@ void SphManager::exchangeParticles() {
 	}
 
 	// for (auto particle : all_new_particles) { std::cout << "all new: " << particle << std::endl; } // debug
-
+	
 	add_particles(all_new_particles);
 	MPI_Barrier(slave_comm);
 }
