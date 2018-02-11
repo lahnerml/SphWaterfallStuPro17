@@ -257,51 +257,40 @@ void SphManager::exchangeRimParticles() {
 				}
 				else {
 					// target domain id, source domain id, tag der richtigen Nachricht
-					//std::cout << count << std::endl;
 					std::array<int, 3> meta = { target.first, source.first, count };
 					MPI_Request request;
-					MPI_Isend(meta.data(), meta.size() * sizeof(int), MPI_BYTE, target_process_id, 0, slave_comm, &request);
+					MPI_Send(meta.data(), meta.size(), MPI_INT, target_process_id, 0, slave_comm);
 
-					MPI_Request_free(&request);
-					
 					//for (auto particle : source.second) { std::cout << particle << std::endl; } // debug
-
 					// send particles
-					MPI_Isend(source.second.data(), source.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm, &request);
-					MPI_Request_free(&request);
-					//std::cout << "exchange rim particles at send rank:" << mpi_rank << " " << meta[2] << std::endl; //debug
+					MPI_Send(source.second.data(), source.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm);
+
 					// increment unique tag
 					count++;
 				}
 			}
 		}	
 	}
-	//std::cout << "exchange rim particles before barrier rank:" << mpi_rank << std::endl; //debug
+
 	MPI_Barrier(slave_comm);
-	//std::cout << "exchange rim particles after barrier rank:" << mpi_rank << std::endl; //debug
+
 	// receive until there is nothing left
 	int flag, useless_flag;
 	MPI_Status status;
 	MPI_Iprobe(MPI_ANY_SOURCE, 0, slave_comm, &flag, &status);
-
+	
 	while (flag) {
 		int source = status.MPI_SOURCE;
-		//tag = status.MPI_TAG;
-		MPI_Get_count(&status, MPI_BYTE, &count);
-
+		
 		std::array<int, 3> meta = std::array<int, 3>();
-		MPI_Recv(meta.data(), count, MPI_BYTE, source, 0, slave_comm, &status);
+		MPI_Recv(meta.data(), meta.size(), MPI_INT, source, 0, slave_comm, &status);
 
-		//std::cout << meta[0] << " " << meta[1] << " " << meta[2] << std::endl; //debug
-		//std::cout << "exchange rim particles before probe rank:" << mpi_rank << " " << source << " " << meta [2] << std::endl; //debug
 		MPI_Iprobe(source, meta[2], slave_comm, &useless_flag, &status);
-		//std::cout << "exchange rim particles after probe rank:" << mpi_rank << std::endl; //debug
 
 		source = status.MPI_SOURCE;
 		int tag = status.MPI_TAG;
 		MPI_Get_count(&status, MPI_BYTE, &count);
-		//std::cout << "count:" << count << std::endl; //debug
-		//std::cout << "tag:" << tag << std::endl; //debug
+
 		incoming_rim_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
 
@@ -312,16 +301,17 @@ void SphManager::exchangeRimParticles() {
 		// next message
 		MPI_Iprobe(MPI_ANY_SOURCE, 0, slave_comm, &flag, &status);
 	}
-	//std::cout << "exchange rim particles after recieve rank:" << mpi_rank << std::endl; //debug
+
 	for (auto target : new_rim_particles) {
 		if (domains.count(target.first) != 0) {
 			getParticleDomain(target.first).setNeighbourRimParticles(target.second);
 			//for (auto neighbour : getParticleDomain(target.first).getNeighbourRimParticles()) { for (auto particle : neighbour.second) { std::cout << particle << std::endl; } } // debug
 		}
 	}
-	//std::cout << "exchange rim particles end rank:" << mpi_rank << std::endl; //debug
+
+	new_rim_particles.clear();
+
 	MPI_Barrier(slave_comm);
-	//std::cout << "exchange rim particles end after barrier rank:" << mpi_rank << std::endl; //debug
 }
 
 void SphManager::exchangeParticles() {
