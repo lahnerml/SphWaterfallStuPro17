@@ -6,23 +6,33 @@
 #include "cui/CUI.h"
 //#include "simulation/SimulationUtilities.h"
 #include "data\FluidParticle.h"
+#include "particleGen/StaticParticleGenerator.h"
 
-void loadMesh() {
-	cout << "command is loadMesh" << endl;
+CUI::AsyncCommand acmd;
+
+void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
+	std::cout << "Loading Mesh: \"" << fileName << "\"" << std::endl;
+	loadedMesh = TerrainParser::loadFromFile(fileName);
+	cout << "Vertices: " << loadedMesh.getVertexCount() << " Faces: " << loadedMesh.getFaceCount() << endl;
 }
 
-void generateParticle() {
-	cout << "command is particleGen" << endl;
+void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
+	StaticParticleGenerator gen(sphManager);
+
+	if (rank == 0)
+		gen.sendAndGenerate(loadedMesh);
+	else
+		gen.receiveAndGenerate();
 }
 
-void moveShutter() {
+void moveShutter(int rank) {
 	cout << "command is moveShutter" << endl;
 }
 
-void simulate() {
+void simulate(int rank, SphManager& sphManager) {
 	cout << "command is simulate" << endl;
 
-	SphManager sph_manager = SphManager(Vector3(2, 2, 2), 5, 1);
+	
 	std::vector<SphParticle> particles;
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
@@ -33,11 +43,11 @@ void simulate() {
 			}
 		}
 	}
-	sph_manager.add_particles(particles);
-	sph_manager.simulate();
+	sphManager.add_particles(particles);
+	sphManager.simulate();
 }
 
-void render() {
+void render(int rank) {
 	cout << "command is render" << endl;
 }
 
@@ -45,10 +55,12 @@ int main(int argc, char** argv)
 {
 	MPI_Init(&argc, &argv);
 
-	bool exit_programm = false;
 	std::thread cuiThread;
-	int *command_buffer;
-	command_buffer = (int*)malloc(sizeof(int));
+	int cmd = CUI::ConsoleCommand::NONE;
+	std::string cmdParam;
+
+	SphManager sphManager = SphManager(Vector3(2, 2, 2), 5, 1);
+	Terrain loadedMesh;
 
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -58,6 +70,7 @@ int main(int argc, char** argv)
 	int color = 1337;
 	if (rank == 0) {
 		color = MPI_UNDEFINED;
+		cuiThread = std::thread(CUI::startCUI);
 	}
 
 	MPI_Comm_split(MPI_COMM_WORLD, color, 0, &slave_comm);
@@ -65,41 +78,43 @@ int main(int argc, char** argv)
 		MPI_Comm_size(slave_comm, &slave_comm_size);
 	}
 
-	while (!exit_programm) {
+	while (cmd != CUI::ConsoleCommand::EXIT) {
 		if (rank == 0) {
-			cuiThread = std::thread(CUI::readCommand, command_buffer);
-			cuiThread.join();
+			cmd = CUI::acmd.aReadCmd(cmdParam);
+		}
+		MPI_Bcast(&cmd, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+
+		//Execute console input
+		switch (cmd)
+		{
+		case CUI::ConsoleCommand::LOAD_MESH:
+			loadMesh(rank, cmdParam, loadedMesh);
+			std::cout << "mesh loading finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			break;
+		case CUI::ConsoleCommand::GENERATE_PARTICLES:
+			generateParticles(rank, sphManager, loadedMesh);
+			std::cout << "particle generation finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			break;
+		case CUI::ConsoleCommand::MOVE_SHUTTER:
+			moveShutter(rank);
+			std::cout << "moveing shutter finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+		case CUI::ConsoleCommand::SIMULATE:
+			simulate(rank, sphManager);
+			std::cout << "simulation finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+		case CUI::ConsoleCommand::RENDER:
+			render(rank);
+			std::cout << "rendering finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+		default:
+			break;
 		}
 
-		MPI_Bcast(command_buffer, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		if (cmd != CUI::ConsoleCommand::EXIT && cmd != CUI::ConsoleCommand::NONE)
+			CUI::acmd.aWriteCmd(CUI::ConsoleCommand::NONE);
+	}
 
-		if (*command_buffer == 0) {
-			exit_programm = true;
-		} 
-		else if (rank != 0) {
-			cout << "command buffer is " << command_buffer[0] << ". ";
-
-			if (*command_buffer == 1) {
-				loadMesh();
-				cout << "mesh loading finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
-			} 
-			else if (*command_buffer == 2) {
-				generateParticle();
-				cout << "particle generation finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
-			} 
-			else if (*command_buffer == 3) {
-				moveShutter();
-				cout << "moveing shutter finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
-			} 
-			else if (*command_buffer == 4) {
-				simulate();
-				cout << "simulation finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
-			} 
-			else if (*command_buffer == 5) {
-				render();
-				cout << "rendering finished from processor " << rank << " out of " << slave_comm_size << " processors" << endl;
-			}
-		}
+	if (rank == 0) {
+		cuiThread.join();
 	}
 
 	if (rank == 0) {

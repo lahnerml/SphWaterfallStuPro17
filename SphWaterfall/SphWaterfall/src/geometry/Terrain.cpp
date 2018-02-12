@@ -8,9 +8,9 @@
 Terrain::Terrain(std::vector<Vector3> &vertices, std::vector<Vector3> &normals, std::vector<int> &faces) :
 	vertices(vertices)
 {
-	std::vector<int>::iterator it;
-	for (it = faces.begin(); it != faces.end(); it++) {
-		this->faces.push_back(Face::Face(vertices[*it], vertices[*++it], vertices[*++it]));
+	for(int i = 0; i < faces.size(); i++)
+	{
+		this->faces.push_back(Face::Face(vertices[faces[i]], vertices[faces[++i]], vertices[faces[++i]]));
 	}
 }
 

@@ -4,6 +4,8 @@
 
 namespace CUI {
 
+	AsyncCommand acmd;
+
 	void trim(std::string &str) {
 		int pos1 = str.find_first_not_of(" ");
 		int pos2 = str.find_last_not_of(" ");
@@ -68,8 +70,7 @@ namespace CUI {
 			readNextCombinedToken(tokens, fileName);
 			cout << fileName << endl;
 
-			Terrain loadedFile = TerrainParser::loadFromFile(fileName);
-			cout << "Vertices: " << loadedFile.getVertexCount() << " Faces: " << loadedFile.getFaceCount() << endl;
+			acmd.aWriteCmd(CUI::ConsoleCommand::LOAD_MESH, fileName);
 		}
 		else
 		{
@@ -77,10 +78,17 @@ namespace CUI {
 		}
 	}
 
-	void simulate(std::queue<std::string> &tokens)
+	void generateParticles(std::queue<std::string> &tokens)
 	{
 		// TODO add correct dimensions
 		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
+		acmd.aWriteCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
+	}
+
+	void simulate(std::queue<std::string> &tokens)
+	{
+		// TODO add correct dimensions
+		acmd.aWriteCmd(CUI::ConsoleCommand::SIMULATE);
 	}
 
 	void render()
@@ -120,57 +128,87 @@ namespace CUI {
 
 	/* -_-_-_Comands End_-_-_- */
 
-
-	void readCommand(int* command_buffer)
+	void startCUI()
 	{
 		string inputLine, command;
 		queue<string> tokens;
 
-		//Read command
-		cout << endl << "Please enter a command or enter 'help' to show a list of all commands" << endl;
-		getline(cin, inputLine);
-		trim(inputLine);
-
-		//Tokenize command
-		istringstream tokenStream(inputLine);
-		tokens = queue<string>();
-		while (tokenStream >> command)
-			tokens.push(command);
-
-		//Execute command
-		if (!tokens.empty())
+		while (acmd.aReadCmd() != CUI::ConsoleCommand::EXIT)
 		{
-			command = tokens.front();
-			tokens.pop();
+			//Read command
+			cout << endl << "Please enter a command or enter 'help' to show a list of all commands" << endl;
+			getline(cin, inputLine);
+			trim(inputLine);
 
-			if (command == "loadMesh") {
-				command_buffer[0] = 1;
-				loadMesh(tokens);
-			}
-			else if (command == "particleGen") {
-				command_buffer[0] = 2;
-			}
-			else if (command == "moveShutter") {
-				command_buffer[0] = 3;
-			}
-			else if (command == "simulate") {
-				command_buffer[0] = 4;
-				//simulate(tokens);
-			}
-			else if (command == "render")
+			//Tokenize command
+			istringstream tokenStream(inputLine);
+			tokens = queue<string>();
+			while (tokenStream >> command)
+				tokens.push(command);
+
+			//Execute command
+			if (!tokens.empty())
 			{
-				command_buffer[0] = 5;
-				render();
-			}
-			else if (command == "help" || command == "?") {
-				showHelp();
-			}
-			else if (command == "exit") {
-				command_buffer[0] = 0;
-			}
-			else {
-				cout << "Unknown command. Enter 'help' to view a list of all available commands." << endl;
+				command = tokens.front();
+				tokens.pop();
+
+				if (command == "loadMesh") {
+					loadMesh(tokens);
+				}
+				else if (command == "particleGen") {
+					generateParticles(tokens);
+				}
+				else if (command == "moveShutter") {
+				}
+				else if (command == "simulate") {
+					simulate(tokens);
+				}
+				else if (command == "render")
+				{
+					render();
+				}
+				else if (command == "help" || command == "?") {
+					showHelp();
+				}
+				else if (command == "exit") {
+					acmd.aWriteCmd(CUI::ConsoleCommand::EXIT);
+				}
+				else {
+					std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
+				}
 			}
 		}
+	}
+
+	//AsyncCommand
+	AsyncCommand::AsyncCommand() :
+		command(ConsoleCommand::NONE), param("")
+	{
+	}
+
+	ConsoleCommand AsyncCommand::aReadCmd()
+	{
+		std::lock_guard<std::mutex> guard(this->cmdLock);
+		return this->command;
+	}
+
+	void AsyncCommand::aWriteCmd(ConsoleCommand cmd)
+	{
+		std::lock_guard<std::mutex> guard(this->cmdLock);
+		this->command = cmd;
+	}
+
+	ConsoleCommand AsyncCommand::aReadCmd(std::string & param)
+	{
+		std::lock_guard<std::mutex> guard(this->cmdLock);
+		param = this->param;
+		return this->command;
+	}
+
+	void AsyncCommand::aWriteCmd(ConsoleCommand cmd, std::string param)
+	{
+		std::lock_guard<std::mutex> guard(this->cmdLock);
+		this->command = cmd;
+		this->param = param;
 	}
 }
