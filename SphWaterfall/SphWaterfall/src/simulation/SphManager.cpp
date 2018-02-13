@@ -327,10 +327,10 @@ void SphManager::exchangeParticles() {
 	}
 
 	// adds particles from domains
-	for (auto each_domain : domains) {
+	for (auto& each_domain : domains) {
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 
-		for (SphParticle each_particle : outside_particles) {
+		for (auto& each_particle : outside_particles) {
 			target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);
 
 			if (target_map.at(target_id).empty()) {
@@ -348,7 +348,7 @@ void SphManager::exchangeParticles() {
 		target_map.erase(mpi_rank);
 	}
 	MPI_Request request;
-	for (auto vector : target_map) {
+	for (auto& vector : target_map) {
 		// for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
 		// std::cout << vector.second.data() << " " << vector.second.size() << std::endl;
 		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, slave_comm, &request);
@@ -370,7 +370,7 @@ void SphManager::exchangeParticles() {
 		incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
 		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
-		std::move(incoming_particles.begin(), incoming_particles.end(), std::inserter(all_new_particles, all_new_particles.end()));
+		incoming_particles.insert(incoming_particles.end(), all_new_particles.begin(), all_new_particles.end());
 
 		// next message
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);

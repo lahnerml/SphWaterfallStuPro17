@@ -83,7 +83,7 @@ bool operator==(const Vector3& a, const Vector3& b)
 	return ((a.x == b.x) && (a.y == b.y) && (a.z == b.z));
 }
 
-bool Vector3::in_range_of(const Vector3& b) const
+bool Vector3::isInRangeOf(const Vector3& b) const
 {
 	return x >= 0 && x < b.x && y >= 0 && y < b.y && z >= 0 && z <= b.z;
 }
