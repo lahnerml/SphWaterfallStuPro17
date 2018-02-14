@@ -86,11 +86,11 @@ namespace CUI {
 	void render()
 	{
 		init(Vector3(0, 0, -10), Vector3(0, 0, 1), 1920, 1080);
-
+		
 	//	addCamera(Vector3(-30, 0, -30), normalizeVector(Vector3(1, 0, 1)), 1920, 1080);
 
-		vector<FluidParticle> particles = generateDebugParticles(10000);
-		//FluidParticle particle = FluidParticle(Vector3(0, 0, 10), Vector3(0, 0, 0));
+	//	vector<FluidParticle> particles = generateDebugParticles(10000);
+	//	FluidParticle particle = FluidParticle(Vector3(0, 0, 10), Vector3(0, 0, 0));
 	//	FluidParticle particle2 = FluidParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));
 	//	FluidParticle particle3 = FluidParticle(Vector3(5, 5, 0), Vector3(0, 0, 0));
 	//	FluidParticle particle4 = FluidParticle(Vector3(-5, -5, -5), Vector3(0, 0, 0));
@@ -102,7 +102,8 @@ namespace CUI {
 
 		cout << "Rendering, please wait..." << endl;
 
-		debugRenderFrame(particles);
+	//	debugRenderFrame(particles);
+		renderFrames("test.particles");
 
 		cout << "Done!" << endl;
 	}
@@ -158,6 +159,11 @@ namespace CUI {
 				//simulate(tokens);
 			}
 			else if (command == "render")
+			{
+				command_buffer[0] = 5;
+				render();
+			}
+			else if (command == "camera")
 			{
 				command_buffer[0] = 5;
 				render();

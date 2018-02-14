@@ -6,10 +6,13 @@ target_sources(SphWaterfall
 		"${CMAKE_CURRENT_LIST_DIR}/DebugObject.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Frame.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Frame.h"
+		"${CMAKE_CURRENT_LIST_DIR}/ParticleObject.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/ParticleObject.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Pixel.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Pixel.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Ray.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Ray.h"
 		"${CMAKE_CURRENT_LIST_DIR}/util.h"
+		"${CMAKE_CURRENT_LIST_DIR}/VideoConverter.h"
 		"${CMAKE_CURRENT_LIST_DIR}/VisualizationManager.h"
 )

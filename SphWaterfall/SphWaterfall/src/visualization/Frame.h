@@ -10,6 +10,9 @@ class Frame {
 		long getFrameID();
 		Pixel getPixel(unsigned int x, unsigned int y);
 		void setPixel(unsigned int x, unsigned int y, Pixel pixel);
+
+		unsigned int getWidth();
+		unsigned int getHeight();
 				
 	private:
 		unsigned int width;

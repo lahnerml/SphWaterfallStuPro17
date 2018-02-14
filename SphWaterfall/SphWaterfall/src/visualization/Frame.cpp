@@ -1,6 +1,5 @@
 #pragma once
 #include "Frame.h"
-#include "Pixel.h"
 
 Frame::Frame() {
 	this->width = 0;
@@ -29,6 +28,14 @@ Pixel Frame::getPixel(unsigned int x, unsigned int y) {
 void Frame::setPixel(unsigned int x, unsigned int y, Pixel pixel) {
 	if (x >= this->width || y >= this->height) return;
 	this->pixels[y*width + x] = pixel;
+}
+
+unsigned int Frame::getWidth() {
+	return this->width;
+}
+
+unsigned Frame::getHeight() {
+	return this->height;
 }
 
 
