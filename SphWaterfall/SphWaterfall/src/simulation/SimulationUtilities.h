@@ -4,10 +4,10 @@
 #include "../data/Vector3.h";
 #include "../data/SphParticle.h";
 
-// Smoothing length
-#define H 1.0
-// Influential radius
-#define Q_MAX 2.0
+// Influence radius
+#define Q_MAX 1.2
+// Smoothing radius (Influence radius / 4)
+#define H (Q_MAX / 4)
 
 namespace SimulationUtilities {
 	int hash(const Vector3&);

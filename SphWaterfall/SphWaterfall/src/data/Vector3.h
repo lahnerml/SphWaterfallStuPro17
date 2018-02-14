@@ -26,9 +26,11 @@ class Vector3 {
 
 		friend Vector3& operator+=(Vector3&, const Vector3&);
 
+		friend bool operator==(const Vector3&, const Vector3&);
+
 		friend std::ostream& operator<<(std::ostream &out, const Vector3&);
 
-		bool in_range_of(const Vector3&) const;
+		bool isInRangeOf(const Vector3&) const;
 		double length() const;
 		Vector3 normalize() const;
 		Vector3 roundDownward() const;

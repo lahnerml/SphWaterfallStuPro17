@@ -19,7 +19,7 @@ double WendlandKernel::computeKernelValue(const Vector3& r) {
 
 Vector3 WendlandKernel::computeKernelGradientValue(const Vector3& r) {
 	double q = r.length() / qMax;
-	if (q >= qMax) {
+	if ((q == 0) || (q >= qMax)) {
 		return Vector3();
 	}
 

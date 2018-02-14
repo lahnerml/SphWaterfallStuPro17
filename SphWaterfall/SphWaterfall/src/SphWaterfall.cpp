@@ -29,22 +29,30 @@ void moveShutter(int rank) {
 	cout << "command is moveShutter" << endl;
 }
 
-void simulate(int rank, SphManager& sphManager) {
+void simulate(int rank, SphManager& sph_manager) {
 	cout << "command is simulate" << endl;
 
-	
-	std::vector<SphParticle> particles;
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 5; j++) {
-			for (int k = 0; k < 5; k++) {
-				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
-				particles.push_back(particle);
-				//cout << particle.position << endl;
+	if (rank == 0) {
+		std::vector<SphParticle> particles;
+		
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				for (int k = 0; k < 10; k++) {
+					SphParticle particle = FluidParticle(Vector3(100.0 + (i/10.0), 100.0 + (j/10.0), 100.0 + (k/10.0)));
+					particles.push_back(particle);
+					//cout << particle.position << endl;
+				}
 			}
 		}
+
+		//particles.push_back(FluidParticle(Vector3(100.9, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.0, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.1, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.2, 100.0, 100.0)));
+
+		sph_manager.add_particles(particles);
 	}
-	sphManager.add_particles(particles);
-	sphManager.simulate();
+	sph_manager.simulate();
 }
 
 void render(int rank) {
@@ -59,7 +67,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(2, 2, 2), 5, 1);
+	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0 / 30.0);
 	Terrain loadedMesh;
 
 	int rank;
@@ -123,4 +131,6 @@ int main(int argc, char** argv)
 	}
 
 	MPI_Finalize();
+
+	return 0;
 }
