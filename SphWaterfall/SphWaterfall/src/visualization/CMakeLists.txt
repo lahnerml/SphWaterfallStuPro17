@@ -13,6 +13,5 @@ target_sources(SphWaterfall
 		"${CMAKE_CURRENT_LIST_DIR}/Ray.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Ray.h"
 		"${CMAKE_CURRENT_LIST_DIR}/util.h"
-		"${CMAKE_CURRENT_LIST_DIR}/VideoConverter.h"
 		"${CMAKE_CURRENT_LIST_DIR}/VisualizationManager.h"
 )

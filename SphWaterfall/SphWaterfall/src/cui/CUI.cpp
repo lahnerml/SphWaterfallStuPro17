@@ -89,6 +89,8 @@ namespace CUI {
 		
 	//	addCamera(Vector3(-30, 0, -30), normalizeVector(Vector3(1, 0, 1)), 1920, 1080);
 
+		generateMultipleFrames(30, 10000);
+
 	//	vector<FluidParticle> particles = generateDebugParticles(10000);
 	//	FluidParticle particle = FluidParticle(Vector3(0, 0, 10), Vector3(0, 0, 0));
 	//	FluidParticle particle2 = FluidParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));

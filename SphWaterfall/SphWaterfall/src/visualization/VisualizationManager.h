@@ -29,7 +29,7 @@ static vector<FluidParticle> generateDebugParticles(int count) {
 		double y = double(rand() % 10000 - 5000) / 1000;
 		double z = double(rand() % 10000 - 5000) / 1000;
 
-		FluidParticle f = FluidParticle(Vector3(x, y, z),Vector3(0,0,0), 0.8f);
+		FluidParticle f = FluidParticle(Vector3(x, y, z),Vector3(0,0,0), 1);
 		particles.emplace_back(f);
 	}
 	return particles;

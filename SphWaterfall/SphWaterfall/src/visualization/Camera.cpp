@@ -89,8 +89,10 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles) {
 		}
 	}
 	
+	waterDepth = waterDepth - bestDistance;
+
 	if (hit != nullptr) {
-		double facRG = 1 - 0.8*exp(-0.15f * waterDepth);
+		double facRG = 1 - 0.8*exp(-0.2f * waterDepth);
 		double facB = 1 - 1.2*exp(-0.1f * waterDepth);
 		facB = facB < 0 ? 0 : facB;
 		initColor.setRed(initColor.getRedValue() - 255 * facRG);
