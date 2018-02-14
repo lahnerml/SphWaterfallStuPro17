@@ -64,7 +64,8 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 	for (int f = facesToSend; f < terrain.getFaceCount(); f++)
 	{
 		generateParticlesOnFace(terrain.getFace(f), PARTICLE_DENSITY, generatedParticles);
-		std::cout << terrain.getFace(f) << std::endl;
+		//std::cout << terrain.getFace(f) << std::endl;
+		//TODO Debug output
 	}
 
 	//TODO Reintegrate
@@ -140,7 +141,8 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
 
 			particlePosition = face.a + ((face.b - face.a) * x) + ((face.c - face.a) * y);
 			generatedParticles.push_back(StaticParticle(particlePosition));
-			std::cout << particlePosition << std::endl;
+			//std::cout << particlePosition << std::endl;
+			//TODO Debug output
 		}
 	}
 }

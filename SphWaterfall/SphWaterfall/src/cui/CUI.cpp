@@ -68,7 +68,6 @@ namespace CUI {
 		if (readNextToken(tokens, paramName) && paramName == "-p") {
 			fileName = "";
 			readNextCombinedToken(tokens, fileName);
-			cout << fileName << endl;
 
 			acmd.aWriteCmd(CUI::ConsoleCommand::LOAD_MESH, fileName);
 		}
