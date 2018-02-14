@@ -82,7 +82,7 @@ void StaticParticleGenerator::receiveAndGenerate()
 		return;
 
 	int facesToReceive = 0;
-	MPI_Recv(&facesToReceive, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	MPI_Recv(&facesToReceive, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 	auto faces = std::vector<Face>();
 
