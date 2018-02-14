@@ -1,7 +1,7 @@
 #pragma once
 #include "StaticParticleGenerator.h"
 
-const double PARTICLE_DENSITY = 0.01;
+const double PARTICLE_DENSITY = 0.1;
 
 
 
@@ -123,7 +123,7 @@ std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrai
 
 
 
-void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, std::vector<SphParticle>& outputVector)
+void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, std::vector<SphParticle>& generatedParticles)
 {
 	Vector3 particlePosition = Vector3();
 
@@ -135,11 +135,12 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
 	{
 		for (double y = 0.0; y <= 1.0; y += particleDensity)
 		{
-			if (x + y < 1)
+			if (x + y > 1)
 				continue;
 
-			particlePosition = face.a + (face.b * x) + (face.c * y);
-			outputVector.push_back(StaticParticle(particlePosition));
+			particlePosition = face.a + ((face.b - face.a) * x) + ((face.c - face.a) * y);
+			generatedParticles.push_back(StaticParticle(particlePosition));
+			std::cout << particlePosition << std::endl;
 		}
 	}
 }
