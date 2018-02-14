@@ -43,7 +43,7 @@ void SphManager::update() {
 		each_neighbour_rim_particles = each_domain.second.getNeighbourRimParticles();
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			each_neighbour_particles = each_domain.second.getParticles();
-			for (auto domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
+			for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
 				if (each_neighbour_rim_particles.count(domain_id) != 0) {
 					each_neighbour_particles.insert(each_neighbour_particles.end(),
 						each_neighbour_rim_particles.at(domain_id).begin(),
@@ -95,13 +95,13 @@ void SphManager::computeLocalDensity(SphParticle& particle) {
 	double local_density = 0.0;
 	// std::vector<SphParticle> neighbours = neighbour_particles.at(particle); TODO: implement Hash for SphParticle (operator())
 	std::vector<SphParticle> neighbours;
-	for (auto neighbour : neighbour_particles) {
+	for (auto& neighbour : neighbour_particles) {
 		if (particle == neighbour.second.first) {
 			neighbours = neighbour.second.second;
 		}
 	}
 
-	for (SphParticle neighbour_particle : neighbours) {
+	for (SphParticle& neighbour_particle : neighbours) {
 		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
 	}
 
@@ -111,7 +111,7 @@ void SphManager::computeLocalDensity(SphParticle& particle) {
 Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 	// std::vector<SphParticle> neighbours = neighbour_particles.at(particle); TODO: implement Hash for SphParticle (operator())
 	std::vector<SphParticle> neighbours;
-	for (auto neighbour : neighbour_particles) {
+	for (auto& neighbour : neighbour_particles) {
 		if (particle == neighbour.second.first) {
 			neighbours = neighbour.second.second;
 		}
@@ -120,7 +120,7 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 	Vector3 density_acceleration = Vector3();
 	double particle_local_pressure = computeLocalPressure(particle);
 
-	for (SphParticle neighbour_particle : neighbours) {
+	for (SphParticle& neighbour_particle : neighbours) {
 		if ( (neighbour_particle.local_density != 0.0) && (particle.local_density != 0.0) ) {
 			density_acceleration += neighbour_particle.mass *
 				((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density * neighbour_particle.local_density)) +
@@ -146,7 +146,7 @@ double SphManager::computeLocalPressure(SphParticle& particle) {
 Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 	// std::vector<SphParticle> neighbours = neighbour_particles.at(particle); TODO: implement Hash for SphParticle (operator())
 	std::vector<SphParticle> neighbours;
-	for (auto neighbour : neighbour_particles) {
+	for (auto& neighbour : neighbour_particles) {
 		if (particle == neighbour.second.first) {
 			neighbours = neighbour.second.second;
 		}
@@ -154,7 +154,7 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 
 	Vector3 viscosity_acceleration = Vector3();
 	Vector3 rij;
-	for (SphParticle neighbour_particle : neighbours)
+	for (SphParticle& neighbour_particle : neighbours)
 	{
 		rij = neighbour_particle.position - particle.position;
 		if ( (rij.length() != 0.0) && (particle.local_density + neighbour_particle.local_density != 0.0) ) {
@@ -343,7 +343,6 @@ void SphManager::exchangeParticles() {
 	MPI_Request request;
 	for (auto& vector : target_map) {
 		//for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
-		//std::cout << vector.second.data() << " " << vector.second.size() << std::endl;
 		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, slave_comm, &request);
 		MPI_Request_free(&request);
 	}
@@ -362,9 +361,8 @@ void SphManager::exchangeParticles() {
 		incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
 		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, 0, slave_comm, &status);
-		//for (auto particle : incoming_particles) { std::cout << "incoming: " << particle << std::endl; } // debug
-
 		all_new_particles.insert(all_new_particles.end(), incoming_particles.begin(), incoming_particles.end());
+		//for (auto particle : incoming_particles) { std::cout << "incoming: " << particle << std::endl; } // debug
 
 		// next message
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);

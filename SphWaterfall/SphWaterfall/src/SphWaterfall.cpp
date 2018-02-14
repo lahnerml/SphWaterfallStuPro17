@@ -31,7 +31,7 @@ void simulate() {
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
 				for (int k = 0; k < 10; k++) {
-					SphParticle particle = FluidParticle(Vector3(100.0 + (i/4), 100.0 + (j/4), 100.0 + (k/4)), Vector3());
+					SphParticle particle = FluidParticle(Vector3(100.0 + (i/10.0), 100.0 + (j/10.0), 100.0 + (k/10.0)), Vector3());
 					particles.push_back(particle);
 					//cout << particle.position << endl;
 				}
