@@ -22,7 +22,7 @@ void moveShutter() {
 void simulate() {
 	cout << "command is simulate" << endl;
 
-	SphManager sph_manager = SphManager(Vector3(1, 1, 1), 5, 1.0 / 30);
+	SphManager sph_manager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0 / 30.0);
 	int rank;
 	MPI_Comm_rank(slave_comm, &rank);
 	if (rank == 0) {
@@ -31,12 +31,17 @@ void simulate() {
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
 				for (int k = 0; k < 10; k++) {
-					SphParticle particle = FluidParticle(Vector3(100.0 + (i/10.0), 100.0 + (j/10.0), 100.0 + (k/10.0)), Vector3());
+					SphParticle particle = FluidParticle(Vector3(100.0 + (i/10.0), 100.0 + (j/10.0), 100.0 + (k/10.0)));
 					particles.push_back(particle);
 					//cout << particle.position << endl;
 				}
 			}
 		}
+
+		//particles.push_back(FluidParticle(Vector3(100.9, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.0, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.1, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.2, 100.0, 100.0)));
 
 		sph_manager.add_particles(particles);
 	}
