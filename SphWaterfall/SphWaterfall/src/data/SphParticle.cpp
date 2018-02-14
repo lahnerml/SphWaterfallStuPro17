@@ -32,7 +32,7 @@ SphParticle::~SphParticle() {
 
 bool operator==(const SphParticle a, const SphParticle b)
 {
-	return ((a.position == b.position) && (a.velocity == b.velocity) && (a.mass == b.mass) && (a.local_density == b.local_density));
+	return ((a.position == b.position) && (a.velocity == b.velocity)); // TODO: local density can't be a value because otherwise calculation won't work
 }
 
 std::ostream& operator<<(std::ostream & out, const SphParticle& particle)
