@@ -1,9 +1,9 @@
 #pragma once
 #include "SphManager.h"
 
-SphManager::SphManager(const Vector3& domain_dimensions, double simulation_time, double timestep_duration) :
+SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
-	simulation_time(simulation_time),
+	number_of_timesteps(number_of_timesteps),
 	timestep_duration(timestep_duration) 
 {
 	kernel = kernel_factory.getInstance(1);
@@ -22,18 +22,15 @@ SphManager::~SphManager() {
 
 void SphManager::simulate() {
 	exchangeParticles();
-	double remaining_simulation_time = simulation_time;
-	int timestep = 1;
-	while (remaining_simulation_time > 0) {
+
+	for (int simulation_timestep = 1; simulation_timestep <= number_of_timesteps; simulation_timestep++) {
 		exchangeRimParticles();
-		std::cout << "after exchange rim particles" << std::endl; //debug
+		//std::cout << "after exchange rim particles" << std::endl; //debug
 		update();
-		std::cout << "after update" << std::endl; //debug
+		//std::cout << "after update" << std::endl; //debug
 		exchangeParticles();
-		std::cout << "after exchange particles" << std::endl; //debug
-		std::cout << "simulation of timestep " << timestep << " finished" << std::endl;
-		remaining_simulation_time -= timestep_duration;
-		timestep++;
+		//std::cout << "after exchange particles" << std::endl; //debug
+		std::cout << "simulation of timestep " << simulation_timestep << " from processor " << mpi_rank + 1 << " out of " << slave_comm_size << " finished" << std::endl;
 	}
 }
 
@@ -59,22 +56,22 @@ void SphManager::update() {
 		}
 	}
 	
-	std::cout << "after neighbour search" << std::endl;
+	//std::cout << "after neighbour search" << std::endl; // debug
 	// compute and set local densities
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			computeLocalDensity(each_particle);
 		}
 	}
-	std::cout << "after compute local densities" << std::endl;
+	//std::cout << "after compute local densities" << std::endl; // debug
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			updateVelocity(each_particle);
-			std::cout << "final particle: " << each_particle << std::endl; //debug
+			std::cout << "final particle: " << each_particle << std::endl; // debug
 		}
 	}
-	std::cout << "after update velocity" << std::endl;
+	//std::cout << "after update velocity" << std::endl;
 }
 
 void SphManager::updateVelocity(SphParticle& particle) {
@@ -173,16 +170,12 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 	return ((1 / particle.local_density) * viscosity_acceleration);
 }
 
-void SphManager::findNeighbourDomains(ParticleDomain) {
-
-}
-
 void SphManager::exchangeRimParticles() {
 	// target domain id, source domain id, rim particles from source in direction of target domain
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> target_map;
 	int target_domain_id, source_domain_id;
 
-	for (auto each_domain : domains) {
+	for (auto& each_domain : domains) {
 		source_domain_id = each_domain.first;
 		Vector3 source_domain_origin = unhash(source_domain_id);
 
@@ -302,7 +295,7 @@ void SphManager::exchangeRimParticles() {
 		MPI_Iprobe(MPI_ANY_SOURCE, 0, slave_comm, &flag, &status);
 	}
 
-	for (auto target : new_rim_particles) {
+	for (auto& target : new_rim_particles) {
 		if (domains.count(target.first) != 0) {
 			getParticleDomain(target.first).setNeighbourRimParticles(target.second);
 			//for (auto neighbour : getParticleDomain(target.first).getNeighbourRimParticles()) { for (auto particle : neighbour.second) { std::cout << particle << std::endl; } } // debug
@@ -349,8 +342,8 @@ void SphManager::exchangeParticles() {
 	}
 	MPI_Request request;
 	for (auto& vector : target_map) {
-		// for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
-		// std::cout << vector.second.data() << " " << vector.second.size() << std::endl;
+		//for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
+		//std::cout << vector.second.data() << " " << vector.second.size() << std::endl;
 		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, slave_comm, &request);
 		MPI_Request_free(&request);
 	}
@@ -362,21 +355,22 @@ void SphManager::exchangeParticles() {
 	MPI_Status status;
 	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
 
-	int source, tag;
+	int source;
 	while (flag) {
 		source = status.MPI_SOURCE;
-		tag = status.MPI_TAG;
 		MPI_Get_count(&status, MPI_BYTE, &count);
 		incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
-		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
-		incoming_particles.insert(incoming_particles.end(), all_new_particles.begin(), all_new_particles.end());
+		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, 0, slave_comm, &status);
+		//for (auto particle : incoming_particles) { std::cout << "incoming: " << particle << std::endl; } // debug
+
+		all_new_particles.insert(all_new_particles.end(), incoming_particles.begin(), incoming_particles.end());
 
 		// next message
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
 	}
 
-	// for (auto particle : all_new_particles) { std::cout << "all new: " << particle << std::endl; } // debug
+	//for (auto particle : all_new_particles) { std::cout << "all new: " << particle << std::endl; } // debug
 	
 	add_particles(all_new_particles);
 	MPI_Barrier(slave_comm);
