@@ -4,7 +4,7 @@
 #include "mpi.h"
 
 #include "cui/CUI.h"
-//#include "simulation/SimulationUtilities.h"
+#include "simulation/SimulationUtilities.h"
 #include "data\FluidParticle.h"
 #include "particleGen/StaticParticleGenerator.h"
 
@@ -63,6 +63,22 @@ int main(int argc, char** argv)
 {
 	MPI_Init(&argc, &argv);
 
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	int world_size;
+	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+	// generate slave_comm and slave_comm_size for simulation
+	int color = 1337;
+	if (rank == 0) {
+		color = MPI_UNDEFINED;
+	}
+	MPI_Comm_split(MPI_COMM_WORLD, color, 0, &slave_comm);
+	if (rank != 0) {
+		MPI_Comm_size(slave_comm, &slave_comm_size);
+	}
+
 	std::thread cuiThread;
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
@@ -70,20 +86,8 @@ int main(int argc, char** argv)
 	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0 / 30.0);
 	Terrain loadedMesh;
 
-	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	int world_size;
-	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-	int color = 1337;
 	if (rank == 0) {
-		color = MPI_UNDEFINED;
 		cuiThread = std::thread(CUI::startCUI);
-	}
-
-	MPI_Comm_split(MPI_COMM_WORLD, color, 0, &slave_comm);
-	if (rank != 0) {
-		MPI_Comm_size(slave_comm, &slave_comm_size);
 	}
 
 	while (cmd != CUI::ConsoleCommand::EXIT) {
@@ -91,7 +95,6 @@ int main(int argc, char** argv)
 			cmd = CUI::acmd.aReadCmd(cmdParam);
 		}
 		MPI_Bcast(&cmd, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
 
 		//Execute console input
 		switch (cmd)
