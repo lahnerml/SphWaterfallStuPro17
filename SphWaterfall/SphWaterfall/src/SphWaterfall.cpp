@@ -29,12 +29,9 @@ void moveShutter(int rank) {
 	cout << "command is moveShutter" << endl;
 }
 
-void simulate(int rank, SphManager& sphManager) {
+void simulate(int rank, SphManager& sph_manager) {
 	cout << "command is simulate" << endl;
 
-	SphManager sph_manager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0 / 30.0);
-	int rank;
-	MPI_Comm_rank(slave_comm, &rank);
 	if (rank == 0) {
 		std::vector<SphParticle> particles;
 		
@@ -70,7 +67,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(2, 2, 2), 5, 1);
+	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0 / 30.0);
 	Terrain loadedMesh;
 
 	int rank;
@@ -134,4 +131,6 @@ int main(int argc, char** argv)
 	}
 
 	MPI_Finalize();
+
+	return 0;
 }

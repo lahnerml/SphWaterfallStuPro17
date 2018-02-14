@@ -9,19 +9,21 @@ SphParticle::SphParticle() :
 }
 
 SphParticle::SphParticle(Vector3 position) :
-	position(position){
+	position(position),
+	pType(SphParticle::ParticleType::FLUID) {
 	this->velocity = Vector3();
 	this->mass = 1.0;
 	this->local_density = 20.0;
-	pType(SphParticle::ParticleType::FLUID)
+
 }
 
 SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
 	position(position),
-	velocity(velocity) {
+	velocity(velocity),
+	pType(SphParticle::ParticleType::FLUID) {
 	this->mass = 1.0;
 	this->local_density = 20.0;
-	pType(SphParticle::ParticleType::FLUID)
+
 }
 
 SphParticle::SphParticle(Vector3 position, Vector3 velocity, double mass) :
