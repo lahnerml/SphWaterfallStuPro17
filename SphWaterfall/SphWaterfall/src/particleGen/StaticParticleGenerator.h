@@ -1,12 +1,29 @@
 #pragma once
 #include <vector>
 
+#include "mpi.h"
+
 #include "../geometry/Terrain.h"
-#include "../data/ISphParticle.h"
+#include "../data/SphParticle.h"
+#include "../data/StaticParticle.h"
+#include "../data/Vector3.h"
+#include "../simulation/SphManager.h"
 
 class StaticParticleGenerator {
 public:
-	StaticParticleGenerator();
-	std::vector<ISphParticle> generateStaticParticles(Terrain source);
+	StaticParticleGenerator(SphManager);
 
+	void sendAndGenerate(Terrain);
+	void receiveAndGenerate();
+
+	static std::vector<SphParticle> generateStaticParticles(Terrain);
+
+	static void generateParticlesOnFace(Face&, double, std::vector<SphParticle>&);
+	static std::vector<SphParticle> generateParticlesOnFace(Face&, double);
+
+	static void detectDuplicate(SphParticle, SphParticle);
+	static void removeDuplicate(SphParticle, SphParticle);
+private:
+	SphManager manager;
 };
+

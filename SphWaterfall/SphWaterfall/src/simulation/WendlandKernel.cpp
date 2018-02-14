@@ -1,7 +1,12 @@
 #pragma once
-#define _USE_MATH_DEFINES
 #include "WendlandKernel.h"
-#include <math.h>
+
+WendlandKernel::WendlandKernel(double aH, double aQMax) :
+	h(aH),
+	qMax(aQMax)
+{
+
+}
 
 double WendlandKernel::computeKernelValue(const Vector3& r) {
 	double q = r.length() / qMax;
@@ -14,7 +19,7 @@ double WendlandKernel::computeKernelValue(const Vector3& r) {
 
 Vector3 WendlandKernel::computeKernelGradientValue(const Vector3& r) {
 	double q = r.length() / qMax;
-	if (q >= qMax) {
+	if ((q == 0) || (q >= qMax)) {
 		return Vector3();
 	}
 
