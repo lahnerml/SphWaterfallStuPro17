@@ -32,19 +32,30 @@ void moveShutter(int rank) {
 void simulate(int rank, SphManager& sphManager) {
 	cout << "command is simulate" << endl;
 
-	
-	std::vector<SphParticle> particles;
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 5; j++) {
-			for (int k = 0; k < 5; k++) {
-				SphParticle particle = FluidParticle(Vector3(i, j, k), Vector3(), 1.0);
-				particles.push_back(particle);
-				//cout << particle.position << endl;
+	SphManager sph_manager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0 / 30.0);
+	int rank;
+	MPI_Comm_rank(slave_comm, &rank);
+	if (rank == 0) {
+		std::vector<SphParticle> particles;
+		
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				for (int k = 0; k < 10; k++) {
+					SphParticle particle = FluidParticle(Vector3(100.0 + (i/10.0), 100.0 + (j/10.0), 100.0 + (k/10.0)));
+					particles.push_back(particle);
+					//cout << particle.position << endl;
+				}
 			}
 		}
+
+		//particles.push_back(FluidParticle(Vector3(100.9, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.0, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.1, 100.0, 100.0)));
+		//particles.push_back(FluidParticle(Vector3(101.2, 100.0, 100.0)));
+
+		sph_manager.add_particles(particles);
 	}
-	sphManager.add_particles(particles);
-	sphManager.simulate();
+	sph_manager.simulate();
 }
 
 void render(int rank) {

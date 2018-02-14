@@ -26,7 +26,7 @@ std::vector<SphParticle> SphNeighbourSearch::findNeigbours(SphParticle particle,
 std::set<int> SphNeighbourSearch::findRelevantNeighbourDomains(SphParticle particle, Vector3 dimension) {
 	std::set<int> neighbour_domain_ids = std::set<int>();
 
-	std::cout << "find relevant neighbours" << std::endl;
+	//std::cout << "find relevant neighbours" << std::endl;
 
 	// center point
 	Vector3 testing_point = particle.position;
