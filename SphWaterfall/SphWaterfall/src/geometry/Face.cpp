@@ -38,5 +38,5 @@ Face Face::MpiReceiveFace(int source)
 
 std::ostream& operator<<(std::ostream &out, const Face& face)
 {
-	return out << "[" << face.a << ", " << face.b << ", " << face.c << "]";
+	return out << "[" << face.a << ", " << face.b << ", " << face.c << "]" << std::endl;
 }
