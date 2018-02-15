@@ -21,15 +21,17 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 	// Only main processor shall pass and only if there are faces to process
 	if (rank != 0)
 		return;
+	if (worldSize < 2)
+		return;
 
-	const int facesPerProcessor = terrain.getFaceCount() / worldSize;
-	const int facesToSend = (worldSize - 1) * facesPerProcessor;
+	const int facesPerProcessor = terrain.getFaceCount() / (worldSize-1);
+	const int facesToSend = (worldSize - 2) * facesPerProcessor;
 	int currentProcessor = 0;
 
 	//If not enough faces -> tell processors to continue
 	if (facesPerProcessor == 0)
 	{
-		for (currentProcessor = 1; currentProcessor < worldSize; currentProcessor++)
+		for (currentProcessor = 2; currentProcessor < worldSize; currentProcessor++)
 		{
 			//Tell processor to skip 'Waiting for faces'
 			int noFacesToSend = 0;
@@ -41,9 +43,10 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 		for (int f = 0; f < facesToSend; f++)
 		{
 			//Check if remote processor has to change
-			if (currentProcessor != (f / facesPerProcessor) + 1)
+			if (currentProcessor != (f / facesPerProcessor) + 2)
 			{
-				currentProcessor = (f / facesPerProcessor) + 1;
+				currentProcessor = (f / facesPerProcessor) + 2;
+				std::cout << "Sending number of faces (" << facesPerProcessor << ") to processor " << currentProcessor << std::endl;
 				//Send number of total faces
 				MPI_Send(&facesPerProcessor, 1, MPI_INT, currentProcessor, 0, MPI_COMM_WORLD);
 			}
@@ -53,21 +56,18 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 		}
 	}
 	//TODO Debug output
-	std::cout << (terrain.getFaceCount() - facesToSend) << " faces remaining for processor " << rank << std::endl;
+	int facesForP1 = terrain.getFaceCount() - facesToSend;
+	std::cout << facesForP1 << " faces remaining for processor 1" << std::endl;
 
 
-	//Process faces of main processor
-	auto generatedParticles = std::vector<SphParticle>();
+	//Process faces of processor 1
+	//Send number of total faces
+	MPI_Send(&facesForP1, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
 
 	for (int f = facesToSend; f < terrain.getFaceCount(); f++)
 	{
-		generateParticlesOnFace(terrain.getFace(f), PARTICLE_DENSITY, generatedParticles);
-		//std::cout << terrain.getFace(f) << std::endl;
-		//TODO Debug output
+		Face::MpiSendFace(terrain.getFace(f), 1);
 	}
-
-	//TODO Reintegrate
-	//manager.add_particles(generatedParticles);
 }
 
 void StaticParticleGenerator::receiveAndGenerate(SphManager manager)
@@ -78,6 +78,8 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager manager)
 	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 
 	if (rank == 0)
+		return;
+	if (worldSize < 2)
 		return;
 
 	int facesToReceive = 0;
