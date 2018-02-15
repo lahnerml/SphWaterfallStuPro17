@@ -45,17 +45,19 @@ void SphManager::update() {
 	for (auto& each_domain : domains) {
 		each_neighbour_rim_particles = each_domain.second.getNeighbourRimParticles();
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			each_neighbour_particles = each_domain.second.getParticles();
-			for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
-				if (each_neighbour_rim_particles.count(domain_id) != 0) {
-					each_neighbour_particles.insert(each_neighbour_particles.end(),
-						each_neighbour_rim_particles.at(domain_id).begin(),
-						each_neighbour_rim_particles.at(domain_id).end());
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				each_neighbour_particles = each_domain.second.getParticles();
+				for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
+					if (each_neighbour_rim_particles.count(domain_id) != 0) {
+						each_neighbour_particles.insert(each_neighbour_particles.end(),
+							each_neighbour_rim_particles.at(domain_id).begin(),
+							each_neighbour_rim_particles.at(domain_id).end());
+					}
 				}
+				each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
+				neighbour_particles[i] = std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles);
+				i++;
 			}
-			each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
-			neighbour_particles[i] = std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles);
-			i++;
 		}
 	}
 	
@@ -63,15 +65,19 @@ void SphManager::update() {
 	// compute and set local densities
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			computeLocalDensity(each_particle);
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				computeLocalDensity(each_particle);
+			}
 		}
 	}
 	//std::cout << "after compute local densities" << std::endl; // debug
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			updateVelocity(each_particle);
-			std::cout << "final particle: " << each_particle << std::endl; // debug
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				updateVelocity(each_particle);
+				std::cout << "final particle: " << each_particle << std::endl; // debug
+			}
 		}
 	}
 	//std::cout << "after update velocity" << std::endl;
