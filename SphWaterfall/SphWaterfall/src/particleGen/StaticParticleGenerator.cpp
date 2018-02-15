@@ -20,12 +20,12 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 
 	// Only main processor shall pass and only if there are faces to process
-	if (rank != 0 || terrain.getFaceCount() == 0)
+	if (rank != 0)
 		return;
 
 	const int facesPerProcessor = terrain.getFaceCount() / worldSize;
 	const int facesToSend = (worldSize - 1) * facesPerProcessor;
-	int currentProcessor = 1;
+	int currentProcessor = 0;
 
 	//If not enough faces -> tell processors to continue
 	if (facesPerProcessor == 0)
@@ -39,13 +39,12 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 	}
 	else {
 		//Send faces to remote processors
-		for (int f = facesPerProcessor; f < facesToSend; f++)
+		for (int f = 0; f < facesToSend; f++)
 		{
 			//Check if remote processor has to change
 			if (currentProcessor != (f / facesPerProcessor) + 1)
 			{
 				currentProcessor = (f / facesPerProcessor) + 1;
-
 				//Send number of total faces
 				MPI_Send(&facesPerProcessor, 1, MPI_INT, currentProcessor, 0, MPI_COMM_WORLD);
 			}
