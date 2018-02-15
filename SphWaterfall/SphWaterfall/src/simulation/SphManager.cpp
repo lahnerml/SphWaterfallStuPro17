@@ -407,6 +407,22 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	}
 }
 
+std::unordered_map <int, std::vector<SphParticle>> SphManager::exportParticles() {
+	std::unordered_map <int, std::vector<SphParticle>> particlesToExport;
+	particlesToExport[0] = std::vector<SphParticle>();
+
+	for (auto& each_domain : domains) {
+		for (auto each_particle : each_domain.second.getParticles()) {
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				particlesToExport[0].push_back(each_particle);
+			}
+		}
+	}
+
+	return particlesToExport;
+}
+
+
 MPI_Request SphManager::requestRimParticles(const Vector3& neighbourDomain, const Vector3& source) {
 	int domain_id = hash(neighbourDomain);
 	int request_id = hash(source);

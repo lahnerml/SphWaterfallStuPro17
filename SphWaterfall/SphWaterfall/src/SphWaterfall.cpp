@@ -17,12 +17,12 @@ void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
-	StaticParticleGenerator gen(sphManager);
+	StaticParticleGenerator gen;
 
 	if (rank == 0)
 		gen.sendAndGenerate(loadedMesh);
 	else
-		gen.receiveAndGenerate();
+		gen.receiveAndGenerate(sphManager);
 }
 
 void moveShutter(int rank) {
@@ -32,13 +32,13 @@ void moveShutter(int rank) {
 void simulate(int rank, SphManager& sph_manager) {
 	cout << "command is simulate" << endl;
 
-	if (rank == 0) {
+	if (rank == 1) {
 		std::vector<SphParticle> particles;
 		
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
 				for (int k = 0; k < 10; k++) {
-					SphParticle particle = FluidParticle(Vector3(100.0 + (i/10.0), 100.0 + (j/10.0), 100.0 + (k/10.0)));
+					SphParticle particle = FluidParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
 					particles.push_back(particle);
 					//cout << particle.position << endl;
 				}
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0 / 30.0);
+	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0);
 	Terrain loadedMesh;
 
 	if (rank == 0) {

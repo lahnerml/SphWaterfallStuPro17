@@ -5,8 +5,7 @@ const double PARTICLE_DENSITY = 0.01;
 
 
 
-StaticParticleGenerator::StaticParticleGenerator(SphManager) :
-	manager(manager)
+StaticParticleGenerator::StaticParticleGenerator()
 {
 }
 
@@ -71,7 +70,7 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 	//manager.add_particles(generatedParticles);
 }
 
-void StaticParticleGenerator::receiveAndGenerate()
+void StaticParticleGenerator::receiveAndGenerate(SphManager manager)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
