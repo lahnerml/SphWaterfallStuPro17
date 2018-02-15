@@ -3,10 +3,10 @@
 #include "Ray.h"
 #include "../data/Vector3.h"
 
-class DebugObject {
+class ParticleObject {
 public:
-	DebugObject(Vector3 location, double radius);
-	DebugObject();
+	ParticleObject(Vector3 location, double radius);
+	ParticleObject();
 
 	Vector3 getLocation();
 	double getRadius();

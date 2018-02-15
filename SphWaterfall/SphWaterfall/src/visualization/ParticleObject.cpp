@@ -1,26 +1,26 @@
 #pragma once
-#include "DebugObject.h"
+#include "ParticleObject.h"
 #include "Pixel.h"
 
-DebugObject::DebugObject() {
+ParticleObject::ParticleObject() {
 	this->radius = radius;
 	this->location = location;
 }
 
-DebugObject::DebugObject(Vector3 location, double radius) {
+ParticleObject::ParticleObject(Vector3 location, double radius) {
 	this->radius = radius;
 	this->location = location;
 }
 
-Vector3 DebugObject::getLocation() {
+Vector3 ParticleObject::getLocation() {
 	return this->location;
 }
 
-double DebugObject::getRadius() {
+double ParticleObject::getRadius() {
 	return this->radius;
 }
 
-bool DebugObject::intersects(Ray &ray, double &distance, double &highestDist) {
+bool ParticleObject::intersects(Ray &ray, double &distance, double &highestDist) {
 	distance = std::numeric_limits<double>::max();
 
 	Vector3	temp = ray.origin - this->location;

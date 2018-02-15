@@ -5,6 +5,7 @@ target_sources(
 		"${CMAKE_CURRENT_LIST_DIR}/FluidParticle.h"
 		"${CMAKE_CURRENT_LIST_DIR}/NullableWrapper.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/NullableWrapper.h"
+		"${CMAKE_CURRENT_LIST_DIR}/ParticleIO.h"
 		"${CMAKE_CURRENT_LIST_DIR}/SphParticle.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/SphParticle.h"
 		"${CMAKE_CURRENT_LIST_DIR}/StaticParticle.cpp"
