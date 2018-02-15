@@ -1,5 +1,6 @@
 #pragma once
 #include "WendlandKernel.h"
+#include "Poly6Kernel.h";
 #include "SimulationUtilities.h";
 
 class SphKernelFactory {

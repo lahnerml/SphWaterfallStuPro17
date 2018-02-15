@@ -15,6 +15,14 @@ ISphKernel* SphKernelFactory::getInstance(int key)
 
 	switch (key)
 	{
+	case (1): {
+		produced_kernel = new Poly6Kernel(H, Q_MAX);
+		break;
+	}
+	case (2): {
+		produced_kernel = new WendlandKernel(H, Q_MAX);
+		break;
+	}
 	default:
 		produced_kernel = new WendlandKernel(H, Q_MAX);
 		break;

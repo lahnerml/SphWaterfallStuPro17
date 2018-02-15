@@ -27,12 +27,13 @@ void SphManager::simulate() {
 	exchangeParticles();
 
 	for (int simulation_timestep = 1; simulation_timestep <= number_of_timesteps; simulation_timestep++) {
+		std::cout << "before exchange rim particles" << std::endl; //debug
 		exchangeRimParticles();
-		//std::cout << "after exchange rim particles" << std::endl; //debug
+		std::cout << "after exchange rim particles" << std::endl; //debug
 		update();
-		//std::cout << "after update" << std::endl; //debug
+		std::cout << "after update" << std::endl; //debug
 		exchangeParticles();
-		//std::cout << "after exchange particles" << std::endl; //debug
+		std::cout << "after exchange particles" << std::endl; //debug
 		std::cout << "simulation of timestep " << simulation_timestep << " from processor " << mpi_rank + 1 << " out of " << slave_comm_size << " finished" << std::endl;
 	}
 }
@@ -61,7 +62,7 @@ void SphManager::update() {
 		}
 	}
 	
-	//std::cout << "after neighbour search" << std::endl; // debug
+	std::cout << "after neighbour search" << std::endl; // debug
 	// compute and set local densities
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
@@ -70,17 +71,17 @@ void SphManager::update() {
 			}
 		}
 	}
-	//std::cout << "after compute local densities" << std::endl; // debug
+	std::cout << "after compute local densities" << std::endl; // debug
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
 				updateVelocity(each_particle);
-				std::cout << "final particle: " << each_particle << std::endl; // debug
+				//std::cout << "final particle: " << each_particle << std::endl; // debug
 			}
 		}
 	}
-	//std::cout << "after update velocity" << std::endl;
+	std::cout << "after update velocity" << std::endl;
 }
 
 void SphManager::updateVelocity(SphParticle& particle) {

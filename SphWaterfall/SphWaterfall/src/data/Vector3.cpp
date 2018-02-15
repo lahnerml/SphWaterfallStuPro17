@@ -101,3 +101,7 @@ Vector3 Vector3::roundDownward() const{
 Vector3 Vector3::distanceTo(const Vector3& v, const Vector3& v1) {
 	return Vector3(abs(v.x - v1.x), abs(v.y - v1.y), abs(v.z - v1.z));
 }
+
+double Vector3::calculateSquareMagnitude() const {
+	return x*x + y*y + z*z;
+}
