@@ -110,11 +110,13 @@ int main(int argc, char** argv)
 		case CUI::ConsoleCommand::MOVE_SHUTTER:
 			moveShutter(rank);
 			std::cout << "moveing shutter finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			break;
 		case CUI::ConsoleCommand::SIMULATE:
 			if (rank != 0) {
 				simulate(rank, sphManager);
 				std::cout << "simulation finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
 			}
+			break;
 		case CUI::ConsoleCommand::RENDER:
 			render(rank);
 			std::cout << "rendering finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
