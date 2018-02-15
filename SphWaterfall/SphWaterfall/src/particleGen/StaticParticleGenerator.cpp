@@ -106,7 +106,7 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager manager)
 	}
 
 	//TODO Reintegrate
-	//manager.add_particles(generatedParticles);
+	manager.add_particles(generatedParticles);
 }
 
 
