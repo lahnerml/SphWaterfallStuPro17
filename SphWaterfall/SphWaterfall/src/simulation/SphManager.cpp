@@ -12,8 +12,6 @@ SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps
 	kernel = kernel_factory.getInstance(1);
 	neighbour_search = neighbour_search_factory.getInstance(1);
 
-	MPI_Comm_rank(slave_comm, &mpi_rank);
-
 	for (int i = 0; i < slave_comm_size + 1; i++) {
 		add_particles_map[i] = std::vector<SphParticle>();
 	}
@@ -24,6 +22,8 @@ SphManager::~SphManager() {
 }
 
 void SphManager::simulate() {
+	MPI_Comm_rank(slave_comm, &mpi_rank);
+
 	exchangeParticles();
 
 	for (int simulation_timestep = 1; simulation_timestep <= number_of_timesteps; simulation_timestep++) {

@@ -52,7 +52,7 @@ bool operator==(const SphParticle a, const SphParticle b)
 
 std::ostream& operator<<(std::ostream & out, const SphParticle& particle)
 {
-	return out << "position: " << particle.position <<  "  velocity: " << particle.velocity << "  mass:" << particle.mass << "  local_density:" << particle.local_density;
+	return out << "position: " << particle.position <<  "  velocity: " << particle.velocity << "  local_density:" << particle.local_density;
 }
 SphParticle::ParticleType SphParticle::getParticleType()
 {
