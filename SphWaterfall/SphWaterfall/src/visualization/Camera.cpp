@@ -53,6 +53,7 @@ Pixel Camera::castDebugRay(Ray ray, std::vector<DebugObject> particles) {
 	DebugObject *hit = &hitObject;
 	hit = nullptr;
 
+	//Calculate hit for every object
 	for (int i = 0; i < particles.size(); i++) {
 		DebugObject &obj = particles.at(i);
 		double currDist = bestDistance;
@@ -119,6 +120,7 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 	Vector3 vec_u = findSkalarVectorWithYZero(this->direction).normalize();
 	Vector3 vec_v = findUpVector(this->direction, vec_u).normalize();
 
+	//Cast ray for every pixel
 	for (int x = 0; x < this->width; x++) {
 		for (int y = 0; y < this->height; y++) {
 			double u = l + (r - l) * (x + 0.5f) / this->width;
@@ -127,12 +129,21 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
 			Ray ray = Ray(vec_s, this->location);
 
-
+			//Set pixel color in Frame
 			frame.setPixel(x, y, castVolumeRay(ray, particles));
 		}
 	}
 
 	return frame;
+}
+
+void Camera::renderGeometryFrame(Terrain t) {
+	//TODO: implement rendering of the base Frame. See renderFrame(...) and castDebugRay(...)
+	Frame frame;
+
+
+
+	this->baseFrame = frame;
 }
 
 void Camera::outputDebugFrame(Frame f, const char* fileName) {

@@ -6,6 +6,7 @@
 #include "ParticleObject.h"
 #include <vector>
 #include <string>
+#include "../geometry/Terrain.h"
 
 class Camera {
 public:
@@ -14,6 +15,7 @@ public:
 	void debugRenderFrame(std::vector<DebugObject> particles, int frameID);
 
 	Frame renderFrame(std::vector<ParticleObject> particles, int frameID); //Vector is only a placeholder here as the data structure isnt decided yet
+	void renderGeometryFrame(Terrain t);
 
 	void outputDebugFrame(Frame f, const char* fileName);
 
@@ -25,6 +27,7 @@ private:
 	Pixel castDebugRay(Ray ray, std::vector<DebugObject> particles);
 	Pixel castVolumeRay(Ray ray, std::vector<ParticleObject> particles);
 
+	Frame baseFrame;
 	Vector3 location;
 	Vector3 direction;
 	unsigned int width;
