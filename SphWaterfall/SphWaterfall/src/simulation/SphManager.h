@@ -31,7 +31,7 @@ private:
 
 	ParticleDomain& getParticleDomain(const int&);
 	ParticleDomain& getParticleDomain(const Vector3&);
-	std::unordered_map <int, std::vector<SphParticle>> exportParticles();
+	std::pair <int, std::vector<SphParticle>> exportParticles();
 
 	void update();
 	void updateVelocity(SphParticle& particle);

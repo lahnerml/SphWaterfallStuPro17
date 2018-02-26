@@ -407,14 +407,14 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	}
 }
 
-std::unordered_map <int, std::vector<SphParticle>> SphManager::exportParticles() {
-	std::unordered_map <int, std::vector<SphParticle>> particlesToExport;
-	particlesToExport[0] = std::vector<SphParticle>();
+std::pair <int, std::vector<SphParticle>> SphManager::exportParticles() {
+	std::pair <int, std::vector<SphParticle>> particlesToExport;
+	particlesToExport.first = 0;
 
 	for (auto& each_domain : domains) {
 		for (auto each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-				particlesToExport[0].push_back(each_particle);
+				particlesToExport.second.push_back(each_particle);
 			}
 		}
 	}
