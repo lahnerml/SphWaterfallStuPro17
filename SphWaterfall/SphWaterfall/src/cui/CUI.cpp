@@ -94,7 +94,7 @@ namespace CUI {
 	{
 		init(Vector3(0, 0, -30), Vector3(0, 0, 1), 1920, 1080);
 
-		addCamera(Vector3(-30, 0, -30), normalizeVector(Vector3(1, 0, 1)), 1920, 1080);
+		addCamera(Vector3(-30, 0, -30), (Vector3(1, 0, 1).normalize()), 1920, 1080);
 
 		vector<FluidParticle> particles;
 		FluidParticle particle = FluidParticle(Vector3(0, 0, 0), Vector3(0, 0, 0));

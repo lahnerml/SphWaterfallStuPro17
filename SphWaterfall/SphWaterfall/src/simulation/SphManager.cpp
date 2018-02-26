@@ -409,7 +409,7 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 
 std::pair <int, std::vector<SphParticle>> SphManager::exportParticles() {
 	std::pair <int, std::vector<SphParticle>> particlesToExport;
-	particlesToExport.first = 0;
+	particlesToExport.first = number_of_timesteps;
 
 	for (auto& each_domain : domains) {
 		for (auto each_particle : each_domain.second.getParticles()) {
