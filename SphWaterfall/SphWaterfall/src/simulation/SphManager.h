@@ -16,7 +16,7 @@ public:
 
 	void simulate();
 	void add_particles(const std::vector<SphParticle>&);
-	std::pair <int, std::vector<SphParticle>> exportParticles();
+	void exportParticles();
 
 private:
 	int mpi_rank;

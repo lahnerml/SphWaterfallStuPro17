@@ -33,6 +33,9 @@ void SphManager::simulate() {
 		//std::cout << "after update" << std::endl; //debug
 		exchangeParticles();
 		//std::cout << "after exchange particles" << std::endl; //debug
+
+		exportParticles();
+		
 		std::cout << "simulation of timestep " << simulation_timestep << " from processor " << mpi_rank + 1 << " out of " << slave_comm_size << " finished" << std::endl;
 	}
 }
@@ -76,7 +79,7 @@ void SphManager::update() {
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
 				updateVelocity(each_particle);
-				std::cout << "final particle: " << each_particle << std::endl; // debug
+				//std::cout << "final particle: " << each_particle << std::endl; // debug
 			}
 		}
 	}
@@ -407,19 +410,26 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	}
 }
 
-std::pair <int, std::vector<SphParticle>> SphManager::exportParticles() {
-	std::pair <int, std::vector<SphParticle>> particlesToExport;
-	particlesToExport.first = number_of_timesteps;
+void SphManager::exportParticles() {
+	//std::pair <int, std::vector<SphParticle>> particlesToExport;
+	//particlesToExport.first = number_of_timesteps;
+	std::vector<SphParticle> particlesToExport;
+
 
 	for (auto& each_domain : domains) {
 		for (auto each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-				particlesToExport.second.push_back(each_particle);
+				particlesToExport.push_back(each_particle);
 			}
 		}
 	}
 
-	return particlesToExport;
+	//send particles to master
+	MPI_Request request;
+	MPI_Isend(particlesToExport.data(), particlesToExport.size() * sizeof(SphParticle), MPI_BYTE, 0, 99, MPI_COMM_WORLD, &request);
+	MPI_Request_free(&request);
+
+	MPI_Barrier(slave_comm);
 }
 
 

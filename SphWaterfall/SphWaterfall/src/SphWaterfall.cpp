@@ -29,6 +29,44 @@ void moveShutter(int rank) {
 	cout << "command is moveShutter" << endl;
 }
 
+void createExport(int rank, SphManager& sph_manager) {
+		while (true) {
+			std::cout << "######## Exporter started " << std::endl;
+			std::unordered_map<int, std::vector<SphParticle>> allParticles;
+
+			std::vector<SphParticle> allParticlesOfTimestep;
+			//std::pair <int, std::vector<SphParticle>> incomingPair;
+
+			// receive until there is nothing left
+			int flag;
+			MPI_Status status;
+			MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
+			std::cout << "After PROBE " << std::endl;
+
+			int count = 0;
+			int currentTimestep = 0;
+			int source;
+
+			while (flag) {
+				std::cout << "**** WHILE " << std::endl;
+				source = status.MPI_SOURCE;
+				MPI_Get_count(&status, MPI_BYTE, &count);
+				std::vector<SphParticle> incomingParticles = std::vector<SphParticle>(count / sizeof(SphParticle));
+
+				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, 99, MPI_COMM_WORLD, &status);
+				allParticlesOfTimestep.insert(allParticlesOfTimestep.end(), incomingParticles.begin(), incomingParticles.end());
+
+				for (auto particle : allParticlesOfTimestep) { std::cout << "received in export: " << particle << std::endl; } // debug
+
+				// next message
+				MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
+			}
+
+			MPI_Barrier(MPI_COMM_WORLD);
+		}
+
+}
+
 void simulate(int rank, SphManager& sph_manager) {
 	cout << "command is simulate" << endl;
 
@@ -54,6 +92,7 @@ void simulate(int rank, SphManager& sph_manager) {
 	}
 	sph_manager.simulate();
 }
+
 
 void render(int rank) {
 	cout << "command is render" << endl;
@@ -115,6 +154,9 @@ int main(int argc, char** argv)
 			if (rank != 0) {
 				simulate(rank, sphManager);
 				std::cout << "simulation finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			}
+			else{
+				createExport(rank, sphManager);
 			}
 			break;
 		case CUI::ConsoleCommand::RENDER:
