@@ -17,7 +17,7 @@ const int infoHeaderSize = 40;
 static Frame applySmoothingShader(Frame f, int shaderDepth) {
 	Frame newFrame;
 	for (int k = 0; k < shaderDepth; k++) {
-		newFrame = Frame(f.getWidth(), f.getHeight(), f.getFrameID());
+		newFrame = Frame(f.getWidth(), f.getHeight());
 
 		for (int x = 0; x < f.getWidth(); x++) {
 			for (int y = 0; y < f.getHeight(); y++) {
@@ -185,4 +185,37 @@ static bool startsWith(const string &s, const string &sequence) {
 	}
 
 	return true;
+}
+
+static bool intersectsWithFace(Ray &ray, Face &face, double &distance) {
+	const float EPSILON = 0.0000001;
+	Vector3 vertex0 = face.a;
+	Vector3 vertex1 = face.b;
+	Vector3 vertex2 = face.c;
+	Vector3 edge1, edge2, h, s, q;
+	float a, f, u, v;
+	edge1 = vertex1 - vertex0;
+	edge2 = vertex2 - vertex0;
+	h = ray.direction.cross(edge2);
+	a = edge1.dot(h);
+	if (a > -EPSILON && a < EPSILON)
+		return false;
+	f = 1 / a;
+	s = ray.origin - vertex0;
+	u = f * (s.dot(h));
+	if (u < 0.0 || u > 1.0)
+		return false;
+	q = s.cross(edge1);
+	v = f * ray.direction.dot(q);
+	if (v < 0.0 || u + v > 1.0)
+		return false;
+	// At this stage we can compute t to find out where the intersection point is on the line.
+	float t = f * edge2.dot(q);
+	if (t > EPSILON) // ray intersection
+	{
+		distance = t;
+		return true;
+	}
+	else // This means that there is a line intersection but not a ray intersection.
+		return false;
 }

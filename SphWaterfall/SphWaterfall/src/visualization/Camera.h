@@ -12,10 +12,10 @@ class Camera {
 public:
 	Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height, unsigned int ID);
 
-	void debugRenderFrame(std::vector<DebugObject> particles, int frameID);
+	void debugRenderFrame(std::vector<DebugObject> particles);
 
-	Frame renderFrame(std::vector<ParticleObject> particles, int frameID); //Vector is only a placeholder here as the data structure isnt decided yet
-	void renderGeometryFrame(Terrain t);
+	Frame renderFrame(std::vector<ParticleObject> particles); 
+	void renderGeometryFrame(Terrain terrain);
 
 	void outputDebugFrame(Frame f, const char* fileName);
 
@@ -26,6 +26,7 @@ private:
 
 	Pixel castDebugRay(Ray ray, std::vector<DebugObject> particles);
 	Pixel castVolumeRay(Ray ray, std::vector<ParticleObject> particles);
+	Pixel castGeometryRay(Ray ray, Terrain terrain);
 
 	Frame baseFrame;
 	Vector3 location;
@@ -33,7 +34,5 @@ private:
 	unsigned int width;
 	unsigned int height;
 	unsigned int ID;
-	std::vector<Frame> frames;
 
-	Frame getFrame(unsigned int frameID);
 };

@@ -4,20 +4,14 @@
 Frame::Frame() {
 	this->width = 0;
 	this->height = 0;
-	this->frameID = -1;
 }
 
-Frame::Frame(unsigned int width, unsigned int height, long frameID) {
+Frame::Frame(unsigned int width, unsigned int height) {
 	this->width = width;
 	this->height = height;
-	this->frameID = frameID;
 	for (int i = 0; i < this->width*this->height; i++) {
 		this->pixels.emplace_back(Pixel(0, 0, 0));
 	}
-}
-
-long Frame::getFrameID() {
-	return this->frameID;
 }
 
 Pixel Frame::getPixel(unsigned int x, unsigned int y) {

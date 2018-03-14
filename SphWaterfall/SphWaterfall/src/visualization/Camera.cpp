@@ -1,4 +1,5 @@
 #pragma once
+#define _USE_MATH_DEFINES
 #include "Camera.h"
 #include "util.h"
 #include "Ray.h"
@@ -14,9 +15,9 @@ Camera::Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned
 	this->direction = direction;
 }
 
-void Camera::debugRenderFrame(std::vector<DebugObject> particles, int frameID) {
+void Camera::debugRenderFrame(std::vector<DebugObject> particles) {
 
-	Frame frame = Frame(this->width, this->height, frameID);
+	Frame frame = Frame(this->width, this->height);
 	const double aspectRatio = (double)width / (double)height;
 	// view plane parameters
 	const double l = -1.f *aspectRatio;   //left
@@ -106,8 +107,8 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles) {
 	return initColor;
 }
 
-Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
-	Frame frame = Frame(this->width, this->height, frameID);
+Frame Camera::renderFrame(std::vector<ParticleObject> particles) {
+	Frame frame = Frame(this->width, this->height);
 	const double aspectRatio = (double)width / (double)height;
 	// view plane parameters
 	const double l = -1.f *aspectRatio;   //left
@@ -137,13 +138,86 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 	return frame;
 }
 
-void Camera::renderGeometryFrame(Terrain t) {
+void Camera::renderGeometryFrame(Terrain terrain) {
 	//TODO: implement rendering of the base Frame. See renderFrame(...) and castDebugRay(...)
-	Frame frame;
+	Frame frame = Frame(this->width, this->height);
 
+	const double aspectRatio = (double)width / (double)height;
+	// view plane parameters
+	const double l = -1.f *aspectRatio;   //left
+	const double r = +1.f *aspectRatio;   //right
+	const double b = -1.f;				  // bottom
+	const double t = +1.f;				  // top
+	const double d = +2.f;				  // distance to camera
+
+
+	Vector3 vec_u = findSkalarVectorWithYZero(this->direction).normalize();
+	Vector3 vec_v = findUpVector(this->direction, vec_u).normalize();
+
+	//Cast ray for every pixel
+	for (int x = 0; x < this->width; x++) {
+		for (int y = 0; y < this->height; y++) {
+			double u = l + (r - l) * (x + 0.5f) / this->width;
+			double v = t + (b - t) * (y + 0.5f) / this->height;
+
+			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
+			Ray ray = Ray(vec_s, this->location);
+
+			//Set pixel color in Frame
+			frame.setPixel(x, y, castGeometryRay(ray, terrain));
+		}
+	}
 
 
 	this->baseFrame = frame;
+	writeFrameToBitmap(frame, "output/terrain_debug.bmp", frame.getWidth(), frame.getHeight());
+}
+
+Pixel Camera::castGeometryRay(Ray ray, Terrain terrain) {
+	double bestDistance = std::numeric_limits<float>::max();
+	double waterDepth = 0;
+	Face hitObject;
+	Face *hit = &hitObject;
+	hit = nullptr;
+
+	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
+
+	for (int i = 0; i < terrain.getFaceCount(); i++) {
+		Face &obj = terrain.getFace(i);
+		double currDist = bestDistance;
+
+		if (intersectsWithFace(ray, obj, currDist)) {
+			if (currDist < bestDistance) {
+				bestDistance = currDist;
+				hit = &obj;
+			}
+		}
+	}
+
+
+	//Calculate Light to not have just brown everywhere
+	if (hit != nullptr){
+
+		Vector3 planar1 = hitObject.a - hitObject.b;
+		Vector3 planar2 = hitObject.a - hitObject.c;
+
+		Vector3 n = planar1.cross(planar2);
+
+		Vector3 staticLight = Vector3(0, 200, 0);
+		Vector3 lightToHit = staticLight - (ray.origin + ray.direction * bestDistance);
+
+		double rad = acos(n.dot(lightToHit) / (n.length() * lightToHit.length()));
+
+		rad = rad > M_PI ? rad - M_PI : rad;
+
+		double val = 1 - (rad / (M_PI / 2));
+
+		Pixel p = Pixel(127 * val, 67 * val, 67 * val);
+
+		return p;
+    }
+
+	return initColor;
 }
 
 void Camera::outputDebugFrame(Frame f, const char* fileName) {
@@ -157,13 +231,3 @@ Vector3 Camera::getLocation() {
 Vector3 Camera::getDirection() {
 	return this->direction;
 }
-
-Frame Camera::getFrame(unsigned int frameID) {
-	if (frames.size() >= frameID) {
-		return Frame();
-		// ^ TODO changend by Magnus
-	}
-	return frames.at(frameID);
-}
-
-//TODO: Impelement Frame Iterator?

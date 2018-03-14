@@ -4,21 +4,28 @@
 #include "../data/ParticleIO.h"
 
 std::vector<Camera> cameras;
+Terrain terrain;
 
 static void init(Vector3 cameraLocation, Vector3 cameraDirection, unsigned int frameWidth, unsigned int frameHeight) {
 	Camera cam = Camera(cameraLocation, cameraDirection.normalize(), frameWidth, frameHeight, cameras.size());
+	cam.renderGeometryFrame(terrain);
 	cameras.emplace_back(cam);
 }
 
 static void addCamera(Vector3 cameraLocation, Vector3 cameraDirection, unsigned int frameWidth, unsigned int frameHeight) {
 	Camera cam = Camera(cameraLocation, cameraDirection, frameWidth, frameHeight, cameras.size());
+	cam.renderGeometryFrame(terrain);
 	cameras.emplace_back(cam);
 }
 
 static void debugRenderFrame(std::vector<FluidParticle> particles) {
 	for (int i = 0; i < cameras.size(); i++) {
-		cameras[i].debugRenderFrame(convertSphParticles(particles), 1);
+		cameras[i].debugRenderFrame(convertSphParticles(particles));
 	}
+}
+
+static void importTerrain(Terrain t) {
+	terrain = t;
 }
 
 static vector<FluidParticle> generateDebugParticles(int count) {
@@ -62,7 +69,7 @@ static void renderFrames(string fileName) {
 		vector<ParticleObject> frame = convertFluidParticles(frameParticles.at(g));
 		for (int i = 0; i < cameras.size(); i++) {
 			cout << "\t...on Camera #" << i << "\n";
-			Frame f = cameras.at(i).renderFrame(frame, g);
+			Frame f = cameras.at(i).renderFrame(frame);
 
 			writeFrameToBitmap(applySmoothingShader(f, 10), (("output/c" + std::to_string(i) + "f" + std::to_string(g)) + ".bmp").c_str(), f.getWidth(), f.getHeight());
 		}
