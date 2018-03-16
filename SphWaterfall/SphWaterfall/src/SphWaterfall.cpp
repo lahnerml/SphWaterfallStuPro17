@@ -32,7 +32,10 @@ void moveShutter(int rank) {
 }
 
 void createExport(int rank, SphManager& sph_manager) {
-		while (true) {
+		int currentTimestep = 1;
+		while (currentTimestep <= TIMESTEPS) {
+			MPI_Barrier(MPI_COMM_WORLD);
+
 			std::cout << "######## Exporter started " << std::endl;
 			std::unordered_map<int, std::vector<SphParticle>> allParticles;
 
@@ -46,7 +49,6 @@ void createExport(int rank, SphManager& sph_manager) {
 			std::cout << "After PROBE " << std::endl;
 
 			int count = 0;
-			int currentTimestep = 0;
 			int source;
 
 			while (flag) {
@@ -58,15 +60,17 @@ void createExport(int rank, SphManager& sph_manager) {
 				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, 99, MPI_COMM_WORLD, &status);
 				allParticlesOfTimestep.insert(allParticlesOfTimestep.end(), incomingParticles.begin(), incomingParticles.end());
 
-				for (auto particle : allParticlesOfTimestep) { std::cout << "received in export: " << particle << std::endl; } // debug
+				for (auto particle : allParticlesOfTimestep) { 
+					std::cout << currentTimestep << " received in export: " << particle << std::endl; 
+				} // debug
 
 				// next message
 				MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
 			}
 
-			MPI_Barrier(MPI_COMM_WORLD);
+			currentTimestep++;
 		}
-
+		std::cout << "Done exporting" << std::endl;
 }
 
 void simulate(int rank, SphManager& sph_manager) {
@@ -124,7 +128,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), 5, 1.0);
+	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 1.0);
 	Terrain loadedMesh;
 
 	if (rank == 0) {
