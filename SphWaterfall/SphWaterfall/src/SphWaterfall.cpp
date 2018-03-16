@@ -5,9 +5,10 @@
 
 #include "cui/CUI.h"
 #include "simulation/SimulationUtilities.h"
-#include "data\FluidParticle.h"
+#include "data\SphParticle.h"
 #include "particleGen/StaticParticleGenerator.h"
 #include "visualization/VisualizationManager.h"
+#include "data\ParticleIO.h"
 
 CUI::AsyncCommand acmd;
 
@@ -33,6 +34,8 @@ void moveShutter(int rank) {
 
 void createExport(int rank, SphManager& sph_manager) {
 		int currentTimestep = 1;
+		unordered_map<int, vector<SphParticle>> export_map;
+
 		while (currentTimestep <= TIMESTEPS) {
 			MPI_Barrier(MPI_COMM_WORLD);
 
@@ -67,9 +70,13 @@ void createExport(int rank, SphManager& sph_manager) {
 				// next message
 				MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
 			}
+			
+			export_map[currentTimestep] = allParticlesOfTimestep;
 
 			currentTimestep++;
 		}
+		exportParticles(export_map, "test.test");
+		
 		std::cout << "Done exporting" << std::endl;
 }
 
@@ -82,17 +89,17 @@ void simulate(int rank, SphManager& sph_manager) {
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
 				for (int k = 0; k < 10; k++) {
-					SphParticle particle = FluidParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
+					SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
 					particles.push_back(particle);
 					//cout << particle.position << endl;
 				}
 			}
 		}
 
-		//particles.push_back(FluidParticle(Vector3(100.9, 100.0, 100.0)));
-		//particles.push_back(FluidParticle(Vector3(101.0, 100.0, 100.0)));
-		//particles.push_back(FluidParticle(Vector3(101.1, 100.0, 100.0)));
-		//particles.push_back(FluidParticle(Vector3(101.2, 100.0, 100.0)));
+		//particles.push_back(SphParticle(Vector3(100.9, 100.0, 100.0)));
+		//particles.push_back(SphParticle(Vector3(101.0, 100.0, 100.0)));
+		//particles.push_back(SphParticle(Vector3(101.1, 100.0, 100.0)));
+		//particles.push_back(SphParticle(Vector3(101.2, 100.0, 100.0)));
 
 		sph_manager.add_particles(particles);
 	}
