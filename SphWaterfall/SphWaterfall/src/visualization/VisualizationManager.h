@@ -1,20 +1,22 @@
+#pragma once
 #include "Camera.h"
 #include "util.h"
 #include "../data/FluidParticle.h"
 #include "../data/ParticleIO.h"
 
-std::vector<Camera> cameras;
-Terrain terrain;
+
+static std::vector<Camera> cameras;
+static Terrain terrainAA;
 
 static void init(Vector3 cameraLocation, Vector3 cameraDirection, unsigned int frameWidth, unsigned int frameHeight) {
 	Camera cam = Camera(cameraLocation, cameraDirection.normalize(), frameWidth, frameHeight, cameras.size());
-	cam.renderGeometryFrame(terrain);
+	cam.renderGeometryFrame(terrainAA);
 	cameras.emplace_back(cam);
 }
 
 static void addCamera(Vector3 cameraLocation, Vector3 cameraDirection, unsigned int frameWidth, unsigned int frameHeight) {
 	Camera cam = Camera(cameraLocation, cameraDirection, frameWidth, frameHeight, cameras.size());
-	cam.renderGeometryFrame(terrain);
+	cam.renderGeometryFrame(terrainAA);
 	cameras.emplace_back(cam);
 }
 
@@ -25,7 +27,7 @@ static void debugRenderFrame(std::vector<FluidParticle> particles) {
 }
 
 static void importTerrain(Terrain t) {
-	terrain = t;
+	terrainAA = t;
 }
 
 static vector<FluidParticle> generateDebugParticles(int count) {

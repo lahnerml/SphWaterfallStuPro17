@@ -15,5 +15,8 @@ public:
 	static void MpiSendFace(Face face, int dest);
 	static Face MpiReceiveFace(int source);
 
+	Face(const Face&) = default;
+	Face& operator=(const Face&) = default;
+
 	friend std::ostream& operator<<(std::ostream &out, const Face&);
 };

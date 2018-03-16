@@ -15,7 +15,7 @@ void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
 	std::cout << "Loading Mesh: \"" << fileName << "\"" << std::endl;
 	loadedMesh = TerrainParser::loadFromFile(fileName);
 	cout << "Vertices: " << loadedMesh.getVertexCount() << " Faces: " << loadedMesh.getFaceCount() << endl;
-	importTerrain(loadedMesh);
+	//importTerrain(loadedMesh);
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {

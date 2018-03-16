@@ -1,6 +1,6 @@
 #pragma once
 #include "CUI.h"
-#include "../visualization/VisualizationManager.h"
+//#include "../visualization/VisualizationManager.h"
 
 namespace CUI {
 
@@ -92,7 +92,7 @@ namespace CUI {
 
 	void render()
 	{
-		init(Vector3(0, 0, -30), Vector3(0, 0, 1), 1920, 1080);
+		//init(Vector3(0, 0, -30), Vector3(0, 0, 1), 1920, 1080);
 
 	//	addCamera(Vector3(-30, 0, -30), (Vector3(1, 0, 1).normalize()), 1920, 1080);
 		/*
