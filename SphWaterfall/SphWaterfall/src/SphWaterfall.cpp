@@ -98,6 +98,10 @@ void simulate(int rank, SphManager& sph_manager) {
 
 void render(int rank) {
 	cout << "command is render" << endl;
+
+	cout << "Rendering in progress..." << endl;
+	init(Vector3(10, 20, 20), Vector3(-0.5, -1, -1).normalize(), 1920, 1080);
+	cout << "Rendering complete" << endl;
 }
 
 int main(int argc, char** argv)

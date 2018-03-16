@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mpi.h>
 #include "Ray.h"
 #include "../data/Vector3.h"
 
@@ -12,6 +13,9 @@ public:
 	double getRadius();
 
 	bool intersects(Ray &ray, double &distance, double &highestDistance);
+
+	static void MpiSendPObject(ParticleObject pObj, int dest);
+	static ParticleObject MpiReceivePObject(int source);
 
 private:
 	Vector3 location;

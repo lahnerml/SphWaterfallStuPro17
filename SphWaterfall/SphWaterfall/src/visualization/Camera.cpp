@@ -170,7 +170,7 @@ void Camera::renderGeometryFrame(Terrain terrain) {
 
 
 	this->baseFrame = frame;
-	writeFrameToBitmap(frame, "output/terrain_debug.bmp", frame.getWidth(), frame.getHeight());
+	writeFrameToBitmap(frame, "terrain_debug.bmp", frame.getWidth(), frame.getHeight());
 }
 
 Pixel Camera::castGeometryRay(Ray ray, Terrain& terrain) {

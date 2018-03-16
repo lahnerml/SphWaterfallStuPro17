@@ -45,3 +45,21 @@ bool ParticleObject::intersects(Ray &ray, double &distance, double &highestDist)
 
 	return ((b*b) - 4 * a*c) < 0 ? false : true;
 }
+
+static void MpiSendPObject(ParticleObject pObj, int dest)
+{
+	double buf[4] =
+	{
+		pObj.getLocation().x, pObj.getLocation().y, pObj.getLocation().z, pObj.getRadius()
+	};
+
+	MPI_Send(buf, 4, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
+}
+
+static ParticleObject MpiReceivePObject(int source)
+{
+	double buf[4];
+	MPI_Recv(buf, 4, MPI_DOUBLE, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+	return ParticleObject(Vector3(buf[0], buf[1], buf[2]), buf[3]);
+}

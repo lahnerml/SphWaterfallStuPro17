@@ -5,8 +5,8 @@
 #include "../data/ParticleIO.h"
 
 
-static std::vector<Camera> cameras;
-static Terrain terrainAA;
+std::vector<Camera> cameras;
+Terrain terrainAA;
 
 static void init(Vector3 cameraLocation, Vector3 cameraDirection, unsigned int frameWidth, unsigned int frameHeight) {
 	Camera cam = Camera(cameraLocation, cameraDirection.normalize(), frameWidth, frameHeight, cameras.size());
