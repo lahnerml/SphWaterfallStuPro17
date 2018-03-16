@@ -92,6 +92,7 @@ namespace CUI {
 
 	void render()
 	{
+
 		acmd.aWriteCmd(CUI::ConsoleCommand::RENDER);
 	}
 

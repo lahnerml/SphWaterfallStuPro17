@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../data/Vector3.h"
-#include "../data/FluidParticle.h"
+#include "../data/SphParticle.h"
 #include <math.h>
 #include <iostream>
 #include <string>
@@ -88,7 +88,7 @@ static Vector3 findUpVector(Vector3 first, Vector3 second) {
 	return up*-1;
 }
 
-static std::vector<DebugObject> convertSphParticles(std::vector<FluidParticle> &particles) {
+static std::vector<DebugObject> convertSphParticles(std::vector<SphParticle> &particles) {
 	std::vector<DebugObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
 		output.emplace_back(DebugObject(particles[i].position, 0.4f));
@@ -97,7 +97,7 @@ static std::vector<DebugObject> convertSphParticles(std::vector<FluidParticle> &
 	return output;
 }
 
-static std::vector<ParticleObject> convertFluidParticles(std::vector<FluidParticle> &particles) {
+static std::vector<ParticleObject> convertFluidParticles(std::vector<SphParticle> &particles) {
 	std::vector<ParticleObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
 		output.emplace_back(ParticleObject(particles.at(i).position, particles.at(i).mass / (double) 5));

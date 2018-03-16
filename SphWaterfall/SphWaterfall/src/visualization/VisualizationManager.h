@@ -1,7 +1,7 @@
 #pragma once
 #include "Camera.h"
 #include "util.h"
-#include "../data/FluidParticle.h"
+#include "../data/SphParticle.h"
 #include "../data/ParticleIO.h"
 
 
@@ -20,7 +20,7 @@ static void addCamera(Vector3 cameraLocation, Vector3 cameraDirection, unsigned 
 	cameras.emplace_back(cam);
 }
 
-static void debugRenderFrame(std::vector<FluidParticle> particles) {
+static void debugRenderFrame(std::vector<SphParticle> particles) {
 	for (int i = 0; i < cameras.size(); i++) {
 		cameras[i].debugRenderFrame(convertSphParticles(particles));
 	}
@@ -30,15 +30,15 @@ static void importTerrain(Terrain t) {
 	terrainAA = t;
 }
 
-static vector<FluidParticle> generateDebugParticles(int count) {
-	vector<FluidParticle> particles;
+static vector<SphParticle> generateDebugParticles(int count) {
+	vector<SphParticle> particles;
 
 	for (int i = 0; i < count; i++) {
 		double x = double(rand() % 10000 - 5000) / 1000;
 		double y = double(rand() % 10000 - 5000) / 1000;
 		double z = double(rand() % 10000 - 5000) / 1000;
 
-		FluidParticle f = FluidParticle(Vector3(x, y, z),Vector3(0,0,0), 1);
+		SphParticle f = SphParticle(Vector3(x, y, z),Vector3(0,0,0), 1);
 		particles.emplace_back(f);
 	}
 	return particles;
@@ -46,7 +46,7 @@ static vector<FluidParticle> generateDebugParticles(int count) {
 }
 
 static void generateMultipleFrames(int frameCount, int particleCount) {
-	unordered_map<int, vector<FluidParticle>> frames;
+	unordered_map<int, vector<SphParticle>> frames;
 
 	cout << "Generating " << frameCount << " frames...\n";
 
@@ -64,7 +64,7 @@ static void renderFrames(string fileName) {
 		cout << "Please add a camera first";
 	}
 
-	vector<vector<FluidParticle>> frameParticles = importParticles(fileName);
+	vector<vector<SphParticle>> frameParticles = importParticles(fileName);
 	
 	for (int g = 0; g < frameParticles.size(); g++) {
 		cout << "Rendering Frame #" << g << "...\n";

@@ -1,4 +1,4 @@
-#include "FluidParticle.h"
+#pragma once
 #include <vector>
 #include <string>
 #include <iostream>
@@ -6,11 +6,11 @@
 
 using namespace std;
 
-static void exportParticles(unordered_map<int, vector<FluidParticle>> frames, string fileName) {
+static void exportParticles(unordered_map<int, vector<SphParticle>> frames, string fileName) {
 	ofstream file(fileName);
 	if (file.is_open())
 	{
-		for (int i = 0; i < frames.size(); i++) {
+		for (int i = 1; i <= frames.size(); i++) {
 			file << "F#" << i << "#" << frames.size() << "\n";
 
 			for (int g = 0; g < frames.at(i).size(); g++) {
@@ -28,15 +28,15 @@ static void exportParticles(unordered_map<int, vector<FluidParticle>> frames, st
 	else cout << "Unable to open file";
 }
 
-static vector<vector<FluidParticle>> importParticles(string fileName) {
-	vector<vector<FluidParticle>> frames;
+static vector<vector<SphParticle>> importParticles(string fileName) {
+	vector<vector<SphParticle>> frames;
 
 	string line;
 	ifstream myfile(fileName);
 	if (myfile.is_open())
 	{
 		int counter = 0;
-		vector<FluidParticle> frame;
+		vector<SphParticle> frame;
 		while (getline(myfile, line))
 		{
 			counter++;
@@ -53,7 +53,7 @@ static vector<vector<FluidParticle>> importParticles(string fileName) {
 				continue;
 			}
 
-			frame.emplace_back(FluidParticle(
+			frame.emplace_back(SphParticle(
 				Vector3(
 					stod(splittedLine.at(0), nullptr),
 					stod(splittedLine.at(1), nullptr),
