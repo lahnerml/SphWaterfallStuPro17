@@ -187,7 +187,7 @@ static bool startsWith(const string &s, const string &sequence) {
 	return true;
 }
 
-static bool intersectsWithFace(Ray &ray, Face &face, double &distance) {
+static bool intersectsWithFace(Ray &ray, Face face, double &distance) {
 	const float EPSILON = 0.0000001;
 	Vector3 vertex0 = face.a;
 	Vector3 vertex1 = face.b;

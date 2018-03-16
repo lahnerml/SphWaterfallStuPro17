@@ -26,7 +26,7 @@ private:
 
 	Pixel castDebugRay(Ray ray, std::vector<DebugObject> particles);
 	Pixel castVolumeRay(Ray ray, std::vector<ParticleObject> particles);
-	Pixel castGeometryRay(Ray ray, Terrain terrain);
+	Pixel castGeometryRay(Ray ray, Terrain& terrain);
 
 	Frame baseFrame;
 	Vector3 location;

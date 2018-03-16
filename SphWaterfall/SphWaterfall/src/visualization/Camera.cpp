@@ -173,33 +173,29 @@ void Camera::renderGeometryFrame(Terrain terrain) {
 	writeFrameToBitmap(frame, "output/terrain_debug.bmp", frame.getWidth(), frame.getHeight());
 }
 
-Pixel Camera::castGeometryRay(Ray ray, Terrain terrain) {
+Pixel Camera::castGeometryRay(Ray ray, Terrain& terrain) {
 	double bestDistance = std::numeric_limits<float>::max();
-	double waterDepth = 0;
-	Face hitObject;
-	Face *hit = &hitObject;
-	hit = nullptr;
+	int hitIndex = -1;
 
 	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
 
 	for (int i = 0; i < terrain.getFaceCount(); i++) {
-		Face &obj = terrain.getFace(i);
 		double currDist = bestDistance;
 
-		if (intersectsWithFace(ray, obj, currDist)) {
+		if (intersectsWithFace(ray, terrain.getFace(i), currDist)) {
 			if (currDist < bestDistance) {
 				bestDistance = currDist;
-				hit = &obj;
+				hitIndex = i;
 			}
 		}
 	}
 
 
 	//Calculate Light to not have just brown everywhere
-	if (hit != nullptr){
+	if (hitIndex >= 0){
 
-		Vector3 planar1 = hitObject.a - hitObject.b;
-		Vector3 planar2 = hitObject.a - hitObject.c;
+		Vector3 planar1 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).b;
+		Vector3 planar2 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).c;
 
 		Vector3 n = planar1.cross(planar2);
 
