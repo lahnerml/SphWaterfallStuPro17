@@ -65,6 +65,7 @@ vector<vector<SphParticle>> ParticleIO::importParticles(string fileName) {
 				stod(splittedLine.at(6), nullptr)
 			));
 		}
+		frames.emplace_back(frame);
 		myfile.close();
 	}
 

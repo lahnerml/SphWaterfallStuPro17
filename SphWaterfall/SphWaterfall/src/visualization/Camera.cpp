@@ -109,21 +109,24 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 	//Copy the pixel from the base Frame
 	Pixel pixel = Pixel(basePixel.getRedValue(), basePixel.getGreenValue(), basePixel.getRedValue());
 
-	std::cout << waterDepth << " -\n";
-
 	if (waterDepth <= 0) {
 		return basePixel;
 	}
 
 	//Shade the pixel depending on water depth
 	if (hit != nullptr) {
-		double facRG = 1 - 0.8*exp(-0.2f * waterDepth);
+		pixel.setBlue(pixel.getBlueValue() + 100);
+		double facRG = 1 - 0.8*exp(-0.05f * waterDepth);
 		double facB = 1 - 1.2*exp(-0.1f * waterDepth);
 		facB = facB < 0 ? 0 : facB;
-
+		//cout << "WD: " << waterDepth << "\n";
 	//Classic Shading, water might get purple if underground is more red than green
-		pixel.setRed(pixel.getRedValue() - 255 * facRG);
-		pixel.setGreen(pixel.getGreenValue() - 255 * facRG);
+		//cout << "oR: " << pixel.getRedValue() << "\n";
+		//cout << "oG: " << pixel.getGreenValue() << "\n";
+		//cout << "oB: " << pixel.getBlueValue() << "\n";
+
+		pixel.setRed(pixel.getRedValue() - 255 * facRG > 0 ? pixel.getRedValue() - 255 * facRG : 0);
+		pixel.setGreen(pixel.getGreenValue() - 255 * facRG > 0 ? pixel.getGreenValue() - 255 * facRG : 0);
 
 	//Experimental Shading, water color shouldnt be influenced as much by underground
 		//unsigned short red = pixel.getRedValue() - 255 * facRG;
@@ -135,6 +138,10 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 	//Blue value gets reduced less, to a minimum of 30
 		pixel.setBlue(pixel.getBlueValue() - 220 * facB > 30 ? pixel.getBlueValue() - 220 * facB : 30);
 		pixel.setShaderUsage(true);
+
+		//cout << "nR: " << pixel.getRedValue() << "\n";
+		//cout << "nG: " << pixel.getGreenValue() << "\n";
+		//cout << "nB: " << pixel.getBlueValue() << "\n";
 	}
 
 	return pixel;
@@ -172,7 +179,7 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 		cout << this->width << " pixel done.\n";
 	}
 
-	return frame;//Shader::applyGaussianSmoothing(frame, 10, 12);
+	return Shader::applyGaussianSmoothing(frame, 10, 12);
 }
 
 void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
