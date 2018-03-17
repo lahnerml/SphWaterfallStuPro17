@@ -87,9 +87,9 @@ void simulate(int rank, SphManager& sph_manager) {
 	if (rank == 1) {
 		std::vector<SphParticle> particles;
 		
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				for (int k = 0; k < 10; k++) {
+		for (int i = 0; i < 15; i++) {
+			for (int j = 0; j < 15; j++) {
+				for (int k = 0; k < 15; k++) {
 					//SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
 					SphParticle particle = SphParticle(Vector3(10.0 + i, 10.0 + j, 10.0 + k));
 					particles.push_back(particle);
