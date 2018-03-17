@@ -2,7 +2,9 @@
 #include "VisualizationManager.h"
 
 void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight) {
-	camera = Camera(cameraLocation, (cameraLocation*-1).normalize(), frameWidth, frameHeight);
+	Vector3 cameraDir = (cameraLocation*-1);
+	cameraDir.z = cameraDir.z + 10;
+	camera = Camera(cameraLocation, Vector3(0,0,-1).normalize(), frameWidth, frameHeight);
 	if (terrainOpen.getVertexCount() > 0 && terrainClosed.getVertexCount() > 0) {
 		camera.renderGeometryFrames(terrainOpen, terrainClosed);
 	}

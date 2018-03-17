@@ -176,10 +176,9 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 			frame.setPixel(x, y, castVolumeRay(ray, particles, getCurrentlyUsedBaseFrame(frameID).getPixel(x, y)));
 			
 		}
-		cout << this->width << " pixel done.\n";
 	}
 
-	return Shader::applyGaussianSmoothing(frame, 10, 12);
+	return Shader::applyGaussianSmoothing(frame, 10, 4);
 }
 
 void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
