@@ -1,6 +1,6 @@
 #pragma once
 #include "CUI.h"
-#include "../visualization/VisualizationManager.h"
+//#include "../visualization/VisualizationManager.h"
 
 namespace CUI {
 
@@ -92,26 +92,8 @@ namespace CUI {
 
 	void render()
 	{
-		init(Vector3(0, 0, -30), Vector3(0, 0, 1), 1920, 1080);
 
-		addCamera(Vector3(-30, 0, -30), normalizeVector(Vector3(1, 0, 1)), 1920, 1080);
-
-		vector<FluidParticle> particles;
-		FluidParticle particle = FluidParticle(Vector3(0, 0, 0), Vector3(0, 0, 0));
-		FluidParticle particle2 = FluidParticle(Vector3(0, 5, 0), Vector3(0, 0, 0));
-		FluidParticle particle3 = FluidParticle(Vector3(5, 5, 0), Vector3(0, 0, 0));
-		FluidParticle particle4 = FluidParticle(Vector3(-5, -5, -5), Vector3(0, 0, 0));
-
-		particles.emplace_back(particle);
-		particles.emplace_back(particle2);
-		particles.emplace_back(particle3);
-		particles.emplace_back(particle4);
-
-		cout << "Rendering, please wait..." << endl;
-
-		debugRenderFrame(particles);
-
-		cout << "Done!" << endl;
+		acmd.aWriteCmd(CUI::ConsoleCommand::RENDER);
 	}
 
 	void showHelp()

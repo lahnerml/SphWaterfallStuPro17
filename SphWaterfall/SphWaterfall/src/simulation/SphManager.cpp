@@ -12,8 +12,6 @@ SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps
 	kernel = kernel_factory.getInstance(1);
 	neighbour_search = neighbour_search_factory.getInstance(1);
 
-	MPI_Comm_rank(slave_comm, &mpi_rank);
-
 	for (int i = 0; i < slave_comm_size + 1; i++) {
 		add_particles_map[i] = std::vector<SphParticle>();
 	}
@@ -24,6 +22,8 @@ SphManager::~SphManager() {
 }
 
 void SphManager::simulate() {
+	MPI_Comm_rank(slave_comm, &mpi_rank);
+
 	exchangeParticles();
 
 	for (int simulation_timestep = 1; simulation_timestep <= number_of_timesteps; simulation_timestep++) {
@@ -33,6 +33,9 @@ void SphManager::simulate() {
 		//std::cout << "after update" << std::endl; //debug
 		exchangeParticles();
 		//std::cout << "after exchange particles" << std::endl; //debug
+
+		exportParticles();
+		
 		std::cout << "simulation of timestep " << simulation_timestep << " from processor " << mpi_rank + 1 << " out of " << slave_comm_size << " finished" << std::endl;
 	}
 }
@@ -45,17 +48,19 @@ void SphManager::update() {
 	for (auto& each_domain : domains) {
 		each_neighbour_rim_particles = each_domain.second.getNeighbourRimParticles();
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			each_neighbour_particles = each_domain.second.getParticles();
-			for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
-				if (each_neighbour_rim_particles.count(domain_id) != 0) {
-					each_neighbour_particles.insert(each_neighbour_particles.end(),
-						each_neighbour_rim_particles.at(domain_id).begin(),
-						each_neighbour_rim_particles.at(domain_id).end());
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				each_neighbour_particles = each_domain.second.getParticles();
+				for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
+					if (each_neighbour_rim_particles.count(domain_id) != 0) {
+						each_neighbour_particles.insert(each_neighbour_particles.end(),
+							each_neighbour_rim_particles.at(domain_id).begin(),
+							each_neighbour_rim_particles.at(domain_id).end());
+					}
 				}
+				each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
+				neighbour_particles[i] = std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles);
+				i++;
 			}
-			each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
-			neighbour_particles[i] = std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles);
-			i++;
 		}
 	}
 	
@@ -63,15 +68,19 @@ void SphManager::update() {
 	// compute and set local densities
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			computeLocalDensity(each_particle);
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				computeLocalDensity(each_particle);
+			}
 		}
 	}
 	//std::cout << "after compute local densities" << std::endl; // debug
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			updateVelocity(each_particle);
-			std::cout << "final particle: " << each_particle << std::endl; // debug
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				updateVelocity(each_particle);
+				//std::cout << "final particle: " << each_particle << std::endl; // debug
+			}
 		}
 	}
 	//std::cout << "after update velocity" << std::endl;
@@ -401,124 +410,24 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 	}
 }
 
-MPI_Request SphManager::requestRimParticles(const Vector3& neighbourDomain, const Vector3& source) {
-	int domain_id = hash(neighbourDomain);
-	int request_id = hash(source);
+void SphManager::exportParticles() {
+	//std::pair <int, std::vector<SphParticle>> particlesToExport;
+	//particlesToExport.first = number_of_timesteps;
+	std::vector<SphParticle> particlesToExport;
 
+
+	for (auto& each_domain : domains) {
+		for (auto each_particle : each_domain.second.getParticles()) {
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				particlesToExport.push_back(each_particle);
+			}
+		}
+	}
+
+	//send particles to master
 	MPI_Request request;
-	MPI_Isend(&request_id, 1, MPI_INT, domain_id, request_id % slave_comm_size, slave_comm, &request);
-	return request;
-}
-
-void SphManager::sendRimParticles(const int& destination, const int& requester) {
-	Vector3 request_coords = unhash(requester);
-	Vector3 target_coords = unhash(destination);
-	ParticleDomain destination_domain = getParticleDomain(destination);
-
-	std::vector<SphParticle> rim_particles;
-
-	// if you know how to do better ... do it, cause this sucks
-
-	if (request_coords.x > target_coords.x) {
-		if (request_coords.y > target_coords.y) {
-			if (request_coords.z > target_coords.z) {
-				rim_particles = destination_domain.getFrontRightTopRimParticles();
-			}
-			else if (request_coords.z < target_coords.z) {
-				rim_particles = destination_domain.getFrontRightBottomRimParticles();
-			}
-			else {
-				rim_particles = destination_domain.getFrontRightRimParticles();
-			}
-		}
-		else if (request_coords.y < target_coords.y) {
-			if (request_coords.z > target_coords.z) {
-				rim_particles = destination_domain.getFrontLeftTopRimParticles();
-			}
-			else if (request_coords.z < target_coords.z) {
-				rim_particles = destination_domain.getFrontLeftBottomRimParticles();
-			}
-			else {
-				rim_particles = destination_domain.getFrontLeftRimParticles();
-			}
-		}
-		else {
-			if (request_coords.z > target_coords.z) {
-				rim_particles = destination_domain.getFrontTopRimParticles();
-			}
-			else if (request_coords.z < target_coords.z) {
-				rim_particles = destination_domain.getFrontBottomRimParticles();
-			}
-			else {
-				rim_particles = destination_domain.getFrontRimParticles();
-			}
-		}
-	}
-	else if (request_coords.x < target_coords.x) {
-		if (request_coords.y > target_coords.y) {
-			if (request_coords.z > target_coords.z) {
-				rim_particles = destination_domain.getBackRightTopRimParticles();
-			}
-			else if (request_coords.z < target_coords.z) {
-				rim_particles = destination_domain.getBackRightBottomRimParticles();
-			}
-			else {
-				rim_particles = destination_domain.getBackRightRimParticles();
-			}
-		}
-		else if (request_coords.y < target_coords.y) {
-			if (request_coords.z > target_coords.z) {
-				rim_particles = destination_domain.getBackLeftTopRimParticles();
-			}
-			else if (request_coords.z < target_coords.z) {
-				rim_particles = destination_domain.getBackLeftBottomRimParticles();
-			}
-			else {
-				rim_particles = destination_domain.getBackLeftRimParticles();
-			}
-		}
-		else {
-			if (request_coords.z > target_coords.z) {
-				rim_particles = destination_domain.getBackTopRimParticles();
-			}
-			else if (request_coords.z < target_coords.z) {
-				rim_particles = destination_domain.getBackBottomRimParticles();
-			}
-			else {
-				rim_particles = destination_domain.getBackRimParticles();
-			}
-		}
-	} 
-	else if (request_coords.y > target_coords.y) {
-		if (request_coords.z > target_coords.z) {
-			rim_particles = destination_domain.getRightTopRimParticles();
-		}
-		else if (request_coords.z < target_coords.z) {
-			rim_particles = destination_domain.getRightBottomRimParticles();
-		}
-		else {
-			rim_particles = destination_domain.getRightRimParticles();
-		}
-	}
-	else if (request_coords.y < target_coords.y) {
-		if (request_coords.z > target_coords.z) {
-			rim_particles = destination_domain.getLeftTopRimParticles();
-		}
-		else if (request_coords.z < target_coords.z) {
-			rim_particles = destination_domain.getLeftBottomRimParticles();
-		}
-		else {
-			rim_particles = destination_domain.getLeftRimParticles();
-		}
-	} 
-	else if (request_coords.z > target_coords.z) {
-		rim_particles = destination_domain.getTopRimParticles();
-	}
-	else if (request_coords.z < target_coords.z) {
-		rim_particles = destination_domain.getBottomRimParticles();
-	}
-
-	MPI_Request request;
-	MPI_Isend(rim_particles.data(), rim_particles.size() * sizeof(SphParticle), MPI_BYTE, requester % slave_comm_size, 0, slave_comm, &request);
+	MPI_Isend(particlesToExport.data(), particlesToExport.size() * sizeof(SphParticle), MPI_BYTE, 0, 99, MPI_COMM_WORLD, &request);
 	MPI_Request_free(&request);
+
+	MPI_Barrier(MPI_COMM_WORLD);
 }

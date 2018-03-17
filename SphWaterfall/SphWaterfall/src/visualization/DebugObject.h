@@ -1,8 +1,7 @@
 #pragma once
-#include <vector>
+
 #include "Ray.h"
 #include "../data/Vector3.h"
-#include "Pixel.h"
 
 class DebugObject {
 public:
@@ -12,9 +11,7 @@ public:
 	Vector3 getLocation();
 	double getRadius();
 
-	Pixel getColor();
-
-	bool intersects(Ray &ray, double &distance);
+	bool intersects(Ray &ray, double &distance, double &highestDistance);
 
 private:
 	Vector3 location;

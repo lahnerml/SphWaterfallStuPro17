@@ -11,10 +11,10 @@
 
 class StaticParticleGenerator {
 public:
-	StaticParticleGenerator(SphManager);
+	StaticParticleGenerator();
 
 	void sendAndGenerate(Terrain);
-	void receiveAndGenerate();
+	void receiveAndGenerate(SphManager);
 
 	static std::vector<SphParticle> generateStaticParticles(Terrain);
 
@@ -24,6 +24,5 @@ public:
 	static void detectDuplicate(SphParticle, SphParticle);
 	static void removeDuplicate(SphParticle, SphParticle);
 private:
-	SphManager manager;
 };
 

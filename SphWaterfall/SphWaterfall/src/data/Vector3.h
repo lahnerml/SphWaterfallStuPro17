@@ -30,6 +30,9 @@ class Vector3 {
 
 		friend std::ostream& operator<<(std::ostream &out, const Vector3&);
 
+		double dot(const Vector3&);
+		Vector3 cross(const Vector3&);
+
 		bool isInRangeOf(const Vector3&) const;
 		double length() const;
 		Vector3 normalize() const;

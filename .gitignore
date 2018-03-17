@@ -11,3 +11,6 @@ SphWaterfall/build/
 
 # CMake
 cmake-build-debug/
+
+#Frame Outputs
+SphWaterfall/output/

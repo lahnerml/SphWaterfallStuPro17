@@ -16,6 +16,8 @@ public:
 
 	void simulate();
 	void add_particles(const std::vector<SphParticle>&);
+	void exportParticles();
+
 private:
 	int mpi_rank;
 	Vector3 domain_dimensions;
@@ -31,6 +33,7 @@ private:
 
 	ParticleDomain& getParticleDomain(const int&);
 	ParticleDomain& getParticleDomain(const Vector3&);
+	
 
 	void update();
 	void updateVelocity(SphParticle& particle);
