@@ -1,4 +1,5 @@
 #pragma once
+#include <mpi.h>
 #include "Pixel.h"
 #include <vector>
 
@@ -12,6 +13,9 @@ class Frame {
 
 		unsigned int getWidth();
 		unsigned int getHeight();
+
+		static void MpiSendFrame(Frame frame, int dest);
+		static Frame MpiReceiveFrame(int source);
 				
 	private:
 		unsigned int width;

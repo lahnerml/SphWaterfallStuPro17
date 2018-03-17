@@ -16,7 +16,8 @@ void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
 	std::cout << "Loading Mesh: \"" << fileName << "\"" << std::endl;
 	loadedMesh = TerrainParser::loadFromFile(fileName);
 	cout << "Vertices: " << loadedMesh.getVertexCount() << " Faces: " << loadedMesh.getFaceCount() << endl;
-	importTerrain(loadedMesh);
+	VisualizationManager::importTerrain(loadedMesh, true);
+	VisualizationManager::importTerrain(loadedMesh, false);
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
@@ -75,7 +76,7 @@ void createExport(int rank, SphManager& sph_manager) {
 
 			currentTimestep++;
 		}
-		exportParticles(export_map, "test.test");
+		ParticleIO::exportParticles(export_map, "test.test");
 		
 		std::cout << "Done exporting" << std::endl;
 }
@@ -111,7 +112,10 @@ void render(int rank) {
 	cout << "command is render" << endl;
 
 	cout << "Rendering in progress..." << endl;
-	init(Vector3(10, 20, 20), Vector3(-0.5, -1, -1).normalize(), 1920, 1080);
+	VisualizationManager::init(Vector3(10, 20, 20), 100, 100);
+	VisualizationManager::generateFrames(2, 2000);
+	VisualizationManager::renderFrames("test.particles");
+
 	cout << "Rendering complete" << endl;
 }
 

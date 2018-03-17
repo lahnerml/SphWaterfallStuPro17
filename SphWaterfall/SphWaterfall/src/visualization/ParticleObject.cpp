@@ -1,6 +1,5 @@
 #pragma once
 #include "ParticleObject.h"
-#include "Pixel.h"
 
 ParticleObject::ParticleObject() {
 	this->radius = radius;
@@ -46,7 +45,7 @@ bool ParticleObject::intersects(Ray &ray, double &distance, double &highestDist)
 	return ((b*b) - 4 * a*c) < 0 ? false : true;
 }
 
-static void MpiSendPObject(ParticleObject pObj, int dest)
+void ParticleObject::MpiSendPObject(ParticleObject pObj, int dest)
 {
 	double buf[4] =
 	{
@@ -56,7 +55,7 @@ static void MpiSendPObject(ParticleObject pObj, int dest)
 	MPI_Send(buf, 4, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
 }
 
-static ParticleObject MpiReceivePObject(int source)
+ParticleObject ParticleObject::MpiReceivePObject(int source)
 {
 	double buf[4];
 	MPI_Recv(buf, 4, MPI_DOUBLE, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);

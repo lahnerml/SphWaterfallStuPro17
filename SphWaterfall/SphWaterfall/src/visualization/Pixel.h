@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 class Pixel {
 public:
 	Pixel();
@@ -17,9 +19,13 @@ public:
 	bool usesShader();
 	void setShaderUsage(bool shaderUsage);
 
+	void setBaseDepth(unsigned int baseDepth);
+	unsigned int getBaseDepth();
+
 private:
 	unsigned short red;
 	unsigned short green;
 	unsigned short blue;
+	unsigned int baseDepth;
 	bool shaderUsage;
 };

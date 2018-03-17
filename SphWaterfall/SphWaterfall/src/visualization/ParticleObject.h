@@ -2,6 +2,7 @@
 
 #include <mpi.h>
 #include "Ray.h"
+#include "Pixel.h"
 #include "../data/Vector3.h"
 
 class ParticleObject {
