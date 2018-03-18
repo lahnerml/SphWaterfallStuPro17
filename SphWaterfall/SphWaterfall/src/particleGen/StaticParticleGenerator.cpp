@@ -70,7 +70,7 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 	}
 }
 
-void StaticParticleGenerator::receiveAndGenerate(SphManager manager)
+void StaticParticleGenerator::receiveAndGenerate(SphManager& manager)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -104,6 +104,8 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager manager)
 	{
 		generateParticlesOnFace(face, PARTICLE_DENSITY, generatedParticles);
 	}
+
+	//for (auto each_particle : generatedParticles) { std::cout << "static particle: " << each_particle << std::endl; } //debug
 
 	//TODO Reintegrate
 	manager.add_particles(generatedParticles);
