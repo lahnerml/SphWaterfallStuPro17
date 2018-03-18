@@ -34,10 +34,12 @@ void moveShutter(int rank) {
 }
 
 void createExport(int rank, SphManager& sph_manager) {
-		int currentTimestep = 1;
+		int current_timestep = 1;
+		int current_frame = 1;
+
 		unordered_map<int, vector<SphParticle>> export_map;
 
-		while (currentTimestep <= TIMESTEPS) {
+		while (current_timestep <= TIMESTEPS) {
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			std::unordered_map<int, std::vector<SphParticle>> allParticles;
@@ -61,15 +63,16 @@ void createExport(int rank, SphManager& sph_manager) {
 				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, 99, MPI_COMM_WORLD, &status);
 				allParticlesOfTimestep.insert(allParticlesOfTimestep.end(), incomingParticles.begin(), incomingParticles.end());
 
-				// for (auto particle : allParticlesOfTimestep) { std::cout << currentTimestep << " received in export: " << particle << std::endl; } // debug
+				// for (auto particle : allParticlesOfTimestep) { std::cout << current_timestep << " received in export: " << particle << std::endl; } // debug
 
 				// next message
 				MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
 			}
 			
-			export_map[currentTimestep] = allParticlesOfTimestep;
+			export_map[current_frame] = allParticlesOfTimestep;
 
-			currentTimestep += 20;
+			current_frame++;
+			current_timestep += 20;
 		}
 		ParticleIO::exportParticles(export_map, "test.test");
 		
