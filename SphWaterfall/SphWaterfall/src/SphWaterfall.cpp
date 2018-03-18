@@ -108,9 +108,10 @@ void render(int rank) {
 	cout << "command is render" << endl;
 
 	cout << "Rendering in progress..." << endl;
-	VisualizationManager::init(Vector3(15, 13, -10), 400, 400);
-	VisualizationManager::generateFrames(2, 2000);
-	VisualizationManager::renderFrames("test.test");
+	VisualizationManager::init(Vector3(0, 0, -10), 400, 400);
+	VisualizationManager::debug();
+	//VisualizationManager::generateFrames(2, 2000);
+	VisualizationManager::renderFrames("test.particles");
 
 	cout << "Rendering complete" << endl;
 }

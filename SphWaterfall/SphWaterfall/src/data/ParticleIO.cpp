@@ -4,7 +4,6 @@
 using namespace std;
 
 void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>> frames, string fileName) {
-	cout << frames.size() << " - Test\n";
 	ofstream file(fileName);
 	if (file.is_open())
 	{
@@ -38,9 +37,12 @@ vector<vector<SphParticle>> ParticleIO::importParticles(string fileName) {
 		while (getline(myfile, line))
 		{
 			counter++;
-			if (startsWith(line, "F") && !(frame.empty())) {
-				frames.emplace_back(frame);
-				frame.clear();
+			if (startsWith(line, "F")) {
+				if (!frame.empty()) 
+				{
+					frames.emplace_back(frame);
+					frame.clear();
+				}
 				continue;
 			}
 

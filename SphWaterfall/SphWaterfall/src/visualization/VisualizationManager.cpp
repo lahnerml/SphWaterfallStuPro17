@@ -3,8 +3,7 @@
 
 void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight) {
 	Vector3 cameraDir = (cameraLocation*-1);
-	cameraDir.z = cameraDir.z + 10;
-	camera = Camera(cameraLocation, Vector3(0,0,-1).normalize(), frameWidth, frameHeight);
+	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
 	if (terrainOpen.getVertexCount() > 0 && terrainClosed.getVertexCount() > 0) {
 		camera.renderGeometryFrames(terrainOpen, terrainClosed);
 	}
@@ -63,6 +62,19 @@ vector<SphParticle> VisualizationManager::generateDebugParticles(int count) {
 		particles.emplace_back(f);
 	}
 	return particles;
+}
+
+void VisualizationManager::debug() {
+	unordered_map<int, vector<SphParticle>> frames;
+
+	vector<SphParticle> part;
+	part.emplace_back(SphParticle(Vector3(3, 0, 0)));
+
+	for (int i = 1; i <= 1; i++) {
+		frames.insert_or_assign(i, part);
+	}
+
+	ParticleIO::exportParticles(frames, "test.particles");
 }
 
 bool VisualizationManager::initilaized = false;

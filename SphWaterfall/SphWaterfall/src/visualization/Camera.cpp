@@ -118,31 +118,12 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 
 	//Shade the pixel depending on water depth
 	if (hit != nullptr) {
-		pixel.setBlue(pixel.getBlueValue() + 100);
-		double facRG = 1 - 0.8*exp(-0.05f * waterDepth);
-		double facB = 1 - 1.2*exp(-0.1f * waterDepth);
-		facB = facB < 0 ? 0 : facB;
-	//Classic Shading, water might get purple if underground is more red than green
-		//pixel.setRed(pixel.getRedValue() - 255 * facRG > 0 ? pixel.getRedValue() - 255 * facRG : 0);
-		//pixel.setGreen(pixel.getGreenValue() - 255 * facRG > 0 ? pixel.getGreenValue() - 255 * facRG : 0);
-
-	//Experimental Shading, water color shouldnt be influenced as much by underground
-		//unsigned short red = pixel.getRedValue() - 255 * facRG;
-		//unsigned short green = pixel.getGreenValue() - 255 * facRG;
-		//unsigned short mean = (red + green) / 2;
-		//pixel.setRed((red + mean) / 2);
-		//pixel.setGreen((green + mean) / 2);
-
-		//Blue value gets reduced less, to a minimum of 30
-		//pixel.setBlue(pixel.getBlueValue() - 220 * facB > 30 ? pixel.getBlueValue() - 220 * facB : 30);
-		//pixel.setShaderUsage(true);
-
-	//New Shading, should work like alpha
+	//New Shading, should work smiliar to alpha
 		int diffR = waterColor.getRedValue() - pixel.getRedValue();
 		int diffG = waterColor.getGreenValue() - pixel.getGreenValue();
 		int diffB = waterColor.getBlueValue() - pixel.getBlueValue();
 
-		double percentage = (double)waterDepth / (double)15;
+		double percentage = 1 - (exp(-0.1*waterDepth));//(double)waterDepth / (double)15;
 
 		double newR = (double)pixel.getRedValue() + (double) diffR * percentage;
 		double newG = (double)pixel.getGreenValue() + (double)diffG * percentage;
@@ -187,7 +168,7 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 		}
 	}
 
-	return Shader::applyGaussianSmoothing(frame, 10, 4);
+	return frame;//Shader::applyGaussianSmoothing(frame, 3, 4);
 }
 
 void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {

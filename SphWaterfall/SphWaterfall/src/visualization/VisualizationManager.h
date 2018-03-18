@@ -19,6 +19,8 @@ public:
 
 	static void generateFrames(int frameCount, int particleCount);
 
+	static void debug();
+
 private:
 	static vector<SphParticle> generateDebugParticles(int count);
 
