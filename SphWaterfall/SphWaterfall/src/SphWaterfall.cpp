@@ -16,7 +16,8 @@ void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
 	std::cout << "Loading Mesh: \"" << fileName << "\"" << std::endl;
 	loadedMesh = TerrainParser::loadFromFile(fileName);
 	cout << "Vertices: " << loadedMesh.getVertexCount() << " Faces: " << loadedMesh.getFaceCount() << endl;
-	importTerrain(loadedMesh);
+	VisualizationManager::importTerrain(loadedMesh, true);
+	VisualizationManager::importTerrain(loadedMesh, false);
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
@@ -33,13 +34,14 @@ void moveShutter(int rank) {
 }
 
 void createExport(int rank, SphManager& sph_manager) {
-		int currentTimestep = 1;
+		int current_timestep = 1;
+		int current_frame = 1;
+
 		unordered_map<int, vector<SphParticle>> export_map;
 
-		while (currentTimestep <= TIMESTEPS) {
+		while (current_timestep <= TIMESTEPS) {
 			MPI_Barrier(MPI_COMM_WORLD);
 
-			std::cout << "######## Exporter started " << std::endl;
 			std::unordered_map<int, std::vector<SphParticle>> allParticles;
 
 			std::vector<SphParticle> allParticlesOfTimestep;
@@ -49,13 +51,11 @@ void createExport(int rank, SphManager& sph_manager) {
 			int flag;
 			MPI_Status status;
 			MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
-			std::cout << "After PROBE " << std::endl;
 
 			int count = 0;
 			int source;
 
 			while (flag) {
-				std::cout << "**** WHILE " << std::endl;
 				source = status.MPI_SOURCE;
 				MPI_Get_count(&status, MPI_BYTE, &count);
 				std::vector<SphParticle> incomingParticles = std::vector<SphParticle>(count / sizeof(SphParticle));
@@ -63,19 +63,18 @@ void createExport(int rank, SphManager& sph_manager) {
 				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, 99, MPI_COMM_WORLD, &status);
 				allParticlesOfTimestep.insert(allParticlesOfTimestep.end(), incomingParticles.begin(), incomingParticles.end());
 
-				for (auto particle : allParticlesOfTimestep) { 
-					std::cout << currentTimestep << " received in export: " << particle << std::endl; 
-				} // debug
+				// for (auto particle : allParticlesOfTimestep) { std::cout << current_timestep << " received in export: " << particle << std::endl; } // debug
 
 				// next message
 				MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
 			}
 			
-			export_map[currentTimestep] = allParticlesOfTimestep;
+			export_map[current_frame] = allParticlesOfTimestep;
 
-			currentTimestep++;
+			current_frame++;
+			current_timestep += 20;
 		}
-		exportParticles(export_map, "test.test");
+		ParticleIO::exportParticles(export_map, "test.test");
 		
 		std::cout << "Done exporting" << std::endl;
 }
@@ -86,20 +85,16 @@ void simulate(int rank, SphManager& sph_manager) {
 	if (rank == 1) {
 		std::vector<SphParticle> particles;
 		
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				for (int k = 0; k < 10; k++) {
-					SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
+		for (int i = 0; i < 15; i++) {
+			for (int j = 0; j < 15; j++) {
+				for (int k = 0; k < 15; k++) {
+					//SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
+					SphParticle particle = SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k));
 					particles.push_back(particle);
 					//cout << particle.position << endl;
 				}
 			}
 		}
-
-		//particles.push_back(SphParticle(Vector3(100.9, 100.0, 100.0)));
-		//particles.push_back(SphParticle(Vector3(101.0, 100.0, 100.0)));
-		//particles.push_back(SphParticle(Vector3(101.1, 100.0, 100.0)));
-		//particles.push_back(SphParticle(Vector3(101.2, 100.0, 100.0)));
 
 		sph_manager.add_particles(particles);
 	}
@@ -108,11 +103,19 @@ void simulate(int rank, SphManager& sph_manager) {
 
 
 void render(int rank) {
-	cout << "command is render" << endl;
 
-	cout << "Rendering in progress..." << endl;
-	init(Vector3(10, 20, 20), Vector3(-0.5, -1, -1).normalize(), 1920, 1080);
-	cout << "Rendering complete" << endl;
+	if (rank == 0) {
+		cout << "Rendering in progress..." << endl;
+	}
+	VisualizationManager::init(Vector3(10, 3, -20), 800, 600);
+	//VisualizationManager::renderFrames("test.test");
+	VisualizationManager::renderFramesDistributed("test.test", rank);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	if (rank == 0) {
+		cout << "Rendering complete" << endl; 
+	}
 }
 
 int main(int argc, char** argv)
@@ -139,7 +142,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 1.0);
+	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 0.01);
 	Terrain loadedMesh;
 
 	if (rank == 0) {

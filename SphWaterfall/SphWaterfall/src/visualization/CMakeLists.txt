@@ -12,6 +12,9 @@ target_sources(SphWaterfall
 		"${CMAKE_CURRENT_LIST_DIR}/Pixel.h"
 		"${CMAKE_CURRENT_LIST_DIR}/Ray.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/Ray.h"
+		"${CMAKE_CURRENT_LIST_DIR}/Shader.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/Shader.h"
 		"${CMAKE_CURRENT_LIST_DIR}/util.h"
+		"${CMAKE_CURRENT_LIST_DIR}/VisualizationManager.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/VisualizationManager.h"
 )

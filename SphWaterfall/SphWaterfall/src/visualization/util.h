@@ -2,6 +2,10 @@
 
 #include "../data/Vector3.h"
 #include "../data/SphParticle.h"
+#include "DebugObject.h"
+#include "ParticleObject.h"
+#include "Frame.h"
+#include "../geometry/Face.h"
 #include <math.h>
 #include <iostream>
 #include <string>
@@ -13,50 +17,6 @@ const int bytesPerPixel = 3; /// red, green, blue
 const int fileHeaderSize = 14;
 const int infoHeaderSize = 40;
 
-
-static Frame applySmoothingShader(Frame f, int shaderDepth) {
-	Frame newFrame;
-	for (int k = 0; k < shaderDepth; k++) {
-		newFrame = Frame(f.getWidth(), f.getHeight());
-
-		for (int x = 0; x < f.getWidth(); x++) {
-			for (int y = 0; y < f.getHeight(); y++) {
-				if (f.getPixel(x, y).usesShader()) {
-					unsigned short r = 0;
-					unsigned short g = 0;
-					unsigned short b = 0;
-
-					//std::cout << "ORG: R." << f.getPixel(x, y).getRedValue() << " G." << f.getPixel(x, y).getGreenValue() << " B." << f.getPixel(x, y).getBlueValue() << "\n";
-
-					unsigned short divider = 0;
-					for (int i = -6; i <= 6; i++) {
-						for (int j = -6; j <= 6; j++) {
-							if (x + i < 0 || x + i > f.getWidth() || y + j < 0 || y + j > f.getHeight()) continue;
-
-							if (!f.getPixel(x + i, y + j).usesShader()) continue;
-
-							//		std::cout << "ORG: R." << f.getPixel(x+i, y+j).getRedValue() << " G." << f.getPixel(x + i, y + j).getGreenValue() << " B." << f.getPixel(x + i, y + j).getBlueValue() << "\n";
-							r += f.getPixel(x + i, y + j).getRedValue();
-							g += f.getPixel(x + i, y + j).getGreenValue();
-							b += f.getPixel(x + i, y + j).getBlueValue();
-							divider++;
-						}
-					}
-					//std::cout << "NEW: R." << r << " G." << g << " B." << b << "\n";
-					Pixel p = Pixel(r / divider, g / divider, b / divider);
-					p.setShaderUsage(true);
-					newFrame.setPixel(x, y, p);
-				}
-				else {
-					newFrame.setPixel(x, y, f.getPixel(x, y));
-				}
-			}
-		}
-		f = newFrame;
-	}
-
-	return newFrame;
-}
 
 static Vector3 findRightSkalar(Vector3 vec, Vector3 right) {
 	Vector3 left = Vector3(right.x * -1, right.y * -1, right.z * -1);
@@ -91,7 +51,7 @@ static Vector3 findUpVector(Vector3 first, Vector3 second) {
 static std::vector<DebugObject> convertSphParticles(std::vector<SphParticle> &particles) {
 	std::vector<DebugObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
-		output.emplace_back(DebugObject(particles[i].position, 0.4f));
+		output.emplace_back(DebugObject(particles[i].position, 1));
 	}
 
 	return output;
@@ -100,7 +60,7 @@ static std::vector<DebugObject> convertSphParticles(std::vector<SphParticle> &pa
 static std::vector<ParticleObject> convertFluidParticles(std::vector<SphParticle> &particles) {
 	std::vector<ParticleObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
-		output.emplace_back(ParticleObject(particles.at(i).position, particles.at(i).mass / (double) 5));
+		output.emplace_back(ParticleObject(particles.at(i).position, particles.at(i).mass));
 	}
 
 	return output;
