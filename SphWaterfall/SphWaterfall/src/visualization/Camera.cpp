@@ -105,6 +105,7 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 	
 	worstDist = worstDist < basePixel.getBaseDepth() ? worstDist : basePixel.getBaseDepth();
 	double waterDepth = worstDist - bestDistance;
+	waterDepth = waterDepth > 15 ? 15 : waterDepth; //Cap waterDepth at 15
 
 	//Copy the pixel from the base Frame
 	Pixel pixel = Pixel(basePixel.getRedValue(), basePixel.getGreenValue(), basePixel.getRedValue());
@@ -113,20 +114,17 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 		return basePixel;
 	}
 
+	Pixel waterColor = Pixel(30, 30, 170); //Color of "pure water"
+
 	//Shade the pixel depending on water depth
 	if (hit != nullptr) {
 		pixel.setBlue(pixel.getBlueValue() + 100);
 		double facRG = 1 - 0.8*exp(-0.05f * waterDepth);
 		double facB = 1 - 1.2*exp(-0.1f * waterDepth);
 		facB = facB < 0 ? 0 : facB;
-		//cout << "WD: " << waterDepth << "\n";
 	//Classic Shading, water might get purple if underground is more red than green
-		//cout << "oR: " << pixel.getRedValue() << "\n";
-		//cout << "oG: " << pixel.getGreenValue() << "\n";
-		//cout << "oB: " << pixel.getBlueValue() << "\n";
-
-		pixel.setRed(pixel.getRedValue() - 255 * facRG > 0 ? pixel.getRedValue() - 255 * facRG : 0);
-		pixel.setGreen(pixel.getGreenValue() - 255 * facRG > 0 ? pixel.getGreenValue() - 255 * facRG : 0);
+		//pixel.setRed(pixel.getRedValue() - 255 * facRG > 0 ? pixel.getRedValue() - 255 * facRG : 0);
+		//pixel.setGreen(pixel.getGreenValue() - 255 * facRG > 0 ? pixel.getGreenValue() - 255 * facRG : 0);
 
 	//Experimental Shading, water color shouldnt be influenced as much by underground
 		//unsigned short red = pixel.getRedValue() - 255 * facRG;
@@ -135,13 +133,24 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 		//pixel.setRed((red + mean) / 2);
 		//pixel.setGreen((green + mean) / 2);
 
-	//Blue value gets reduced less, to a minimum of 30
-		pixel.setBlue(pixel.getBlueValue() - 220 * facB > 30 ? pixel.getBlueValue() - 220 * facB : 30);
-		pixel.setShaderUsage(true);
+		//Blue value gets reduced less, to a minimum of 30
+		//pixel.setBlue(pixel.getBlueValue() - 220 * facB > 30 ? pixel.getBlueValue() - 220 * facB : 30);
+		//pixel.setShaderUsage(true);
 
-		//cout << "nR: " << pixel.getRedValue() << "\n";
-		//cout << "nG: " << pixel.getGreenValue() << "\n";
-		//cout << "nB: " << pixel.getBlueValue() << "\n";
+	//New Shading, should work like alpha
+		int diffR = waterColor.getRedValue() - pixel.getRedValue();
+		int diffG = waterColor.getGreenValue() - pixel.getGreenValue();
+		int diffB = waterColor.getBlueValue() - pixel.getBlueValue();
+
+		double percentage = (double)waterDepth / (double)15;
+
+		double newR = (double)pixel.getRedValue() + (double) diffR * percentage;
+		double newG = (double)pixel.getGreenValue() + (double)diffG * percentage;
+		double newB = (double)pixel.getBlueValue() + (double)diffB * percentage;
+
+		pixel.setRed((unsigned short)newR);
+		pixel.setGreen((unsigned short)newG);
+		pixel.setBlue((unsigned short)newB);
 	}
 
 	return pixel;
@@ -152,8 +161,8 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 
 	// view plane parameters
 	const double aspectRatio = (double)width / (double)height;
-	const double l = -1.f *aspectRatio;   //left
-	const double r = +1.f *aspectRatio;   //right
+	const double l = -1.f * aspectRatio;   //left
+	const double r = +1.f * aspectRatio;   //right
 	const double b = -1.f;				  // bottom
 	const double t = +1.f;				  // top
 	const double d = +2.f;				  // distance to camera
