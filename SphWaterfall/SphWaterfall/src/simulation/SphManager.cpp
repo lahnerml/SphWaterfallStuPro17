@@ -73,7 +73,7 @@ void SphManager::update() {
 			}
 		}
 	}
-	//std::cout << "after compute local densities" << std::endl; // debug
+	//std::cout << "after compute local densities" < < std::endl; // debug
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
@@ -411,23 +411,22 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 }
 
 void SphManager::exportParticles() {
-	//std::pair <int, std::vector<SphParticle>> particlesToExport;
-	//particlesToExport.first = number_of_timesteps;
-	std::vector<SphParticle> particlesToExport;
-
-
+	//std::pair <int, std::vector<SphParticle>> particles_to_export;
+	//particles_to_export.first = number_of_timesteps;
+	std::vector<SphParticle> particles_to_export;
+	
 	for (auto& each_domain : domains) {
 		for (auto each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-				particlesToExport.push_back(each_particle);
+				particles_to_export.push_back(each_particle);
 			}
 		}
 	}
 
+	// for (auto each_particle : particles_to_export) { std::cout << "final particle: " << each_particle << std::endl; } // debug 
+
 	//send particles to master
-	MPI_Request request;
-	MPI_Isend(particlesToExport.data(), particlesToExport.size() * sizeof(SphParticle), MPI_BYTE, 0, 99, MPI_COMM_WORLD, &request);
-	MPI_Request_free(&request);
+	MPI_Send(particles_to_export.data(), particles_to_export.size() * sizeof(SphParticle), MPI_BYTE, 0, 99, MPI_COMM_WORLD);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 }

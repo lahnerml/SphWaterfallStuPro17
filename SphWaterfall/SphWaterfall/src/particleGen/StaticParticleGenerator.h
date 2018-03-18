@@ -14,7 +14,7 @@ public:
 	StaticParticleGenerator();
 
 	void sendAndGenerate(Terrain);
-	void receiveAndGenerate(SphManager);
+	void receiveAndGenerate(SphManager&);
 
 	static std::vector<SphParticle> generateStaticParticles(Terrain);
 
