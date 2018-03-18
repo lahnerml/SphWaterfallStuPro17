@@ -36,8 +36,8 @@ vector<vector<SphParticle>> ParticleIO::importParticles(string fileName) {
 		vector<SphParticle> frame;
 		while (getline(myfile, line))
 		{
-			counter++;
 			if (startsWith(line, "F")) {
+				counter++;
 				if (!frame.empty()) 
 				{
 					frames.emplace_back(frame);
@@ -69,6 +69,7 @@ vector<vector<SphParticle>> ParticleIO::importParticles(string fileName) {
 		}
 		frames.emplace_back(frame);
 		myfile.close();
+		cout << "Found " << counter << " frames in file.\n";
 	}
 
 	else cout << "Unable to open file";

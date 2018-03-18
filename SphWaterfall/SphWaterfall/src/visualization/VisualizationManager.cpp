@@ -19,7 +19,7 @@ void VisualizationManager::importTerrain(Terrain t, bool open) {
 	else { terrainClosed = t; }
 }
 
-void VisualizationManager::renderFrames(string inputFileName) {
+void VisualizationManager::renderFrames(string inputFileName, int rank) {
 	if (!initilaized) {
 		cout << "Please initialize the VisualizationManager before rendering!";
 	}
