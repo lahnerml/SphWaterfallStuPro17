@@ -40,7 +40,6 @@ void createExport(int rank, SphManager& sph_manager) {
 		while (currentTimestep <= TIMESTEPS) {
 			MPI_Barrier(MPI_COMM_WORLD);
 
-			std::cout << "######## Exporter started " << std::endl;
 			std::unordered_map<int, std::vector<SphParticle>> allParticles;
 
 			std::vector<SphParticle> allParticlesOfTimestep;
@@ -50,13 +49,11 @@ void createExport(int rank, SphManager& sph_manager) {
 			int flag;
 			MPI_Status status;
 			MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
-			std::cout << "After PROBE " << std::endl;
 
 			int count = 0;
 			int source;
 
 			while (flag) {
-				std::cout << "**** WHILE " << std::endl;
 				source = status.MPI_SOURCE;
 				MPI_Get_count(&status, MPI_BYTE, &count);
 				std::vector<SphParticle> incomingParticles = std::vector<SphParticle>(count / sizeof(SphParticle));
@@ -64,9 +61,7 @@ void createExport(int rank, SphManager& sph_manager) {
 				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, 99, MPI_COMM_WORLD, &status);
 				allParticlesOfTimestep.insert(allParticlesOfTimestep.end(), incomingParticles.begin(), incomingParticles.end());
 
-				for (auto particle : allParticlesOfTimestep) { 
-					std::cout << currentTimestep << " received in export: " << particle << std::endl; 
-				} // debug
+				// for (auto particle : allParticlesOfTimestep) { std::cout << currentTimestep << " received in export: " << particle << std::endl; } // debug
 
 				// next message
 				MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
