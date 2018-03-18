@@ -34,7 +34,9 @@ void SphManager::simulate() {
 		exchangeParticles();
 		//std::cout << "after exchange particles" << std::endl; //debug
 
-		exportParticles();
+		if ((simulation_timestep % 20) == 1) {
+			exportParticles();
+		}
 		
 		std::cout << "simulation of timestep " << simulation_timestep << " from processor " << mpi_rank + 1 << " out of " << slave_comm_size << " finished" << std::endl;
 	}
