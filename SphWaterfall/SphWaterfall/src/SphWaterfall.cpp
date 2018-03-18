@@ -100,15 +100,19 @@ void simulate(int rank, SphManager& sph_manager) {
 
 
 void render(int rank) {
-	cout << "command is render" << endl;
 
-	cout << "Rendering in progress..." << endl;
+	if (rank == 0) {
+		cout << "Rendering in progress..." << endl;
+	}
 	VisualizationManager::init(Vector3(15, 10, -20), 400, 400);
+	cout << "Init #" << rank << endl;
 	//VisualizationManager::debug();
 	//VisualizationManager::generateFrames(2, 2000);
-	VisualizationManager::renderFrames("test.test", rank);
 
-	cout << "Rendering complete" << endl;
+	VisualizationManager::renderFramesDistributed("test.test", rank);
+	if (rank == 0) {
+		cout << "Rendering complete" << endl; 
+	}
 }
 
 int main(int argc, char** argv)

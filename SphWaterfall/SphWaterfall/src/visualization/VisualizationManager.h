@@ -17,6 +17,8 @@ public:
 
 	static void renderFrames(string inputFileName, int rank);
 
+	static void renderFramesDistributed(string inputFileName, int rank);
+
 	static void generateFrames(int frameCount, int particleCount);
 
 	static void debug();
