@@ -2,8 +2,8 @@
 #include "VisualizationManager.h"
 
 void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight) {
-	if (initilaized) cout << "FUCK YOU";
 	Vector3 cameraDir = (cameraLocation*-1);
+	cameraDir = Vector3(0, 0, 1);
 	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
 	if (terrainOpen.getVertexCount() > 0 && terrainClosed.getVertexCount() > 0) {
 		camera.renderGeometryFrames(terrainOpen, terrainClosed);
@@ -20,28 +20,20 @@ void VisualizationManager::importTerrain(Terrain t, bool open) {
 	else { terrainClosed = t; }
 }
 
-void VisualizationManager::renderFrames(string inputFileName, int rank) {
-	cout << "What? #" << rank << "\n";
+void VisualizationManager::renderFrames(string inputFileName) {
 	if (!initilaized) {
 		cout << "Please initialize the VisualizationManager before rendering!\n";
 	}
 
-	cout << "Reading #" << rank << "\n";
 	vector<vector<SphParticle>> frameParticles = ParticleIO::importParticles(inputFileName);
-	cout << "Done Reading #" << rank << "\n";
-
-	int world_size;
-	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 	for (int g = 0; g < frameParticles.size(); g++) {
-		if (g % world_size == rank) {
-			cout << "Rendering Frame #" << g << "\n";
-			vector<ParticleObject> frame = convertFluidParticles(frameParticles.at(g));
+		cout << "Rendering Frame #" << g << "\n";
+		vector<ParticleObject> frame = convertFluidParticles(frameParticles.at(g));
 
-			Frame f = camera.renderFrame(frame, g);
+		Frame f = camera.renderFrame(frame, g);
 
-			writeFrameToBitmap(f, (("output/frame_" + std::to_string(g)) + ".bmp").c_str(), f.getWidth(), f.getHeight());
-		}
+		writeFrameToBitmap(f, (("output/frame_" + std::to_string(g)) + ".bmp").c_str(), f.getWidth(), f.getHeight());
 	}
 }
 
@@ -65,7 +57,6 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 
 		for (int g = 0; g < frameParticles.size(); g++) {
 				int target = (g % (world_size - 1)) + 1;
-				cout << "Sending Frame #" << g << " to processor #" << target << "\n";
 				vector<ParticleObject> frame = convertFluidParticles(frameParticles.at(g));
 
 				//Send frame size
@@ -92,30 +83,28 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 			if ((g % (world_size - 1)) + 1 == rank) {
 				unsigned int frameSize[1];
 				MPI_Recv(frameSize, 1, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				cout << "Received size for Frame #" << g << " - #" << rank << endl;
 				vector<ParticleObject> frame;
 				for (int i = 0; i < frameSize[0]; i++) {
 					frame.emplace_back(ParticleObject::MpiReceivePObject(0));
 				}
-				cout << "Received Frame #" << g << " - #" << rank << endl;
 				frameParticles.emplace_back(frame);
 			}
 		}
 
 		int counter = 0;
-		cout << "Size: " << frameParticles.size() << " - #" << rank << endl;
 
 		//Here it stops working for some reason..
 
 		for (int i = 0; i < frameCount; i++) {
+			if ((i % (world_size - 1)) + 1 == rank) {
+				if (counter >= frameParticles.size()) continue;
+				vector<ParticleObject> frame = frameParticles.at(counter);
 
-			cout << "Rendering Frame #" << i << " on processor #" << rank << "\n";
-			vector<ParticleObject> frame = frameParticles.at(counter);
+				Frame f = camera.renderFrame(frame, i);
 
-			Frame f = camera.renderFrame(frame, i);
-
-			writeFrameToBitmap(f, (("output/frame_p" + std::to_string(i)) + ".bmp").c_str(), f.getWidth(), f.getHeight());
-			counter++;
+				writeFrameToBitmap(f, (("output/frame_" + std::to_string(i)) + ".bmp").c_str(), f.getWidth(), f.getHeight());
+				counter++;
+			}
 		}
 	}
 }

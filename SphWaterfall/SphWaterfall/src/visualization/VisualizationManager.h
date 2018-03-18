@@ -15,7 +15,7 @@ public:
 
 	static void debugRenderFrame(std::vector<SphParticle> particles, string fileName);
 
-	static void renderFrames(string inputFileName, int rank);
+	static void renderFrames(string inputFileName);
 
 	static void renderFramesDistributed(string inputFileName, int rank);
 

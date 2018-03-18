@@ -115,7 +115,7 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 	}
 
 	Pixel waterColor = Pixel(30, 30, 170); //Color of "pure water"
-
+	pixel.setShaderUsage(true);
 	//Shade the pixel depending on water depth
 	if (hit != nullptr) {
 	//New Shading, should work smiliar to alpha
@@ -123,7 +123,7 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 		int diffG = waterColor.getGreenValue() - pixel.getGreenValue();
 		int diffB = waterColor.getBlueValue() - pixel.getBlueValue();
 
-		double percentage = 1 - (exp(-0.1*waterDepth));//(double)waterDepth / (double)15;
+		double percentage = 1.2 - (exp(-0.1*waterDepth));//(double)waterDepth / (double)15;
 
 		double newR = (double)pixel.getRedValue() + (double) diffR * percentage;
 		double newG = (double)pixel.getGreenValue() + (double)diffG * percentage;
@@ -168,7 +168,7 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 		}
 	}
 
-	return frame;//Shader::applyGaussianSmoothing(frame, 3, 4);
+	return Shader::applyGaussianSmoothing(frame, 5, 8);
 }
 
 void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
