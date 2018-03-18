@@ -9,7 +9,7 @@
 // Smoothing radius (Influence radius / 4)
 #define H (Q_MAX / 4)
 // Number of simulation timesteps
-#define TIMESTEPS 30
+#define TIMESTEPS 200
 
 namespace SimulationUtilities {
 	int hash(const Vector3&);
