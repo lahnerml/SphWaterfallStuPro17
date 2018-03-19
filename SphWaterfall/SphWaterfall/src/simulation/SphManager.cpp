@@ -7,7 +7,22 @@
 SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
 	number_of_timesteps(number_of_timesteps),
-	timestep_duration(timestep_duration) 
+	timestep_duration(timestep_duration),
+	sink_height(0.0)
+{
+	kernel = kernel_factory.getInstance(1);
+	neighbour_search = neighbour_search_factory.getInstance(1);
+
+	for (int i = 0; i < slave_comm_size + 1; i++) {
+		add_particles_map[i] = std::vector<SphParticle>();
+	}
+}
+
+SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration, double sink_height) :
+	domain_dimensions(domain_dimensions),
+	number_of_timesteps(number_of_timesteps),
+	timestep_duration(timestep_duration),
+	sink_height(sink_height)
 {
 	kernel = kernel_factory.getInstance(1);
 	neighbour_search = neighbour_search_factory.getInstance(1);
@@ -51,17 +66,22 @@ void SphManager::update() {
 		each_neighbour_rim_particles = each_domain.second.getNeighbourRimParticles();
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-				each_neighbour_particles = each_domain.second.getParticles();
-				for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
-					if (each_neighbour_rim_particles.count(domain_id) != 0) {
-						each_neighbour_particles.insert(each_neighbour_particles.end(),
-							each_neighbour_rim_particles.at(domain_id).begin(),
-							each_neighbour_rim_particles.at(domain_id).end());
+				if (each_particle.position.z < sink_height) {
+					// Remove particles below sink height
+					each_particle.makeInactive();
+				} else {
+					each_neighbour_particles = each_domain.second.getParticles();
+					for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
+						if (each_neighbour_rim_particles.count(domain_id) != 0) {
+							each_neighbour_particles.insert(each_neighbour_particles.end(),
+								each_neighbour_rim_particles.at(domain_id).begin(),
+								each_neighbour_rim_particles.at(domain_id).end());
+						}
 					}
+					each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
+					neighbour_particles[i] = std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles);
+					i++;
 				}
-				each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
-				neighbour_particles[i] = std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles);
-				i++;
 			}
 		}
 	}
@@ -293,7 +313,6 @@ void SphManager::exchangeRimParticles() {
 
 		incoming_rim_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
-
 		//for (auto particle : incoming_rim_particles) { std::cout << particle << std::endl; } // debug
 
 		new_rim_particles[meta[0]][meta[1]] = incoming_rim_particles;
@@ -328,6 +347,9 @@ void SphManager::exchangeParticles() {
 
 	// adds particles from domains
 	for (auto& each_domain : domains) {
+		// Remove inactive particles
+		each_domain.second.removeInactiveParticles();
+
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 
 		for (auto& each_particle : outside_particles) {
@@ -350,7 +372,7 @@ void SphManager::exchangeParticles() {
 	MPI_Request request;
 	for (auto& vector : target_map) {
 		//for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
-		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, slave_comm, &request);
+		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 1, slave_comm, &request);
 		MPI_Request_free(&request);
 	}
 
@@ -367,7 +389,7 @@ void SphManager::exchangeParticles() {
 		MPI_Get_count(&status, MPI_BYTE, &count);
 		incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
-		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, 0, slave_comm, &status);
+		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, 1, slave_comm, &status);
 		all_new_particles.insert(all_new_particles.end(), incoming_particles.begin(), incoming_particles.end());
 		//for (auto particle : incoming_particles) { std::cout << "incoming: " << particle << std::endl; } // debug
 

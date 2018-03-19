@@ -94,6 +94,11 @@ Vector3 Vector3::normalize() const {
 	return *this / length();
 }
 
+Vector3 Vector3::unit() const
+{
+	return Vector3(abs(x), abs(y), abs(z));
+}
+
 Vector3 Vector3::roundDownward() const{
 	return Vector3(floor(x), floor(y), floor(z));
 }

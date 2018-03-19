@@ -58,3 +58,9 @@ SphParticle::ParticleType SphParticle::getParticleType()
 {
 	return this->pType;
 }
+
+void SphParticle::makeInactive()
+{
+	if (this->pType == SphParticle::ParticleType::FLUID)
+		this->pType = SphParticle::ParticleType::INACTIVE;
+}

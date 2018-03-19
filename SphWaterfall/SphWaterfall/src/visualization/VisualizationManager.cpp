@@ -4,7 +4,7 @@
 void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight) {
 	Vector3 cameraDir = (cameraLocation*-1);
 	cameraDir = Vector3(0, 0, 1);
-	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
+	camera = Camera(cameraLocation, -cameraLocation.normalize(), frameWidth, frameHeight);
 	if (terrainOpen.getVertexCount() > 0 && terrainClosed.getVertexCount() > 0) {
 		camera.renderGeometryFrames(terrainOpen, terrainClosed);
 	}
@@ -44,6 +44,12 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 
 	int world_size;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+	//In case we are single cored
+	if (world_size == 1) {
+		renderFrames(inputFileName);
+		return;
+	}
 
 	if (rank == 0) {
 		vector<vector<SphParticle>> frameParticles = ParticleIO::importParticles(inputFileName);

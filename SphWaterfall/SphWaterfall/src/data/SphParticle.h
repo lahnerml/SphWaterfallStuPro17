@@ -7,7 +7,8 @@ class SphParticle {
 		{
 			FLUID,
 			STATIC,
-			MIRRORED
+			MIRRORED,
+			INACTIVE
 		};
 
 		SphParticle();
@@ -27,6 +28,7 @@ class SphParticle {
 		double local_density;
 
 		ParticleType SphParticle::getParticleType();
+		void SphParticle::makeInactive();
 	private:
 		ParticleType pType;
 };

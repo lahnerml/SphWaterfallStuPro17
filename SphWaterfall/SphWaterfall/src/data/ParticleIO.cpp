@@ -22,7 +22,7 @@ void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>> frames,
 		}
 		file.close();
 	}
-	else cout << "Unable to open file";
+	else cout << "Unable to open file for simulation export." << endl;
 }
 
 vector<vector<SphParticle>> ParticleIO::importParticles(string fileName) {

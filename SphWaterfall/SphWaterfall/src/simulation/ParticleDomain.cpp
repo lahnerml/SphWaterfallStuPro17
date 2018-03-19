@@ -28,6 +28,18 @@ void ParticleDomain::clearRimParticles() {
 	neighbour_rim_particles = std::unordered_map<int, std::vector<SphParticle>>();
 }
 
+void ParticleDomain::removeInactiveParticles()
+{
+	for (int i = 0; i < particles.size(); i++) {
+		SphParticle each_particle = particles.at(i);
+		if (each_particle.getParticleType() == SphParticle::ParticleType::INACTIVE) {
+			particles.erase(particles.begin() + i);
+			//Fix counter after removing particle
+			i--;
+		}
+	}
+}
+
 std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 	std::vector<SphParticle> outsideParticles;
 
@@ -36,6 +48,8 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 		if (!(each_particle.position - origin).isInRangeOf(dimensions)) {
 			outsideParticles.push_back(each_particle);
 			particles.erase(particles.begin() + i);
+			//Fix counter after removing particle
+			i--;
 		}
 	}
 

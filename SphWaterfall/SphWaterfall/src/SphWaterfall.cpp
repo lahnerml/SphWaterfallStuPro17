@@ -106,8 +106,9 @@ void render(int rank) {
 
 	if (rank == 0) {
 		cout << "Rendering in progress..." << endl;
+
 	}
-	VisualizationManager::init(Vector3(10, 3, -20), 800, 600);
+	VisualizationManager::init(Vector3(0, -20, 30), 800, 600);
 	//VisualizationManager::renderFrames("test.test");
 	VisualizationManager::renderFramesDistributed("test.test", rank);
 

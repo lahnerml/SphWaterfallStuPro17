@@ -24,6 +24,7 @@ public:
 	std::vector<SphParticle>& getParticles();
 	void resetRimParticles();
 	void clearRimParticles();
+	void removeInactiveParticles();
 	void setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
 	std::unordered_map<int, std::vector<SphParticle>>& getNeighbourRimParticles();
 

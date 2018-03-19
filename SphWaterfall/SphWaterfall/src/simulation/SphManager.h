@@ -12,6 +12,7 @@
 class SphManager {
 public:
 	SphManager(const Vector3&, int number_of_timesteps, double timestep_duration);
+	SphManager(const Vector3&, int number_of_timesteps, double timestep_duration, double sink_height);
 	~SphManager();
 
 	void simulate();
@@ -34,6 +35,8 @@ private:
 	ParticleDomain& getParticleDomain(const int&);
 	ParticleDomain& getParticleDomain(const Vector3&);
 	
+	double sink_height;
+
 
 	void update();
 	void updateVelocity(SphParticle& particle);

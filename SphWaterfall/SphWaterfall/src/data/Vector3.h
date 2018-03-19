@@ -36,6 +36,7 @@ class Vector3 {
 		bool isInRangeOf(const Vector3&) const;
 		double length() const;
 		Vector3 normalize() const;
+		Vector3 unit() const;
 		Vector3 roundDownward() const;
 		Vector3 distanceTo(const Vector3&, const Vector3&);
 	private:
