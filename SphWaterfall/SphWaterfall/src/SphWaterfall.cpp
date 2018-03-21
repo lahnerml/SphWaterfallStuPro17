@@ -189,8 +189,11 @@ int main(int argc, char** argv)
 			break;
 		}
 
-		if (cmd != CUI::ConsoleCommand::EXIT && cmd != CUI::ConsoleCommand::NONE)
+		if (cmd != CUI::ConsoleCommand::EXIT && cmd != CUI::ConsoleCommand::NONE) {
 			CUI::acmd.aWriteCmd(CUI::ConsoleCommand::NONE);
+		}
+		
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
 	if (rank == 0) {
