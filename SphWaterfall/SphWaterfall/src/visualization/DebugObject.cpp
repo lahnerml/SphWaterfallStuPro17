@@ -1,6 +1,5 @@
 #pragma once
 #include "DebugObject.h"
-#include "Pixel.h"
 
 DebugObject::DebugObject() {
 	this->radius = radius;

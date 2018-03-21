@@ -1,15 +1,14 @@
 #pragma once
-
-#include "mpi.h";
-#include "../data/Vector3.h";
-#include "../data/SphParticle.h";
+#include "mpi.h"
+#include "../data/Vector3.h"
+#include "../data/SphParticle.h"
 
 // Influence radius
 #define Q_MAX 1.2
 // Smoothing radius (Influence radius / 4)
 #define H (Q_MAX / 4)
 // Number of simulation timesteps
-#define TIMESTEPS 201
+#define TIMESTEPS 301
 
 namespace SimulationUtilities {
 	int hash(const Vector3&);

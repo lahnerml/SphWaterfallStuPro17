@@ -81,7 +81,7 @@ void SphManager::update() {
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
 				updateVelocity(each_particle);
-				//std::cout << "final particle: " << each_particle << std::endl; // debug
+				std::cout << "final particle: " << each_particle << std::endl; // debug
 			}
 		}
 	}

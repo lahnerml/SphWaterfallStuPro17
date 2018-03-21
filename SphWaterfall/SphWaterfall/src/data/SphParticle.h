@@ -26,7 +26,7 @@ class SphParticle {
 		double mass;
 		double local_density;
 
-		ParticleType SphParticle::getParticleType();
+		ParticleType getParticleType();
 	private:
 		ParticleType pType;
 };

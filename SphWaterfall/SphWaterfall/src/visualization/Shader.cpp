@@ -1,6 +1,5 @@
 #pragma once
 #include "Shader.h"
-#include <iostream>
 
 Frame Shader::applyGaussianSmoothing(Frame f, int shaderDepth, int matrixSize) {
 	std::cout << "Shading Frame\n";

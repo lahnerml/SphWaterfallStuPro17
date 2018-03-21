@@ -2,7 +2,7 @@
 #include "mpi.h"
 #include "SphKernelFactory.h"
 #include "SphNeighbourSearchFactory.h"
-#include "SimulationUtilities.h";
+#include "SimulationUtilities.h"
 
 #include <vector>
 #include <array>

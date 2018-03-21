@@ -8,7 +8,7 @@
 #include "../geometry/Face.h"
 #include <math.h>
 #include <iostream>
-#include <string>
+#include <cstring>
 #include <vector>
 
 using namespace std;

@@ -5,10 +5,10 @@
 
 #include "cui/CUI.h"
 #include "simulation/SimulationUtilities.h"
-#include "data\SphParticle.h"
+#include "data/SphParticle.h"
 #include "particleGen/StaticParticleGenerator.h"
 #include "visualization/VisualizationManager.h"
-#include "data\ParticleIO.h"
+#include "data/ParticleIO.h"
 
 CUI::AsyncCommand acmd;
 
@@ -84,7 +84,7 @@ void simulate(int rank, SphManager& sph_manager) {
 
 	if (rank == 1) {
 		std::vector<SphParticle> particles;
-		
+		/*
 		for (int i = 0; i < 15; i++) {
 			for (int j = 0; j < 15; j++) {
 				for (int k = 0; k < 15; k++) {
@@ -95,6 +95,9 @@ void simulate(int rank, SphManager& sph_manager) {
 				}
 			}
 		}
+		*/
+
+		particles.push_back(SphParticle(Vector3(10.0, 10.0, 10.0)));
 
 		sph_manager.add_particles(particles);
 	}

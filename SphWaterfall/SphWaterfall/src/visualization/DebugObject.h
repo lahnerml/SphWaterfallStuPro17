@@ -1,6 +1,7 @@
 #pragma once
-
+#include <math.h>
 #include "Ray.h"
+#include "Pixel.h"
 #include "../data/Vector3.h"
 
 class DebugObject {
