@@ -2,7 +2,7 @@
 #include "SphManager.h"
 
 #define REFERENCE_DENSITY 20.0
-#define PRESURE_CONSTANT 20.0
+#define PRESSURE_CONSTANT 20.0
 
 SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
