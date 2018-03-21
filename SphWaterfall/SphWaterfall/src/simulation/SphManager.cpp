@@ -150,7 +150,7 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 }
 
 double SphManager::computeLocalPressure(SphParticle& particle) {
-	return PRESURE_CONSTANT * (particle.local_density - REFERENCE_DENSITY);
+	return PRESSURE_CONSTANT * (particle.local_density - REFERENCE_DENSITY);
 }
 
 Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
@@ -258,7 +258,6 @@ void SphManager::exchangeRimParticles() {
 				else {
 					// target domain id, source domain id, tag der richtigen Nachricht
 					std::array<int, 3> meta = { target.first, source.first, count };
-					MPI_Request request;
 					MPI_Send(meta.data(), meta.size(), MPI_INT, target_process_id, 0, slave_comm);
 
 					//for (auto particle : source.second) { std::cout << particle << std::endl; } // debug
