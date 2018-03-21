@@ -19,7 +19,7 @@ double ParticleObject::getRadius() {
 	return this->radius;
 }
 
-bool ParticleObject::intersects(Ray &ray, double &distance, double &highestDist) {
+bool ParticleObject::intersects(Ray &ray, double &distance, double &waterDepth, double maxDepth) {
 	distance = std::numeric_limits<double>::max();
 
 	Vector3	temp = ray.origin - this->location;
@@ -35,9 +35,7 @@ bool ParticleObject::intersects(Ray &ray, double &distance, double &highestDist)
 		float t1 = (-1 * b + sqrt((b*b) - 4 * a*c)) / (2 * a);
 		float t2 = (-1 * b - sqrt((b*b) - 4 * a*c)) / (2 * a);
 
-		double highDist = t1 > t2 ? t1 : t2;
-
-		if (highDist > highestDist) highestDist = highDist;
+		waterDepth += t1 > t2 ? (t1 > maxDepth ? maxDepth : t1) - (t2 > maxDepth ? 0 : t2) : (t2 > maxDepth ? maxDepth : t2) - (t1 > maxDepth ? 0 : t1);
 
 		distance = t1 < t2 ? t1 : t2;
 	}

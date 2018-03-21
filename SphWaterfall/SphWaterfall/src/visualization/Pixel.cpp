@@ -55,10 +55,10 @@ void Pixel::setShaderUsage(bool shaderUsage) {
 	this->shaderUsage = shaderUsage;
 }
 
-void Pixel::setBaseDepth(unsigned int baseDepth) {
+void Pixel::setBaseDepth(double baseDepth) {
 	this->baseDepth = baseDepth;
 }
 
-unsigned int Pixel::getBaseDepth() {
+double Pixel::getBaseDepth() {
 	return this->baseDepth;
 }

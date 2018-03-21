@@ -110,9 +110,9 @@ void render(int rank) {
 	if (rank == 0) {
 		cout << "Rendering in progress..." << endl;
 	}
-	VisualizationManager::init(Vector3(10, 3, -20), 800, 600);
-	//VisualizationManager::renderFrames("test.test");
-	VisualizationManager::renderFramesDistributed("test.test", rank);
+	VisualizationManager::init(Vector3(10, 5, -20), 200, 200);
+	VisualizationManager::renderFrames("test.test");
+	//VisualizationManager::renderFramesDistributed("test.test", rank);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 

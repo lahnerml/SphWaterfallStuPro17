@@ -14,7 +14,7 @@ public:
 	Vector3 getLocation();
 	double getRadius();
 
-	bool intersects(Ray &ray, double &distance, double &highestDistance);
+	bool intersects(Ray &ray, double &distance, double &waterDepth, double maxDepth);
 
 	static void MpiSendPObject(ParticleObject pObj, int dest);
 	static ParticleObject MpiReceivePObject(int source);

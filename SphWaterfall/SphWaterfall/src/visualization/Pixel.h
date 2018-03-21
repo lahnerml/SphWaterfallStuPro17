@@ -19,13 +19,13 @@ public:
 	bool usesShader();
 	void setShaderUsage(bool shaderUsage);
 
-	void setBaseDepth(unsigned int baseDepth);
-	unsigned int getBaseDepth();
+	void setBaseDepth(double baseDepth);
+	double getBaseDepth();
 
 private:
 	unsigned short red;
 	unsigned short green;
 	unsigned short blue;
-	unsigned int baseDepth;
+	double baseDepth;
 	bool shaderUsage;
 };

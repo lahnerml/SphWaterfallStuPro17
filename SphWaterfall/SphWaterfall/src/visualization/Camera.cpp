@@ -85,7 +85,7 @@ Pixel Camera::castDebugRay(Ray ray, std::vector<DebugObject> particles) {
 
 Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixel basePixel) {
 	double bestDistance = std::numeric_limits<float>::max();
-	double worstDist = 0;
+	double waterDepth = 0;
 	ParticleObject hitObject;
 	ParticleObject *hit = &hitObject;
 	hit = nullptr;
@@ -95,16 +95,14 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 		ParticleObject &obj = particles.at(i);
 		double currDist = bestDistance;
 
-		if (obj.intersects(ray, currDist, worstDist)) {
+		if (obj.intersects(ray, currDist, waterDepth, basePixel.getBaseDepth())) {
 			if (currDist < bestDistance) {
 				bestDistance = currDist;
 				hit = &obj;
 			}
 		}
 	}
-	
-	worstDist = worstDist < basePixel.getBaseDepth() ? worstDist : basePixel.getBaseDepth();
-	double waterDepth = worstDist - bestDistance;
+
 	waterDepth = waterDepth > 15 ? 15 : waterDepth; //Cap waterDepth at 15
 
 	//Copy the pixel from the base Frame
