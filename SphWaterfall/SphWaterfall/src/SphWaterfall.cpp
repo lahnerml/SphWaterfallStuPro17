@@ -195,10 +195,6 @@ int main(int argc, char** argv)
 
 	if (rank == 0) {
 		cuiThread.join();
-	}
-
-	if (rank == 0) {
-		system("pause");
 		MPI_Wait;
 	}
 
