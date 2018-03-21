@@ -5,6 +5,12 @@ find_package(MPI REQUIRED)
 # add this line only when you are using openmpi which has a different c++ bindings
 add_definitions(-DOMPI_SKIP_MPICXX)
 
+# uncomment for linux
+# set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(CMAKE_CXX_EXTENSIONS OFF)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lstdc++ -lm")
+
 include("SphWaterfall/src/CMakeLists.txt")
 
 target_link_libraries(SphWaterfall
