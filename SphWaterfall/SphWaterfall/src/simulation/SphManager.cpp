@@ -354,7 +354,7 @@ void SphManager::exchangeParticles() {
 		std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 
 		for (auto& each_particle : outside_particles) {
-			std::cout << "particle: " << each_particle << std::endl;
+			// std::cout << "particle: " << each_particle << std::endl;
 			target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);
 
 			if (target_map.at(target_id).empty()) {
