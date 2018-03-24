@@ -144,14 +144,38 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 	double particle_local_pressure = computeLocalPressure(particle);
 
 	for (SphParticle& neighbour_particle : neighbours) {
+		density_acceleration -= (neighbour_particle.mass / particle.mass) *
+			((particle_local_pressure + computeLocalPressure(neighbour_particle)) / (2 * particle.local_density * neighbour_particle.local_density)) * 
+			(kernel->computeKernelGradientValue(particle.position - neighbour_particle.position));
+	}
+
+	//std::cout << "after density acceleration:" << density_acceleration << std::endl; //debug
+	return density_acceleration;
+}
+
+/*
+Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
+	// std::vector<SphParticle> neighbours = neighbour_particles.at(particle); TODO: implement Hash for SphParticle (operator())
+	std::vector<SphParticle> neighbours;
+	for (auto& neighbour : neighbour_particles) {
+		if (particle == neighbour.second.first) {
+			neighbours = neighbour.second.second;
+		}
+	}
+
+	Vector3 density_acceleration = Vector3();
+	double particle_local_pressure = computeLocalPressure(particle);
+
+	for (SphParticle& neighbour_particle : neighbours) {
 		density_acceleration += neighbour_particle.mass *
 			((computeLocalPressure(neighbour_particle) / (neighbour_particle.local_density * neighbour_particle.local_density)) +
 			(particle_local_pressure / (particle.local_density * particle.local_density))) *
 			kernel->computeKernelGradientValue(particle.position - neighbour_particle.position);
 	}
-	//std::cout << "after density acceleration:" << density_acceleration << std::endl; //debug
+	std::cout << "after density acceleration:" << density_acceleration << std::endl; //debug
 	return density_acceleration;
 }
+*/
 
 double SphManager::computeLocalPressure(SphParticle& particle) {
 	return PRESSURE_CONSTANT * (particle.local_density - REFERENCE_DENSITY);
@@ -177,8 +201,11 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 				(particle.velocity - neighbour_particle.velocity);
 		}
 	}
-	
-	return ((1 / particle.local_density) * viscosity_acceleration);
+
+	viscosity_acceleration *= 1 / particle.local_density;
+
+	//std::cout << "after viscosity acceleration:" << viscosity_acceleration << std::endl; //debug
+	return viscosity_acceleration;
 }
 
 void SphManager::exchangeRimParticles() {
