@@ -8,7 +8,7 @@
 // Smoothing radius (Influence radius / 4)
 #define H (Q_MAX / 4)
 // Number of simulation timesteps
-#define TIMESTEPS 301
+#define TIMESTEPS 1001
 
 // Sph Manager tags
 #define META_TAG 0

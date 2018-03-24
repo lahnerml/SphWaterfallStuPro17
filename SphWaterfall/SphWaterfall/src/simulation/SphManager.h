@@ -42,9 +42,6 @@ private:
 	Vector3 computeViscosityAcceleration(SphParticle& particle);
 	void computeLocalDensity(SphParticle&);
 	double computeLocalPressure(SphParticle&);
-
-	MPI_Request requestRimParticles(const Vector3&, const Vector3&);
 	void exchangeParticles();
 	void exchangeRimParticles();
-	void sendRimParticles(const int&, const int&);
 };

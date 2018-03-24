@@ -10,8 +10,6 @@
 #include "visualization/VisualizationManager.h"
 #include "data/ParticleIO.h"
 
-#define EXPORT_TAG 2
-
 CUI::AsyncCommand acmd;
 
 void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
@@ -112,8 +110,8 @@ void render(int rank) {
 		cout << "Rendering in progress..." << endl;
 	}
 	VisualizationManager::init(Vector3(10, 5, -20), 200, 200);
-	VisualizationManager::renderFrames("test.test");
-	//VisualizationManager::renderFramesDistributed("test.test", rank);
+	//VisualizationManager::renderFrames("test.test");
+	VisualizationManager::renderFramesDistributed("test.test", rank);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
@@ -146,7 +144,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 0.1);
+	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 0.01);
 	Terrain loadedMesh;
 
 	if (rank == 0) {

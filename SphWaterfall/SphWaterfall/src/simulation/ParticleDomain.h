@@ -3,6 +3,7 @@
 #include "../data/Vector3.h"
 #include "../data/NullableWrapper.h"
 #include "../data/NullableWrapper.cpp"
+#include "../simulation/SimulationUtilities.h"
 
 #include <vector>
 #include <iterator>
