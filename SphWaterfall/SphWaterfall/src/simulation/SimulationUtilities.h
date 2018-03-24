@@ -10,6 +10,11 @@
 // Number of simulation timesteps
 #define TIMESTEPS 301
 
+// Sph Manager tags
+#define META_TAG 0
+#define EXCHANGE_TAG 1
+#define EXPORT_TAG 2
+
 namespace SimulationUtilities {
 	int hash(const Vector3&);
 	Vector3 unhash(const int&);	

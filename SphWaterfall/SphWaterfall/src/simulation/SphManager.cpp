@@ -4,10 +4,6 @@
 #define REFERENCE_DENSITY 20.0
 #define PRESSURE_CONSTANT 20.0
 
-#define META_TAG 0
-#define EXCHANGE_TAG 1
-#define EXPORT_TAG 2
-
 SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
 	number_of_timesteps(number_of_timesteps),
@@ -377,7 +373,7 @@ void SphManager::exchangeParticles() {
 	MPI_Request request;
 	for (auto& vector : target_map) {
 		//for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
-		MPI_Send(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, EXCHANGE_TAG, slave_comm);
+		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, EXCHANGE_TAG, slave_comm, &request);
 	}
 
 	MPI_Barrier(slave_comm);

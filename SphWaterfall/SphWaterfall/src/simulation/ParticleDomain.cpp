@@ -29,17 +29,20 @@ void ParticleDomain::clearRimParticles() {
 }
 
 std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
-	std::vector<SphParticle> outsideParticles;
+	std::vector<SphParticle> outside_particles;
 
-	for (int i = 0; i < particles.size(); i++) {
-		SphParticle each_particle = particles.at(i);
+	int number_of_particles_inside_domain = 0;
+	for (auto each_particle : particles) {
 		if (!(each_particle.position - origin).isInRangeOf(dimensions)) {
-			outsideParticles.push_back(each_particle);
-			particles.erase(particles.begin() + i);
+			outside_particles.push_back(each_particle);
+			particles.erase(particles.begin() + number_of_particles_inside_domain);
+		}
+		else {
+			number_of_particles_inside_domain++;
 		}
 	}
 
-	return outsideParticles;
+	return outside_particles;
 }
 
 void ParticleDomain::setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_map) {

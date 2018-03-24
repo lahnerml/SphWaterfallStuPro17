@@ -100,7 +100,6 @@ void simulate(int rank, SphManager& sph_manager) {
 		
 
 		//particles.push_back(SphParticle(Vector3(10.0, 10.0, 10.0)));
-
 		sph_manager.add_particles(particles);
 	}
 	sph_manager.simulate();
