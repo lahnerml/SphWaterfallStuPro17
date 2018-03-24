@@ -32,9 +32,11 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 	std::vector<SphParticle> outside_particles;
 
 	int number_of_particles_inside_domain = 0;
-	for (auto each_particle : particles) {
-		if (!(each_particle.position - origin).isInRangeOf(dimensions)) {
-			std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl;
+	while (number_of_particles_inside_domain < particles.size()) {
+		SphParticle each_particle = particles.at(number_of_particles_inside_domain);
+		Vector3 vector_difference = each_particle.position - origin;
+		if (!(vector_difference.isInRangeOf(dimensions))) {
+			//std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl << "debug: " << vector_difference << std::endl; //debug
 			outside_particles.push_back(each_particle);
 			particles.erase(particles.begin() + number_of_particles_inside_domain);
 		}

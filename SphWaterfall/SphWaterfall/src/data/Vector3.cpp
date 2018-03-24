@@ -66,7 +66,7 @@ Vector3& operator-=(Vector3& a, const Vector3& b) {
 }
 
 Vector3& operator*=(Vector3& vector, const double factor) {
-	vector.x = factor;
+	vector.x *= factor;
 	vector.y *= factor;
 	vector.z *= factor;
 	return vector;
@@ -89,7 +89,8 @@ bool operator==(const Vector3& a, const Vector3& b) {
 }
 
 bool Vector3::isInRangeOf(const Vector3& vector) const {
-	return x >= 0 && x < vector.x && y >= 0 && y < vector.y && z >= 0 && z <= vector.z;
+	double epsilon = 1e-6;
+	return ((abs(x) >= 0) && ((x - vector.x) < epsilon) && (abs(y) >= 0) && ((y - vector.y) < epsilon) && (abs(z) >= 0) && ((z - vector.z) < epsilon));
 }
 
 double Vector3::length() const {
