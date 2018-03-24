@@ -10,6 +10,8 @@
 #include "visualization/VisualizationManager.h"
 #include "data/ParticleIO.h"
 
+#define EXPORT_TAG 2
+
 CUI::AsyncCommand acmd;
 
 void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
@@ -50,7 +52,7 @@ void createExport(int rank, SphManager& sph_manager) {
 			// receive until there is nothing left
 			int flag;
 			MPI_Status status;
-			MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
+			MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
 
 			int count = 0;
 			int source;
@@ -60,13 +62,13 @@ void createExport(int rank, SphManager& sph_manager) {
 				MPI_Get_count(&status, MPI_BYTE, &count);
 				std::vector<SphParticle> incomingParticles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
-				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, 99, MPI_COMM_WORLD, &status);
+				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, EXPORT_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 				allParticlesOfTimestep.insert(allParticlesOfTimestep.end(), incomingParticles.begin(), incomingParticles.end());
 
 				// for (auto particle : allParticlesOfTimestep) { std::cout << current_timestep << " received in export: " << particle << std::endl; } // debug
 
 				// next message
-				MPI_Iprobe(MPI_ANY_SOURCE, 99, MPI_COMM_WORLD, &flag, &status);
+				MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
 			}
 			
 			export_map[current_frame] = allParticlesOfTimestep;
@@ -84,7 +86,7 @@ void simulate(int rank, SphManager& sph_manager) {
 
 	if (rank == 1) {
 		std::vector<SphParticle> particles;
-		/*
+		
 		for (int i = 0; i < 15; i++) {
 			for (int j = 0; j < 15; j++) {
 				for (int k = 0; k < 15; k++) {
@@ -95,9 +97,9 @@ void simulate(int rank, SphManager& sph_manager) {
 				}
 			}
 		}
-		*/
+		
 
-		particles.push_back(SphParticle(Vector3(10.0, 10.0, 10.0)));
+		//particles.push_back(SphParticle(Vector3(10.0, 10.0, 10.0)));
 
 		sph_manager.add_particles(particles);
 	}

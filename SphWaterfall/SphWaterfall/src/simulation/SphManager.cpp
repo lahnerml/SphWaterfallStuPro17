@@ -4,6 +4,10 @@
 #define REFERENCE_DENSITY 20.0
 #define PRESSURE_CONSTANT 20.0
 
+#define META_TAG 0
+#define EXCHANGE_TAG 1
+#define EXPORT_TAG 2
+
 SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
 	number_of_timesteps(number_of_timesteps),
@@ -28,11 +32,11 @@ void SphManager::simulate() {
 
 	for (int simulation_timestep = 1; simulation_timestep <= number_of_timesteps; simulation_timestep++) {
 		exchangeRimParticles();
-		//std::cout << "after exchange rim particles" << std::endl; //debug
+		//std::cout << "processor " << mpi_rank + 1 << " after timestep " << simulation_timestep << " exchange rim particles" << std::endl; //debug
 		update();
-		//std::cout << "after update" << std::endl; //debug
+		//std::cout << "processor " << mpi_rank + 1 << " after timestep " << simulation_timestep << " update" << std::endl; //debug
 		exchangeParticles();
-		//std::cout << "after exchange particles" << std::endl; //debug
+		//std::cout << "processor " << mpi_rank + 1 << " after timestep " << simulation_timestep << " exchange particles" << std::endl; //debug
 
 		if ((simulation_timestep % 20) == 1) {
 			exportParticles();
@@ -81,7 +85,7 @@ void SphManager::update() {
 		for (auto& each_particle : each_domain.second.getParticles()) {
 			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
 				updateVelocity(each_particle);
-				std::cout << "final particle: " << each_particle << std::endl; // debug
+				//std::cout << "final particle: " << each_particle << " on processor " << mpi_rank + 1 << std::endl; // debug
 			}
 		}
 	}
@@ -244,7 +248,7 @@ void SphManager::exchangeRimParticles() {
 
 	std::vector<SphParticle> incoming_rim_particles;
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> new_rim_particles;
-	int count = 1;
+	int count = 10;
 
 	//for (auto target : target_map) { for (auto source : target.second) { std::cout << "source: " << unhash(source.first) << "  target: " << unhash(target.first) << std::endl; } }
 
@@ -257,8 +261,8 @@ void SphManager::exchangeRimParticles() {
 				}
 				else {
 					// target domain id, source domain id, tag der richtigen Nachricht
-					std::array<int, 3> meta = { target.first, source.first, count };
-					MPI_Send(meta.data(), meta.size(), MPI_INT, target_process_id, 0, slave_comm);
+					std::array<int, 4> meta = { target.first, source.first, count, source.second.size()};
+					MPI_Send(meta.data(), meta.size(), MPI_INT, target_process_id, META_TAG, slave_comm);
 
 					//for (auto particle : source.second) { std::cout << particle << std::endl; } // debug
 					// send particles
@@ -276,29 +280,26 @@ void SphManager::exchangeRimParticles() {
 	// receive until there is nothing left
 	int flag, useless_flag;
 	MPI_Status status;
-	MPI_Iprobe(MPI_ANY_SOURCE, 0, slave_comm, &flag, &status);
+	MPI_Iprobe(MPI_ANY_SOURCE, META_TAG, slave_comm, &flag, &status);
 	
 	while (flag) {
 		int source = status.MPI_SOURCE;
 		
-		std::array<int, 3> meta = std::array<int, 3>();
-		MPI_Recv(meta.data(), meta.size(), MPI_INT, source, 0, slave_comm, &status);
+		std::array<int, 4> meta = std::array<int, 4>();
+		MPI_Recv(meta.data(), meta.size(), MPI_INT, source, META_TAG, slave_comm, &status);
 
-		MPI_Iprobe(source, meta[2], slave_comm, &useless_flag, &status);
+		int tag = meta[2];
+		count = meta[3] * sizeof(SphParticle);
+		incoming_rim_particles = std::vector<SphParticle>(meta[3]);
 
-		source = status.MPI_SOURCE;
-		int tag = status.MPI_TAG;
-		MPI_Get_count(&status, MPI_BYTE, &count);
-
-		incoming_rim_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
-		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, slave_comm, &status);
+		MPI_Recv(incoming_rim_particles.data(), count, MPI_BYTE, source, tag, slave_comm, MPI_STATUS_IGNORE);
 
 		//for (auto particle : incoming_rim_particles) { std::cout << particle << std::endl; } // debug
 
 		new_rim_particles[meta[0]][meta[1]] = incoming_rim_particles;
 
 		// next message
-		MPI_Iprobe(MPI_ANY_SOURCE, 0, slave_comm, &flag, &status);
+		MPI_Iprobe(MPI_ANY_SOURCE, META_TAG, slave_comm, &flag, &status);
 	}
 
 	for (auto& target : new_rim_particles) {
@@ -349,8 +350,7 @@ void SphManager::exchangeParticles() {
 	MPI_Request request;
 	for (auto& vector : target_map) {
 		//for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
-		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, 0, slave_comm, &request);
-		MPI_Request_free(&request);
+		MPI_Send(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, EXCHANGE_TAG, slave_comm);
 	}
 
 	MPI_Barrier(slave_comm);
@@ -358,7 +358,7 @@ void SphManager::exchangeParticles() {
 	// receive until there is nothing left
 	int flag;
 	MPI_Status status;
-	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
+	MPI_Iprobe(MPI_ANY_SOURCE, EXCHANGE_TAG, slave_comm, &flag, &status);
 
 	int source;
 	while (flag) {
@@ -366,12 +366,12 @@ void SphManager::exchangeParticles() {
 		MPI_Get_count(&status, MPI_BYTE, &count);
 		incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
-		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, 0, slave_comm, &status);
+		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, EXCHANGE_TAG, slave_comm, MPI_STATUS_IGNORE);
 		all_new_particles.insert(all_new_particles.end(), incoming_particles.begin(), incoming_particles.end());
 		//for (auto particle : incoming_particles) { std::cout << "incoming: " << particle << std::endl; } // debug
 
 		// next message
-		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, slave_comm, &flag, &status);
+		MPI_Iprobe(MPI_ANY_SOURCE, EXCHANGE_TAG, slave_comm, &flag, &status);
 	}
 
 	//for (auto particle : all_new_particles) { std::cout << "all new: " << particle << std::endl; } // debug
@@ -427,7 +427,7 @@ void SphManager::exportParticles() {
 	// for (auto each_particle : particles_to_export) { std::cout << "final particle: " << each_particle << std::endl; } // debug 
 
 	//send particles to master
-	MPI_Send(particles_to_export.data(), particles_to_export.size() * sizeof(SphParticle), MPI_BYTE, 0, 99, MPI_COMM_WORLD);
+	MPI_Send(particles_to_export.data(), particles_to_export.size() * sizeof(SphParticle), MPI_BYTE, 0, EXPORT_TAG, MPI_COMM_WORLD);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 }
