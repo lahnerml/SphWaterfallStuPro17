@@ -13,6 +13,7 @@ class SphParticle {
 		SphParticle();
 		SphParticle(Vector3 position);
 		SphParticle(Vector3 position, Vector3 velocity);
+		SphParticle(Vector3 position, Vector3 velocity, double mass);
 		SphParticle(Vector3 position, ParticleType particle_type);
 		~SphParticle();
 

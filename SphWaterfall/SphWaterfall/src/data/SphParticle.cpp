@@ -24,7 +24,14 @@ SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
 	particle_type(SphParticle::ParticleType::FLUID) {
 	this->mass = 1.0;
 	this->local_density = 20.0;
+}
 
+SphParticle::SphParticle(Vector3 position, Vector3 velocity, double mass) :
+	position(position),
+	velocity(velocity),
+	mass(mass),
+	particle_type(SphParticle::ParticleType::FLUID) {
+	this->local_density = 20.0;
 }
 
 SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particle_type) :
