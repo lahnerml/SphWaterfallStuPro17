@@ -160,7 +160,6 @@ std::vector<SphParticle> StaticParticleGenerator::generateParticlesOnFace(Face& 
 }
 
 
-
 void StaticParticleGenerator::detectDuplicate(SphParticle a, SphParticle b) {
 	
 }

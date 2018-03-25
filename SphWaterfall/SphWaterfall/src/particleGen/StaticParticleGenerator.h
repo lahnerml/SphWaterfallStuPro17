@@ -20,7 +20,7 @@ public:
 
 	static void generateParticlesOnFace(Face&, double, std::vector<SphParticle>&);
 	static std::vector<SphParticle> generateParticlesOnFace(Face&, double);
-
+  
 	static void detectDuplicate(SphParticle, SphParticle);
 	static void removeDuplicate(SphParticle, SphParticle);
 private:
