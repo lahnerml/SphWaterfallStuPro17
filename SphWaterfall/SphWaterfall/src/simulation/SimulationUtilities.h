@@ -9,8 +9,6 @@
 #define H (Q_MAX / 4)
 // minimal density of a particle
 #define REFERENCE_DENSITY 20.0
-// density for static particles
-#define STATIC_PARTICLE_REFERENCE_DENSITY 20
 
 // Number of simulation timesteps
 #define TIMESTEPS 101

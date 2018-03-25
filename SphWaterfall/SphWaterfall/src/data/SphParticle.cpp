@@ -39,12 +39,7 @@ SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particle_ty
 	velocity(Vector3()),
 	particle_type(particle_type) {
 	this->mass = 1.0;
-	if (particle_type == SphParticle::ParticleType::STATIC) {
-		this->local_density = STATIC_PARTICLE_REFERENCE_DENSITY;
-	}
-	else {
-		this->local_density = REFERENCE_DENSITY;
-	}
+	this->local_density = REFERENCE_DENSITY;
 }
 
 SphParticle::~SphParticle() {
