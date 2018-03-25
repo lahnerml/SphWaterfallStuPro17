@@ -44,6 +44,21 @@ void SphManager::simulate() {
 			std::cout << "simulation of timestep " << simulation_timestep << " finished" << std::endl;
 		}
 	}
+
+	// cleans up all FluidParticles after simulation has finished
+	for (auto& each_domain : domains) {
+		if (each_domain.second.hasFluidParticles()) {
+			std::vector<SphParticle>& particles_in_current_domain = each_domain.second.getParticles();
+			for (int i = 0; i < particles_in_current_domain.size(); i++) {
+				SphParticle& each_particle = particles_in_current_domain.at(i);
+				if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+					particles_in_current_domain.erase(particles_in_current_domain.begin() + i);
+					i--;
+				}
+			}
+		}
+	}
+	//for (auto& each_domain : domains) {for (auto& each_particle : each_domain.second.getParticles()) {std::cout << "particle in domain: " << each_particle << std::endl;}} // debug
 }
 
 void SphManager::update() {
