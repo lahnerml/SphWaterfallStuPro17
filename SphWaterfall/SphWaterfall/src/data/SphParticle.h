@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector3.h"
+#include "../simulation/SimulationUtilities.h"
 
 class SphParticle {
 	public:
@@ -26,7 +27,7 @@ class SphParticle {
 		double mass;
 		double local_density;
 
-		ParticleType getParticleType();
+		ParticleType getParticleType() const;
 	private:
 		ParticleType particle_type;
 };

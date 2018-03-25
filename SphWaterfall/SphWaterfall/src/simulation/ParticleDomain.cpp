@@ -5,14 +5,16 @@
 
 ParticleDomain::ParticleDomain() :
 	origin(Vector3()),
-	dimensions(Vector3())
+	dimensions(Vector3()),
+	number_of_fluid_particles(0)
 {
 	particles = std::vector<SphParticle>();
 }
 
 ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& dimension) : 
 	origin(origin),
-	dimensions(dimension)
+	dimensions(dimension),
+	number_of_fluid_particles(0)
 {
 	particles = std::vector<SphParticle>();
 }
@@ -42,6 +44,7 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 			//std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl << "debug: " << vector_difference << std::endl; //debug
 			outside_particles.push_back(each_particle);
 			particles.erase(particles.begin() + number_of_particles_inside_domain);
+			number_of_fluid_particles--;
 		}
 		else {
 			number_of_particles_inside_domain++;
@@ -68,11 +71,18 @@ const Vector3& ParticleDomain::getOrigin() const {
 }
 
 void ParticleDomain::addParticle(const SphParticle& particle) {
+	if (particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+		number_of_fluid_particles++;
+	}
 	particles.push_back(particle);
 }
 
 std::vector<SphParticle>& ParticleDomain::getParticles() {
 	return particles;
+}
+
+bool ParticleDomain::hasFluidParticles() {
+	return number_of_fluid_particles != 0;
 }
 
 std::vector<SphParticle> ParticleDomain::getTopRimParticles() {

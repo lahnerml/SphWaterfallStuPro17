@@ -2,7 +2,7 @@
 #include "StaticParticleGenerator.h"
 
 // density of how many static particles are generated per face
-#define STATIC_PARTICLE_GENERATION_DENSITY 0.1
+#define STATIC_PARTICLE_GENERATION_DENSITY 0.01
 
 StaticParticleGenerator::StaticParticleGenerator()
 {

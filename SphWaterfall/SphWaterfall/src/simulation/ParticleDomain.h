@@ -24,7 +24,7 @@ public:
 
 	void addParticle(const SphParticle&);
 	std::vector<SphParticle>& getParticles();
-
+	bool hasFluidParticles();
 	void resetRimParticles();
 	void clearRimParticles();
 	void setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
@@ -62,6 +62,8 @@ private:
 	std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_particles;
 
 	std::vector<int> neighbour_domains;
+
+	int number_of_fluid_particles;
 
 	NullableWrapper<std::vector<SphParticle>> front_rim_particles;
 	NullableWrapper<std::vector<SphParticle>> back_rim_particles;
