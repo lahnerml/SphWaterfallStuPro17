@@ -4,8 +4,9 @@
 SphParticle::SphParticle() :
 	position(Vector3()),
 	velocity(Vector3()),
-	pType(SphParticle::ParticleType::FLUID)
-{
+	pType(SphParticle::ParticleType::FLUID) {
+	this->mass = 1.0;
+	this->local_density = 20.0;
 }
 
 SphParticle::SphParticle(Vector3 position) :
@@ -29,21 +30,20 @@ SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
 SphParticle::SphParticle(Vector3 position, Vector3 velocity, double mass) :
 	position(position),
 	velocity(velocity),
-	mass(mass){
+	mass(mass) {
 	this->local_density = 20.0;
 }
 
-SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particleType) :
+SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particle_type) :
 	position(position),
 	velocity(Vector3()),
-	pType(particleType)
-{
+	pType(particle_type) {
+	this->local_density = 20.0;
 }
 
 SphParticle::~SphParticle() {
 
 }
-
 
 bool operator==(const SphParticle a, const SphParticle b)
 {
