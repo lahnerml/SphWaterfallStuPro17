@@ -77,11 +77,9 @@ void SphManager::update() {
 	//std::cout << "after neighbour search" << std::endl; // debug
 	// compute and set local densities
 	for (auto& each_domain : domains) {
-		if (each_domain.second.size() != 0) {
-			for (auto& each_particle : each_domain.second.getParticles()) {
-				if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-					computeLocalDensity(each_particle);
-				}
+		for (auto& each_particle : each_domain.second.getParticles()) {
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				computeLocalDensity(each_particle);
 			}
 		}
 	}
@@ -89,13 +87,12 @@ void SphManager::update() {
 	//std::cout << "after compute local densities" < < std::endl; // debug
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
-		if (each_domain.second.size() != 0) {
-			for (auto& each_particle : each_domain.second.getParticles()) {
-				if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-					updateVelocity(each_particle);
-					//std::cout << "final particle: " << each_particle << " on processor " << mpi_rank + 1 << std::endl; // debug
-				}
+		for (auto& each_particle : each_domain.second.getParticles()) {
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				updateVelocity(each_particle);
+				//std::cout << "final particle: " << each_particle << " on processor " << mpi_rank + 1 << std::endl; // debug
 			}
+		
 		}
 	}
 	//std::cout << "after update velocity" << std::endl;
@@ -456,11 +453,9 @@ void SphManager::exportParticles() {
 	std::vector<SphParticle> particles_to_export;
 	
 	for (auto& each_domain : domains) {
-		if (each_domain.second.size() != 0) {
-			for (auto each_particle : each_domain.second.getParticles()) {
-				if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-					particles_to_export.push_back(each_particle);
-				}
+		for (auto each_particle : each_domain.second.getParticles()) {
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				particles_to_export.push_back(each_particle);
 			}
 		}
 	}
