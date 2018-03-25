@@ -22,7 +22,7 @@ private:
 	int mpi_rank;
 	Vector3 domain_dimensions;
 	int number_of_timesteps;
-	double timestep_duration;
+	double const timestep_duration;
 	double half_timestep_duration;
 	std::unordered_map<int, ParticleDomain> domains;
 	std::unordered_map<int, std::vector<SphParticle>> add_particles_map;

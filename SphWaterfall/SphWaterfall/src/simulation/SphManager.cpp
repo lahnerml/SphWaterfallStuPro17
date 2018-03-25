@@ -78,9 +78,7 @@ void SphManager::update() {
 	// compute and set local densities
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getParticles()) {
-			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-				computeLocalDensity(each_particle);
-			}
+			computeLocalDensity(each_particle);
 		}
 	}
 
