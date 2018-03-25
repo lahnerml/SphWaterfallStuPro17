@@ -72,7 +72,7 @@ void createExport(int rank, SphManager& sph_manager) {
 			export_map[current_frame] = allParticlesOfTimestep;
 
 			current_frame++;
-			current_timestep += 20;
+			current_timestep++;
 		}
 		ParticleIO::exportParticles(export_map, "test.test");
 		
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 0.01);
+	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 0.04);
 	Terrain loadedMesh;
 
 	if (rank == 0) {
