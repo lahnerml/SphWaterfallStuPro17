@@ -24,7 +24,6 @@ private:
 	int number_of_timesteps;
 	double timestep_duration;
 	double half_timestep_duration;
-	Vector3 gravity_acceleration;
 	std::unordered_map<int, ParticleDomain> domains;
 	std::unordered_map<int, std::vector<SphParticle>> add_particles_map;
 	std::unordered_map<int, std::pair<SphParticle, std::vector<SphParticle>>> neighbour_particles;

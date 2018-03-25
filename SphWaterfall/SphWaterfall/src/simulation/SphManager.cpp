@@ -4,6 +4,7 @@
 #define REFERENCE_DENSITY 20.0
 #define PRESSURE_CONSTANT 20.0
 #define HALF_TIMESTEP
+#define GRAVITY_ACCELERATION Vector3(0.0, -9.81, 0.0)
 
 SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
@@ -11,7 +12,6 @@ SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps
 	timestep_duration(timestep_duration) 
 {
 	half_timestep_duration = timestep_duration / 2.0;
-	Vector3 gravity_acceleration = Vector3(0.0, -9.81, 0.0);
 
 	kernel = kernel_factory.getInstance(1);
 	neighbour_search = neighbour_search_factory.getInstance(1);
@@ -109,7 +109,7 @@ void SphManager::updateVelocity(SphParticle& particle) {
 }
 
 Vector3 SphManager::computeAcceleration(SphParticle& particle) {
-	Vector3 acceleration = gravity_acceleration + computeDensityAcceleration(particle) + computeViscosityAcceleration(particle);
+	Vector3 acceleration = GRAVITY_ACCELERATION + computeDensityAcceleration(particle) + computeViscosityAcceleration(particle);
 	return acceleration;
 }
 
