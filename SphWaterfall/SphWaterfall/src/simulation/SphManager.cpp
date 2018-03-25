@@ -215,7 +215,7 @@ void SphManager::exchangeRimParticles() {
 
 
 	for (auto& each_domain : domains) {
-		if (each_domain.second.size() == 0) {
+		if (!(each_domain.second.size() == 0)) {
 			source_domain_id = each_domain.first;
 			Vector3 source_domain_origin = unhash(source_domain_id);
 
