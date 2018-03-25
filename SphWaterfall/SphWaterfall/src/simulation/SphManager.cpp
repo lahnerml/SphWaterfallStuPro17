@@ -213,64 +213,67 @@ void SphManager::exchangeRimParticles() {
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> target_map;
 	int target_domain_id, source_domain_id;
 
-	for (auto& each_domain : domains) {
-		source_domain_id = each_domain.first;
-		Vector3 source_domain_origin = unhash(source_domain_id);
 
-		each_domain.second.clearRimParticles();
-		
-		target_domain_id = hash(source_domain_origin + Vector3(-1, -1, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontLeftBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, -1, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getLeftBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, -1, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackLeftBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, 0, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontLeftRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, 0, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getLeftRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, 0, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackLeftRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, 1, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontLeftTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, 1, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getLeftTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(-1, 1, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackLeftTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, -1, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, -1, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, -1, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, 0, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, 0, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, 1, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, 1, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(0, 1, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, -1, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRightBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, -1, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getRightBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, -1, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRightBottomRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, 0, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRightRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, 0, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getRightRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, 0, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRightRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, 1, -1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRightTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, 1, 0));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getRightTopRimParticles();
-		target_domain_id = hash(source_domain_origin + Vector3(1, 1, 1));
-		target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRightTopRimParticles();
+	for (auto& each_domain : domains) {
+		if (each_domain.second.size() == 0) {
+			source_domain_id = each_domain.first;
+			Vector3 source_domain_origin = unhash(source_domain_id);
+
+			each_domain.second.clearRimParticles();
+
+			target_domain_id = hash(source_domain_origin + Vector3(-1, -1, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontLeftBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, -1, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getLeftBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, -1, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackLeftBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, 0, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontLeftRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, 0, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getLeftRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, 0, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackLeftRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, 1, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontLeftTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, 1, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getLeftTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(-1, 1, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackLeftTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, -1, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, -1, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, -1, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, 0, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, 0, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, 1, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, 1, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(0, 1, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, -1, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRightBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, -1, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getRightBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, -1, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRightBottomRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, 0, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRightRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, 0, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getRightRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, 0, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRightRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, 1, -1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getFrontRightTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, 1, 0));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getRightTopRimParticles();
+			target_domain_id = hash(source_domain_origin + Vector3(1, 1, 1));
+			target_map[target_domain_id][source_domain_id] = each_domain.second.getBackRightTopRimParticles();
+		}
 	}
 
 	std::vector<SphParticle> incoming_rim_particles;
