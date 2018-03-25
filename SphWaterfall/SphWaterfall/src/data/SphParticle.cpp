@@ -38,6 +38,7 @@ SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particle_ty
 	position(position),
 	velocity(Vector3()),
 	pType(particle_type) {
+	this->mass = 1.0;
 	this->local_density = 20.0;
 }
 

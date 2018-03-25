@@ -92,12 +92,12 @@ void SphManager::update() {
 
 void SphManager::updateVelocity(SphParticle& particle) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle);
-	particle.velocity += ((timestep_duration / 2) * accelleration_timestep_start);
+	particle.velocity += ((timestep_duration / 2.0) * accelleration_timestep_start);
 	Vector3 position_timestep_half = particle.position + ((timestep_duration / 2) * particle.velocity);
 
 	Vector3 accelleration_timestep_half = computeAcceleration(particle);
 	Vector3 velocity_timestep_end = particle.velocity + (timestep_duration * accelleration_timestep_half);
-	particle.position = position_timestep_half + ((timestep_duration / 2) * velocity_timestep_end);
+	particle.position = position_timestep_half + ((timestep_duration / 2.0) * velocity_timestep_end);
 }
 
 Vector3 SphManager::computeAcceleration(SphParticle& particle) {
