@@ -4,15 +4,15 @@
 SphParticle::SphParticle() :
 	position(Vector3()),
 	velocity(Vector3()),
-	pType(SphParticle::ParticleType::FLUID) {
+	particle_type(SphParticle::ParticleType::FLUID) {
 	this->mass = 1.0;
 	this->local_density = 20.0;
 }
 
 SphParticle::SphParticle(Vector3 position) :
 	position(position),
-	pType(SphParticle::ParticleType::FLUID) {
-	this->velocity = Vector3();
+	velocity(Vector3()),
+	particle_type(SphParticle::ParticleType::FLUID) {
 	this->mass = 1.0;
 	this->local_density = 20.0;
 
@@ -21,23 +21,16 @@ SphParticle::SphParticle(Vector3 position) :
 SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
 	position(position),
 	velocity(velocity),
-	pType(SphParticle::ParticleType::FLUID) {
+	particle_type(SphParticle::ParticleType::FLUID) {
 	this->mass = 1.0;
 	this->local_density = 20.0;
 
 }
 
-SphParticle::SphParticle(Vector3 position, Vector3 velocity, double mass) :
-	position(position),
-	velocity(velocity),
-	mass(mass) {
-	this->local_density = 20.0;
-}
-
 SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particle_type) :
 	position(position),
 	velocity(Vector3()),
-	pType(particle_type) {
+	particle_type(particle_type) {
 	this->mass = 1.0;
 	this->local_density = 20.0;
 }
@@ -57,5 +50,5 @@ std::ostream& operator<<(std::ostream & out, const SphParticle& particle)
 }
 SphParticle::ParticleType SphParticle::getParticleType()
 {
-	return this->pType;
+	return this->particle_type;
 }

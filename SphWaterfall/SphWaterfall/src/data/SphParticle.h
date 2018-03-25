@@ -11,10 +11,9 @@ class SphParticle {
 		};
 
 		SphParticle();
-		SphParticle(Vector3);
-		SphParticle(Vector3, Vector3);
-		SphParticle(Vector3, Vector3, double);
-		SphParticle(Vector3, ParticleType);
+		SphParticle(Vector3 position);
+		SphParticle(Vector3 position, Vector3 velocity);
+		SphParticle(Vector3 position, ParticleType particle_type);
 		~SphParticle();
 
 		friend bool operator==(const SphParticle, const SphParticle);
@@ -28,5 +27,5 @@ class SphParticle {
 
 		ParticleType getParticleType();
 	private:
-		ParticleType pType;
+		ParticleType particle_type;
 };
