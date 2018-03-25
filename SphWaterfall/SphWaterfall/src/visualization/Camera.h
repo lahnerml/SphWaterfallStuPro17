@@ -39,7 +39,7 @@ private:
 
 	Pixel castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixel basePixel);
 
-	Frame getCurrentlyUsedBaseFrame(unsigned int frameID);
+	Frame& getCurrentlyUsedBaseFrame(unsigned int frameID);
 
 	Frame baseFrameOpen;
 	Frame baseFrameClosed;
