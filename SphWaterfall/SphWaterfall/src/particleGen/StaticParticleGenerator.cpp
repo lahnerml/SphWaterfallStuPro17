@@ -1,15 +1,12 @@
 #pragma once
 #include "StaticParticleGenerator.h"
 
-const double PARTICLE_DENSITY = 10.0;
-
-
+// density of how many static particles are generated per face
+#define STATIC_PARTICLE_GENERATION_DENSITY 0.1
 
 StaticParticleGenerator::StaticParticleGenerator()
 {
 }
-
-
 
 void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 {
@@ -102,7 +99,7 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager& manager)
 
 	for (auto face : faces)
 	{
-		generateParticlesOnFace(face, PARTICLE_DENSITY, generatedParticles);
+		generateParticlesOnFace(face, STATIC_PARTICLE_GENERATION_DENSITY, generatedParticles);
 	}
 
 	//for (auto each_particle : generatedParticles) { std::cout << "static particle: " << each_particle << std::endl; } //debug
