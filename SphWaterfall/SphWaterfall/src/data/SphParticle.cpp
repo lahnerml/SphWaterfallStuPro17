@@ -4,48 +4,56 @@
 SphParticle::SphParticle() :
 	position(Vector3()),
 	velocity(Vector3()),
-	pType(SphParticle::ParticleType::FLUID)
-{
+	particle_type(SphParticle::ParticleType::FLUID) {
+	this->mass = 1.0;
+	this->local_density = REFERENCE_DENSITY;
 }
 
 SphParticle::SphParticle(Vector3 position) :
 	position(position),
 	velocity(Vector3()),
-	pType(SphParticle::ParticleType::FLUID)
-{
+	particle_type(SphParticle::ParticleType::FLUID) {
+	this->mass = 1.0;
+	this->local_density = REFERENCE_DENSITY;
+
 }
 
 SphParticle::SphParticle(Vector3 position, Vector3 velocity) :
 	position(position),
 	velocity(velocity),
-	pType(SphParticle::ParticleType::FLUID)
-{
+	particle_type(SphParticle::ParticleType::FLUID) {
+	this->mass = 1.0;
+	this->local_density = REFERENCE_DENSITY;
 }
 
 SphParticle::SphParticle(Vector3 position, Vector3 velocity, double mass) :
 	position(position),
 	velocity(velocity),
-	mass(mass) {
+	mass(mass),
+	particle_type(SphParticle::ParticleType::FLUID) {
+	this->local_density = REFERENCE_DENSITY;
 }
 
-SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particleType) :
+SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particle_type) :
 	position(position),
 	velocity(Vector3()),
-	pType(particleType)
-{
+	particle_type(particle_type) {
+	this->mass = 1.0;
+	this->local_density = REFERENCE_DENSITY;
 }
 
 SphParticle::~SphParticle() {
 
 }
 
-
-bool operator==(const SphParticle a, const SphParticle b)
-{
-	return ((a.position == b.position) && (a.velocity == b.velocity) && (a.mass == b.mass) && (a.local_density == b.local_density));
+bool operator==(const SphParticle a, const SphParticle b) {
+	return ((a.position == b.position) && (a.velocity == b.velocity)); // TODO: local density can't be a value because otherwise calculation won't work
 }
 
-SphParticle::ParticleType SphParticle::getParticleType()
-{
-	return this->pType;
+std::ostream& operator<<(std::ostream & out, const SphParticle& particle) {
+	return out << "position: " << particle.position <<  "  velocity: " << particle.velocity << "  local_density:" << particle.local_density;
+}
+
+SphParticle::ParticleType SphParticle::getParticleType() const {
+	return this->particle_type;
 }

@@ -1,21 +1,34 @@
+#pragma once
+
 #include "Camera.h"
 #include "util.h"
-#include "../data/FluidParticle.h"
+#include "../data/SphParticle.h"
+#include "../data/ParticleIO.h"
+#include <string>
 
-std::vector<Camera> cameras;
 
-static void init(Vector3 cameraLocation, Vector3 cameraDirection, unsigned int frameWidth, unsigned int frameHeight) {
-	Camera cam = Camera(cameraLocation, cameraDirection, frameWidth, frameHeight, cameras.size());
-	cameras.emplace_back(cam);
-}
+class VisualizationManager {
+public:
+	static void init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight);
 
-static void addCamera(Vector3 cameraLocation, Vector3 cameraDirection, unsigned int frameWidth, unsigned int frameHeight) {
-	Camera cam = Camera(cameraLocation, cameraDirection, frameWidth, frameHeight, cameras.size());
-	cameras.emplace_back(cam);
-}
+	static void importTerrain(Terrain t, bool open);
 
-static void debugRenderFrame(std::vector<FluidParticle> particles) {
-	for (int i = 0; i < cameras.size(); i++) {
-		cameras[i].debugRenderFrame(convertSphParticles(particles), 1);
-	}
-}
+	static void debugRenderFrame(std::vector<SphParticle> particles, string fileName);
+
+	static void renderFrames(string inputFileName);
+
+	static void renderFramesDistributed(string inputFileName, int rank);
+
+	static void generateFrames(int frameCount, int particleCount);
+
+	static void debug();
+
+private:
+	static vector<SphParticle> generateDebugParticles(int count);
+
+	static bool initilaized;
+
+	static Camera camera;
+	static Terrain terrainOpen;
+	static Terrain terrainClosed;
+};

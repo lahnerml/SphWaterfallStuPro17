@@ -1,13 +1,22 @@
 #pragma once
+#include "mpi.h"
+#include "../data/Vector3.h"
+#include "../data/SphParticle.h"
 
-#include "mpi.h";
-#include "../data/Vector3.h";
-#include "../data/SphParticle.h";
+// Influence radius
+#define Q_MAX 1.2
+// Smoothing radius (Influence radius / 4)
+#define H (Q_MAX / 4)
+// minimal density of a particle
+#define REFERENCE_DENSITY 20.0
 
-// Smoothing length
-#define H 1.0
-// Influential radius
-#define Q_MAX 2.0
+// Number of simulation timesteps
+#define TIMESTEPS 101
+
+// Sph Manager tags
+#define META_TAG 0
+#define EXCHANGE_TAG 1
+#define EXPORT_TAG 2
 
 namespace SimulationUtilities {
 	int hash(const Vector3&);

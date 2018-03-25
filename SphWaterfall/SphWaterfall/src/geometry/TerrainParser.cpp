@@ -1,12 +1,5 @@
-#include <vector>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-
+#pragma once
 #include "TerrainParser.h"
-#include "Terrain.h"
-#include "../data/Vector3.h"
 
 Terrain TerrainParser::loadFromFile(std::string fileName) {
 	std::vector<Vector3> vertices;
@@ -17,7 +10,7 @@ Terrain TerrainParser::loadFromFile(std::string fileName) {
 	readObjFile(fileName, vertices, normals, faces);
 
 	//Generate terrain
-	return Terrain::Terrain(vertices, normals, faces);
+	return Terrain(vertices, normals, faces);
 }
 
 void TerrainParser::readObjFile(std::string fileName, std::vector<Vector3> &vertices, std::vector<Vector3> &normals, std::vector<int> &faces)
@@ -54,7 +47,7 @@ void TerrainParser::readObjFile(std::string fileName, std::vector<Vector3> &vert
 			int a, b, c;
 			s >> a; s >> b; s >> c;
 			a--; b--; c--;
-			//TODO Create Face object here
+			
 			faces.push_back(a); faces.push_back(b); faces.push_back(c);
 		}
 		else if (line[0] == '#')

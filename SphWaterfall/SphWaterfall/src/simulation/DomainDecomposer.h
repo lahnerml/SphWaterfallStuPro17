@@ -9,6 +9,5 @@ public:
 	bool decideDecomposition(ParticleDomain domains[]);
 	void decompose(ParticleDomain domains[]);
 private:
-	unsigned int totalDomains;
-	ParticleDomain domains[];
+	std::unordered_map<int, ParticleDomain> domains;
 };

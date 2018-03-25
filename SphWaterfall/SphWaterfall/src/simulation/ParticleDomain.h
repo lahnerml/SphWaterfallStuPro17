@@ -3,6 +3,7 @@
 #include "../data/Vector3.h"
 #include "../data/NullableWrapper.h"
 #include "../data/NullableWrapper.cpp"
+#include "../simulation/SimulationUtilities.h"
 
 #include <vector>
 #include <iterator>
@@ -12,7 +13,7 @@
 class ParticleDomain {
 public:
 	ParticleDomain();
-	ParticleDomain(const Vector3&, const Vector3&);
+	ParticleDomain(const Vector3& origin, const Vector3& dimension);
 	~ParticleDomain();
 
 	std::vector<SphParticle> removeParticlesOutsideDomain();
@@ -20,8 +21,10 @@ public:
 	int size() const;
 	const Vector3& getDimensions() const;
 	const Vector3& getOrigin() const;
+
 	void addParticle(const SphParticle&);
 	std::vector<SphParticle>& getParticles();
+	bool hasFluidParticles();
 	void resetRimParticles();
 	void clearRimParticles();
 	void setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
@@ -56,10 +59,11 @@ public:
 
 private:
 	std::vector<SphParticle> particles;
-	std::vector<SphParticle> static_particles;
 	std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_particles;
 
 	std::vector<int> neighbour_domains;
+
+	int number_of_fluid_particles;
 
 	NullableWrapper<std::vector<SphParticle>> front_rim_particles;
 	NullableWrapper<std::vector<SphParticle>> back_rim_particles;
@@ -89,7 +93,6 @@ private:
 	NullableWrapper<std::vector<SphParticle>> back_right_top_rim_particles;
 	
 	int particles_outside_domain;
-	double rim_distance = 2;
 	Vector3 origin;
 	Vector3 dimensions;
 };

@@ -1,8 +1,17 @@
 #pragma once
 
 #include "../data/Vector3.h"
-#include "../data/FluidParticle.h"
+#include "../data/SphParticle.h"
+#include "DebugObject.h"
+#include "ParticleObject.h"
+#include "Frame.h"
+#include "../geometry/Face.h"
 #include <math.h>
+#include <iostream>
+#include <cstring>
+#include <vector>
+
+using namespace std;
 
 const int bytesPerPixel = 3; /// red, green, blue
 const int fileHeaderSize = 14;
@@ -36,22 +45,22 @@ static Vector3 findUpVector(Vector3 first, Vector3 second) {
 		first.x * second.y - first.y * second.x);
 
 	if (up.y > 0) return up;
-	return Vector3(up.x * -1, up.y * -1, up.z * -1);
+	return up*-1;
 }
 
-static double getLength(Vector3 vec) {
-	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-}
-
-static Vector3 normalizeVector(Vector3 vec) {
-	double len = getLength(vec);
-	return Vector3(vec.x / len, vec.y / len, vec.z / len);
-}
-
-static std::vector<DebugObject> convertSphParticles(std::vector<FluidParticle> &particles) {
+static std::vector<DebugObject> convertSphParticles(std::vector<SphParticle> &particles) {
 	std::vector<DebugObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
 		output.emplace_back(DebugObject(particles[i].position, 1));
+	}
+
+	return output;
+}
+
+static std::vector<ParticleObject> convertFluidParticles(std::vector<SphParticle> &particles) {
+	std::vector<ParticleObject> output;
+	for (unsigned int i = 0; i < particles.size(); i++) {
+		output.emplace_back(ParticleObject(particles.at(i).position, particles.at(i).mass));
 	}
 
 	return output;
@@ -111,4 +120,62 @@ static void writeFrameToBitmap(Frame f, const char* fileName, unsigned int w, un
 
 	free(img);
 	fclose(file);
+}
+
+static vector<string> split(const string &s, const char &c)
+{
+	string buff{ "" };
+	vector<string> v;
+
+	for (auto n : s)
+	{
+		if (n != c) buff += n; else
+			if (n == c && buff != "") { v.push_back(buff); buff = ""; }
+	}
+	if (buff != "") v.push_back(buff);
+
+	return v;
+}
+
+static bool startsWith(const string &s, const string &sequence) {
+	if (s.size() < sequence.size()) return false;
+
+	for (int i = 0; i < sequence.size(); i++) {
+		if (s.at(i) != sequence.at(i)) return false;
+	}
+
+	return true;
+}
+
+static bool intersectsWithFace(Ray &ray, Face face, double &distance) {
+	const float EPSILON = 0.0000001;
+	Vector3 vertex0 = face.a;
+	Vector3 vertex1 = face.b;
+	Vector3 vertex2 = face.c;
+	Vector3 edge1, edge2, h, s, q;
+	float a, f, u, v;
+	edge1 = vertex1 - vertex0;
+	edge2 = vertex2 - vertex0;
+	h = ray.direction.cross(edge2);
+	a = edge1.dot(h);
+	if (a > -EPSILON && a < EPSILON)
+		return false;
+	f = 1 / a;
+	s = ray.origin - vertex0;
+	u = f * (s.dot(h));
+	if (u < 0.0 || u > 1.0)
+		return false;
+	q = s.cross(edge1);
+	v = f * ray.direction.dot(q);
+	if (v < 0.0 || u + v > 1.0)
+		return false;
+	// At this stage we can compute t to find out where the intersection point is on the line.
+	float t = f * edge2.dot(q);
+	if (t > EPSILON) // ray intersection
+	{
+		distance = t;
+		return true;
+	}
+	else // This means that there is a line intersection but not a ray intersection.
+		return false;
 }

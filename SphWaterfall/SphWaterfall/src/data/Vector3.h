@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <math.h>
 
 class Vector3 {
 	public:
@@ -25,14 +26,20 @@ class Vector3 {
 		friend Vector3 operator-(const Vector3&, const Vector3&);
 
 		friend Vector3& operator+=(Vector3&, const Vector3&);
+		friend Vector3& operator-=(Vector3&, const Vector3&);
+		friend Vector3& operator*=(Vector3&, const double);
+
+		friend bool operator==(const Vector3&, const Vector3&);
 
 		friend std::ostream& operator<<(std::ostream &out, const Vector3&);
 
-		bool in_range_of(const Vector3&) const;
+		double dot(const Vector3&);
+		Vector3 cross(const Vector3&);
+
+		bool isInRangeOf(const Vector3&) const;
 		double length() const;
 		Vector3 normalize() const;
 		Vector3 roundDownward() const;
 		Vector3 distanceTo(const Vector3&, const Vector3&);
-
 	private:
 };
