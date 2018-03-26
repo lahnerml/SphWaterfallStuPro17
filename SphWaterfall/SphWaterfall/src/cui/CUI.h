@@ -34,6 +34,7 @@ namespace CUI {
 
 		ConsoleCommand aReadCmd(std::string& param);
 		void aWriteCmd(ConsoleCommand cmd, std::string param);
+		void printInputMessage();
 	private:
 		std::mutex cmdLock;
 		ConsoleCommand command;

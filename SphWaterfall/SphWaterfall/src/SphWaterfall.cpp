@@ -85,9 +85,9 @@ void simulate(int rank, SphManager& sph_manager) {
 	if (rank == 1) {
 		std::vector<SphParticle> particles;
 		
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				for (int k = 0; k < 5; k++) {
+		for (int i = 0; i < 20; i++) {
+			for (int j = 0; j < 20; j++) {
+				for (int k = 0; k < 20; k++) {
 					//SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
 					SphParticle particle = SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k));
 					particles.push_back(particle);
@@ -162,28 +162,48 @@ int main(int argc, char** argv)
 		{
 		case CUI::ConsoleCommand::LOAD_MESH:
 			loadMesh(rank, cmdParam, loadedMesh);
-			std::cout << "mesh loading finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Mesh loaded." << endl;
+				acmd.printInputMessage();
+			}
 			break;
 		case CUI::ConsoleCommand::GENERATE_PARTICLES:
 			generateParticles(rank, sphManager, loadedMesh);
-			std::cout << "particle generation finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Static particles generated." << endl;
+				acmd.printInputMessage();
+			}
 			break;
 		case CUI::ConsoleCommand::MOVE_SHUTTER:
 			moveShutter(rank);
-			std::cout << "moveing shutter finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Stutter move set." << endl;
+				acmd.printInputMessage();
+			}
 			break;
 		case CUI::ConsoleCommand::SIMULATE:
 			if (rank != 0) {
 				simulate(rank, sphManager);
-				std::cout << "simulation finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
 			}
 			else{
 				createExport(rank, sphManager);
 			}
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Simulation finished." << endl;
+				acmd.printInputMessage();
+			}
 			break;
 		case CUI::ConsoleCommand::RENDER:
 			render(rank);
-			std::cout << "rendering finished from processor " << rank << " out of " << slave_comm_size << " processors" << std::endl;
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Rendering finished." << endl;
+				acmd.printInputMessage();
+			}
 		default:
 			break;
 		}
@@ -191,7 +211,7 @@ int main(int argc, char** argv)
 		if (cmd != CUI::ConsoleCommand::EXIT && cmd != CUI::ConsoleCommand::NONE) {
 			CUI::acmd.aWriteCmd(CUI::ConsoleCommand::NONE);
 		}
-		
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 

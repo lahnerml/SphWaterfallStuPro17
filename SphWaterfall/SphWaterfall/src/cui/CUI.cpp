@@ -113,11 +113,11 @@ namespace CUI {
 	{
 		string inputLine, command;
 		queue<string> tokens;
+		acmd.printInputMessage();
 
 		while (acmd.aReadCmd() != CUI::ConsoleCommand::EXIT)
 		{
 			//Read command
-			cout << endl << "Please enter a command or enter 'help' to show a list of all commands" << endl;
 			getline(cin, inputLine);
 			trim(inputLine);
 
@@ -159,6 +159,10 @@ namespace CUI {
 				}
 			}
 		}
+	}
+
+	void AsyncCommand::printInputMessage() {
+		cout << endl << "Please enter a command or enter 'help' to show a list of all commands" << endl;
 	}
 
 	//AsyncCommand

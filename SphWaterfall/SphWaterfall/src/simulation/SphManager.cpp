@@ -1,5 +1,6 @@
 #pragma once
 #include "SphManager.h"
+#include <chrono>
 
 #define PRESSURE_CONSTANT 20.0
 
@@ -29,11 +30,30 @@ void SphManager::simulate() {
 	exchangeParticles();
 
 	for (int simulation_timestep = 1; simulation_timestep <= number_of_timesteps; simulation_timestep++) {
+		std::chrono::steady_clock::time_point begin;
+		std::chrono::steady_clock::time_point end;
+		if (mpi_rank == 0) {
+			begin = std::chrono::steady_clock::now();
+		}
 		exchangeRimParticles();
+		if (mpi_rank == 0) {
+			end = std::chrono::steady_clock::now();
+			std::cout << "finished rim exchange in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms"<< std::endl;
+			begin = std::chrono::steady_clock::now();
+		}
 		//std::cout << "processor " << mpi_rank + 1 << " after timestep " << simulation_timestep << " exchange rim particles" << std::endl; //debug
 		update();
+		if (mpi_rank == 0) {
+			end = std::chrono::steady_clock::now();
+			std::cout << "finished update in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+			begin = std::chrono::steady_clock::now();
+		}
 		//std::cout << "processor " << mpi_rank + 1 << " after timestep " << simulation_timestep << " update" << std::endl; //debug
 		exchangeParticles();
+		if (mpi_rank == 0) {
+			end = std::chrono::steady_clock::now();
+			std::cout << "finished exchange in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+		}
 		//std::cout << "processor " << mpi_rank + 1 << " after timestep " << simulation_timestep << " exchange particles" << std::endl; //debug
 
 		//if ((simulation_timestep % 20) == 1) {
@@ -90,11 +110,9 @@ void SphManager::update() {
 	//std::cout << "after neighbour search" << std::endl; // debug
 	// compute and set local densities
 	for (auto& each_domain : domains) {
-		if (each_domain.second.hasFluidParticles()) {
-			for (auto& each_particle : each_domain.second.getParticles()) {
-				if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
-					computeLocalDensity(each_particle);
-				}
+		for (auto& each_particle : each_domain.second.getParticles()) {
+			if (each_particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+				computeLocalDensity(each_particle);
 			}
 		}
 	}
