@@ -86,9 +86,9 @@ void simulate(int rank, SphManager& sph_manager) {
 	if (rank == 1) {
 		std::vector<SphParticle> particles;
 		
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				for (int k = 0; k < 5; k++) {
+		for (int i = 0; i < 20; i++) {
+			for (int j = 0; j < 20; j++) {
+				for (int k = 0; k < 20; k++) {
 					//SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
 					SphParticle particle = SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k));
 					particles.push_back(particle);
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 	int cmd = CUI::ConsoleCommand::NONE;
 	std::string cmdParam;
 
-	SphManager sphManager = SphManager(Vector3(Q_MAX, Q_MAX, Q_MAX), TIMESTEPS, 0.04);
+	SphManager sphManager = SphManager(Vector3(DOMAIN_DIMENSION, DOMAIN_DIMENSION, DOMAIN_DIMENSION), TIMESTEPS, 0.03);
 	Terrain loadedMesh;
 
 	if (rank == 0) {

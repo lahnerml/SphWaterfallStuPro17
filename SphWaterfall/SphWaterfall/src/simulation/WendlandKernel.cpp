@@ -9,16 +9,16 @@ WendlandKernel::WendlandKernel(double aH, double aQMax) :
 }
 
 double WendlandKernel::computeKernelValue(const Vector3& r) {
-	double q = r.length() / qMax;
+	double q = r.length() / h;
 	if (q >= qMax) {
 		return 0.0;
 	}
 
-	return 12.0 / (256.0 * M_PI * pow(h, 3.0)) * pow(2 - q, 4.0) * (2.0 * q + 1.0);
+	return 12.0 / (256.0 * M_PI * pow(h, 3.0)) * pow(2.0 - q, 4.0) * (2.0 * q + 1.0);
 }
 
 Vector3 WendlandKernel::computeKernelGradientValue(const Vector3& r) {
-	double q = r.length() / qMax;
+	double q = r.length() / h;
 	if ((q == 0) || (q >= qMax)) {
 		return Vector3();
 	}

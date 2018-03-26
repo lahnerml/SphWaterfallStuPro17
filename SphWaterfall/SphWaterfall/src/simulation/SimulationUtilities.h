@@ -3,15 +3,26 @@
 #include "../data/Vector3.h"
 #include "../data/SphParticle.h"
 
-// Influence radius
+// kernel Influence radius
 #define Q_MAX 1.2
-// Smoothing radius (Influence radius / 4)
-#define H (Q_MAX / 4)
+// smoothing radius 
+#define H 1.0
+// max Influence radius
+#define R_MAX Q_MAX * H
+// domain dimesion
+#define DOMAIN_DIMENSION R_MAX * 2.0
 // minimal density of a particle
-#define REFERENCE_DENSITY 20.0
+#define FLUID_REFERENCE_DENSITY 1.0
+// minimal density of a particle
+#define STATIC_REFERENCE_DENSITY 1.0
+// particle mass
+#define FLUID_MASS 1.0
+// particle mass
+#define STATIC_MASS 5.0
+
 
 // Number of simulation timesteps
-#define TIMESTEPS 101
+#define TIMESTEPS 1000
 
 // Sph Manager tags
 #define META_TAG 0
