@@ -168,6 +168,7 @@ void SphManager::computeLocalDensity(SphParticle& particle) {
 	for (auto& neighbour : neighbour_particles) {
 		if (particle == neighbour.second.first) {
 			neighbours = neighbour.second.second;
+			break;
 		}
 	}
 
@@ -189,6 +190,7 @@ Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
 	for (auto& neighbour : neighbour_particles) {
 		if (particle == neighbour.second.first) {
 			neighbours = neighbour.second.second;
+			break;
 		}
 	}
 
@@ -239,6 +241,7 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 	for (auto& neighbour : neighbour_particles) {
 		if (particle == neighbour.second.first) {
 			neighbours = neighbour.second.second;
+			break;
 		}
 	}
 
