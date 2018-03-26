@@ -45,5 +45,5 @@ private:
 	void computeLocalDensity(SphParticle&);
 	double computeLocalPressure(SphParticle&);
 	void exchangeParticles();
-	void exchangeRimParticles();
+	void exchangeRimParticles(SphParticle::ParticleType);
 };
