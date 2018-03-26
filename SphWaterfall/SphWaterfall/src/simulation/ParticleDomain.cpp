@@ -31,8 +31,8 @@ int ParticleDomain::size() const {
 void ParticleDomain::clearNeighbourRimParticles(SphParticle::ParticleType particle_type) {
 	for (auto& each_rim : neighbour_rim_particles) {
 		for (int i = 0; i < each_rim.second.size(); i++) {
-			SphParticle each_particle = each_rim.second.at(i);
-			if (each_particle.getParticleType() = particle_type) {
+			SphParticle& each_particle = each_rim.second.at(i);
+			if (each_particle.getParticleType() == particle_type) {
 				each_rim.second.erase(each_rim.second.begin() + i);
 				--i;
 			}

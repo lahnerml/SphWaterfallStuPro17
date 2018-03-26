@@ -70,6 +70,7 @@ void createExport(int rank, SphManager& sph_manager) {
 			}
 			
 			export_map[current_frame] = allParticlesOfTimestep;
+			ParticleIO::exportParticlesToVTK(allParticlesOfTimestep, "vtk/particles", current_timestep);
 
 			current_frame++;
 			current_timestep++;
@@ -85,9 +86,9 @@ void simulate(int rank, SphManager& sph_manager) {
 	if (rank == 1) {
 		std::vector<SphParticle> particles;
 		
-		for (int i = 0; i < 20; i++) {
-			for (int j = 0; j < 20; j++) {
-				for (int k = 0; k < 20; k++) {
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				for (int k = 0; k < 5; k++) {
 					//SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
 					SphParticle particle = SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k));
 					particles.push_back(particle);
