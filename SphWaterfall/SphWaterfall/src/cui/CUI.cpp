@@ -90,22 +90,6 @@ namespace CUI {
 		}
 	}
 
-	void generateParticles(std::queue<std::string> &tokens)
-	{
-		acmd.writeCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
-	}
-
-	void simulate(std::queue<std::string> &tokens)
-	{
-		// TODO add correct dimensions
-		acmd.writeCmd(CUI::ConsoleCommand::SIMULATE);
-	}
-
-	void render()
-	{
-		acmd.writeCmd(CUI::ConsoleCommand::RENDER);
-	}
-
 	void loadConfig(std::queue<std::string> &tokens)
 	{
 		std::string paramName, fileName;
@@ -187,19 +171,19 @@ namespace CUI {
 					acmd.printInputMessage();
 				}
 				else if (command == "particleGen") {
-					generateParticles(tokens);
+					acmd.writeCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
 					acmd.printInputMessage();
 				}
 				else if (command == "moveShutter") {
 					acmd.printInputMessage();
 				}
 				else if (command == "simulate") {
-					simulate(tokens);
+					acmd.writeCmd(CUI::ConsoleCommand::SIMULATE);
 					acmd.printInputMessage();
 				}
 				else if (command == "render")
 				{
-					render();
+					acmd.writeCmd(CUI::ConsoleCommand::RENDER);
 					acmd.printInputMessage();
 				}
 				else if (command == "loadConfig")
