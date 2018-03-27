@@ -261,7 +261,6 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> target_map;
 	int target_domain_id, source_domain_id;
 
-
 	for (auto& each_domain : domains) {
 		each_domain.second.clearNeighbourRimParticles(particle_type);
 		if (each_domain.second.hasFluidParticles() || (particle_type != SphParticle::FLUID && each_domain.second.size() > 0)) {
@@ -293,8 +292,8 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 					MPI_Send(meta.data(), meta.size(), MPI_INT, target_process_id, META_TAG, slave_comm);
 
 					//for (auto particle : source.second) { std::cout << particle << std::endl; } // debug
-					// send particles
-					MPI_Send(source.second.data(), source.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm);
+					// send particles TODO: change to MPI_Isend because big data makes Send blocking or similar solutions
+					MPI_Send(source.second.data(), source.second.size() * sizeof(SphParticle), MPI_BYTE, target_process_id, count, slave_comm); 
 
 					// increment unique tag
 					count++;
@@ -306,7 +305,7 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	MPI_Barrier(slave_comm);
 
 	// receive until there is nothing left
-	int flag, useless_flag;
+	int flag;
 	MPI_Status status;
 	MPI_Iprobe(MPI_ANY_SOURCE, META_TAG, slave_comm, &flag, &status);
 	
