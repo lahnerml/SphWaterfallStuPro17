@@ -484,6 +484,4 @@ void SphManager::exportParticles() {
 
 	//send particles to master
 	MPI_Send(particles_to_export.data(), particles_to_export.size() * sizeof(SphParticle), MPI_BYTE, 0, EXPORT_TAG, MPI_COMM_WORLD);
-
-	MPI_Barrier(MPI_COMM_WORLD);
 }
