@@ -52,6 +52,10 @@ void createExport(int rank, SphManager& sph_manager) {
 			MPI_Status status;
 			MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
 
+			//while (!flag) {
+			//	MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
+			//}
+
 			int count = 0;
 			int source;
 
