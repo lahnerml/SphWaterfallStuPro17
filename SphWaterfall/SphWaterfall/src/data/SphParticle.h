@@ -18,7 +18,7 @@ class SphParticle {
 		SphParticle(Vector3 position, ParticleType particle_type);
 		~SphParticle();
 
-		friend bool operator==(const SphParticle, const SphParticle);
+		friend bool operator==(const SphParticle&, const SphParticle&);
 
 		friend std::ostream& operator<<(std::ostream &, const SphParticle&);
 

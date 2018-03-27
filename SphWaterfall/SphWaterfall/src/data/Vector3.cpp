@@ -19,19 +19,19 @@ Vector3::~Vector3()
 {
 }
 
-Vector3 operator*(const Vector3& vector, const double factor) {
+Vector3 operator*(const Vector3& vector, const double& factor) {
 	return Vector3(vector.x * factor, vector.y * factor, vector.z * factor);
 }
 
-Vector3 operator*(const double factor, const Vector3& vector) {
-	return vector * factor;
+Vector3 operator*(const double& factor, const Vector3& vector) {
+	return Vector3(vector.x * factor, vector.y * factor, vector.z * factor);
 }
 
 Vector3 operator*(const Vector3& a, const Vector3& b) {
 	return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-Vector3 operator/(const Vector3& vector, const double factor) {
+Vector3 operator/(const Vector3& vector, const double& factor) {
 	return Vector3(vector.x / factor, vector.y / factor, vector.z / factor);
 }
 
@@ -39,7 +39,7 @@ Vector3 operator/(const Vector3& a, const Vector3 b) {
 	return Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
 }
 
-Vector3 operator%(const Vector3& vector, const double factor) {
+Vector3 operator%(const Vector3& vector, const double& factor) {
 	return Vector3(fmod(vector.x, factor), fmod(vector.y, factor), fmod(vector.z, factor));
 }
 
@@ -49,6 +49,14 @@ Vector3 operator%(const Vector3& a, const Vector3& b) {
 
 Vector3 operator+(const Vector3& a, const Vector3& b) {
 	return Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+Vector3 operator-(const Vector3& a) {
+	return Vector3(-a.x, -a.y, -a.z);
+}
+
+Vector3 operator-(const Vector3& a, const Vector3& b) {
+	return Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
 Vector3& operator+=(Vector3& a, const Vector3& b) {
@@ -65,22 +73,14 @@ Vector3& operator-=(Vector3& a, const Vector3& b) {
 	return a;
 }
 
-Vector3& operator*=(Vector3& vector, const double factor) {
+Vector3& operator*=(Vector3& vector, const double& factor) {
 	vector.x *= factor;
 	vector.y *= factor;
 	vector.z *= factor;
 	return vector;
 }
 
-Vector3 operator-(const Vector3& a) {
-	return Vector3(-a.x, -a.y, -a.z);
-}
-
-Vector3 operator-(const Vector3& a, const Vector3& b) {
-	return Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
-}
-
-std::ostream& operator<<(std::ostream & out, const Vector3& vector) {
+std::ostream& operator<<(std::ostream& out, const Vector3& vector) {
 	return out << "(" << "x:" << vector.x << " y:" << vector.y << " z:" << vector.z << ")";
 }
 

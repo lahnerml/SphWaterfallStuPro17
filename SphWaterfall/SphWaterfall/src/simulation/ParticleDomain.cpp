@@ -4,7 +4,8 @@
 ParticleDomain::ParticleDomain() :
 	origin(Vector3()),
 	dimensions(Vector3()),
-	number_of_fluid_particles(0)
+	number_of_fluid_particles(0),
+	has_static_particles(false)
 {
 	particles = std::vector<SphParticle>();
 }
@@ -12,7 +13,8 @@ ParticleDomain::ParticleDomain() :
 ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& dimension) : 
 	origin(origin),
 	dimensions(dimension),
-	number_of_fluid_particles(0)
+	number_of_fluid_particles(0),
+	has_static_particles(false)
 {
 	particles = std::vector<SphParticle>();
 }
@@ -25,6 +27,31 @@ int ParticleDomain::size() const {
 	return particles.size();
 }
 
+void ParticleDomain::clearParticles() {
+	particles.clear();
+	has_static_particles = false;
+	number_of_fluid_particles = 0;
+}
+
+void ParticleDomain::clearParticles(SphParticle::ParticleType particle_type) {
+	for (int i = 0; i < particles.size(); i++) {
+		SphParticle& each_particle = particles.at(i);
+		if (each_particle.getParticleType() == particle_type) {
+			particles.erase(particles.begin() + i);
+			i--;
+		}
+	}
+	if (particle_type == SphParticle::STATIC) {
+		has_static_particles = false;
+	}
+	else if (particle_type == SphParticle::FLUID) {
+		number_of_fluid_particles = 0;
+	}
+}
+
+void ParticleDomain::clearNeighbourRimParticles() {
+	neighbour_rim_particles.clear();
+}
 
 void ParticleDomain::clearNeighbourRimParticles(SphParticle::ParticleType particle_type) {
 	for (auto& each_rim : neighbour_rim_particles) {
@@ -78,8 +105,11 @@ const Vector3& ParticleDomain::getOrigin() const {
 }
 
 void ParticleDomain::addParticle(const SphParticle& particle) {
-	if (particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+	if (particle.getParticleType() == SphParticle::FLUID) {
 		number_of_fluid_particles++;
+	}
+	if (!has_static_particles && particle.getParticleType() == SphParticle::STATIC) {
+		has_static_particles = true;
 	}
 	particles.push_back(particle);
 }
@@ -88,8 +118,12 @@ std::vector<SphParticle>& ParticleDomain::getParticles() {
 	return particles;
 }
 
-bool ParticleDomain::hasFluidParticles() {
+const bool& ParticleDomain::hasFluidParticles() const {
 	return number_of_fluid_particles != 0;
+}
+
+const bool& ParticleDomain::hasStaticParticles() const {
+	return has_static_particles;
 }
 
 std::unordered_map<int, std::vector<SphParticle>> ParticleDomain::getRimParticleTargetMap(SphParticle::ParticleType particle_type) {
