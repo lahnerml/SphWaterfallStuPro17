@@ -1,8 +1,8 @@
 #pragma once
 #include "StaticParticleGenerator.h"
 
-// density of how many static particles are generated per face
-#define STATIC_PARTICLE_GENERATION_DENSITY 0.01
+// density of how much the distance between static particles is
+#define STATIC_PARTICLE_GENERATION_DENSITY 0.1
 
 StaticParticleGenerator::StaticParticleGenerator()
 {
@@ -125,24 +125,42 @@ std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrai
 
 void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, std::vector<SphParticle>& generatedParticles)
 {
-	Vector3 particlePosition = Vector3();
-
-	if (0.0 >= particleDensity || 1.0 < particleDensity)
+	//New version
+	if (particleDensity < 0.0)
 		return;
 
-	//Create uniform grid of particles
-	for (double x = 0.0; x <= 1.0; x += particleDensity)
+	Vector3 particlePosition = Vector3();
+
+	double uneven_offset = particleDensity / 2;
+	double curr_offset = 0.0;
+
+	double x_distance = (face.b - face.a).length();
+	double y_distance = (face.c - face.a).length();
+
+	double x_perc, y_perc;
+
+	bool uneven = false;
+
+	//Create triangualted grid of particles
+	for (int x = 0; x * particleDensity <= x_distance; x++)
 	{
-		for (double y = 0.0; y <= 1.0; y += particleDensity)
+		x_perc = (x * particleDensity) / x_distance;
+		curr_offset = uneven ? uneven_offset : 0.0;
+		
+		for (int y = 0; ((y * particleDensity) + curr_offset) <= y_distance; y++)
 		{
-			if (x + y > 1)
+			y_perc = ((y * particleDensity) + curr_offset) / y_distance;
+			
+			if (x_perc + y_perc >= 1.0)
 				continue;
 
-			particlePosition = face.a + ((face.b - face.a) * x) + ((face.c - face.a) * y);
+			particlePosition = face.a + ((face.b - face.a) * x_perc) + ((face.c - face.a) * y_perc);
 			generatedParticles.push_back(StaticParticle(particlePosition));
-			//std::cout << particlePosition << std::endl;
+			std::cout << particlePosition << std::endl;
 			//TODO Debug output
 		}
+
+		uneven = !uneven;
 	}
 }
 
