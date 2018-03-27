@@ -9,6 +9,8 @@ namespace CUI {
 	void trim(std::string &str) {
 		int pos1 = str.find_first_not_of(" ");
 		int pos2 = str.find_last_not_of(" ");
+		if (pos1 == -1 || pos2 == -1)
+			return;
 		str = str.substr(pos1, pos2 - pos1 + 1);
 	}
 
@@ -60,6 +62,17 @@ namespace CUI {
 
 	/* -_-_-_Comands Begin_-_-_- */
 
+	void printCommand(std::queue<std::string> &tokens)
+	{
+		std::string token;
+
+		std::cout << "-> ";
+		while(readNextToken(tokens, token)) {
+			std::cout << token << " ";
+		}
+		std::cout << std::endl;
+	}
+
 	void loadMesh(std::queue<std::string> &tokens)
 	{
 		string paramName, fileName;
@@ -69,7 +82,7 @@ namespace CUI {
 			fileName = "";
 			readNextCombinedToken(tokens, fileName);
 
-			acmd.aWriteCmd(CUI::ConsoleCommand::LOAD_MESH, fileName);
+			acmd.writeCmd(CUI::ConsoleCommand::LOAD_MESH, fileName);
 		}
 		else
 		{
@@ -79,21 +92,41 @@ namespace CUI {
 
 	void generateParticles(std::queue<std::string> &tokens)
 	{
-		// TODO add correct dimensions
-		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
-		acmd.aWriteCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
+		acmd.writeCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
 	}
 
 	void simulate(std::queue<std::string> &tokens)
 	{
 		// TODO add correct dimensions
-		acmd.aWriteCmd(CUI::ConsoleCommand::SIMULATE);
+		acmd.writeCmd(CUI::ConsoleCommand::SIMULATE);
 	}
 
 	void render()
 	{
+		acmd.writeCmd(CUI::ConsoleCommand::RENDER);
+	}
 
-		acmd.aWriteCmd(CUI::ConsoleCommand::RENDER);
+	void loadConfig(std::queue<std::string> &tokens)
+	{
+		string paramName, fileName;
+
+		if (!readNextToken(tokens, paramName) || paramName != "-p")
+			return;
+
+		fileName = "";
+		readNextCombinedToken(tokens, fileName);
+		
+		std::ifstream in(fileName);
+		if (!in)
+		{
+			std::cerr << "Cannot open \"" << fileName << "\"" << std::endl;
+		}
+		else
+		{
+			std::cerr << "Config file \"" << fileName << "\" loaded and running..." << std::endl;
+			startWithStream(in, false);
+			std::cout << "Done reading config file." << std::endl;
+		}
 	}
 
 	void showHelp()
@@ -111,17 +144,24 @@ namespace CUI {
 
 	void startCUI()
 	{
+		startWithStream(cin, true);
+	}
+
+	void startWithStream(std::istream &inputStream, bool broadcastExitCmd)
+	{
 		string inputLine, command;
 		queue<string> tokens;
 		acmd.printInputMessage();
 
-		while (acmd.aReadCmd() != CUI::ConsoleCommand::EXIT)
+		while (true)
 		{
 			//Read command
-			getline(cin, inputLine);
+			getline(inputStream, inputLine);
 			trim(inputLine);
 
 			//Tokenize command
+			if (inputLine == "")
+				continue;
 			istringstream tokenStream(inputLine);
 			tokens = queue<string>();
 			while (tokenStream >> command)
@@ -133,26 +173,45 @@ namespace CUI {
 				command = tokens.front();
 				tokens.pop();
 
-				if (command == "loadMesh") {
+				if (command == "#") {
+					//Comment
+				}
+				else if (command == "print") {
+					printCommand(tokens);
+				}
+				else if (command == "loadMesh") {
 					loadMesh(tokens);
+					acmd.printInputMessage();
 				}
 				else if (command == "particleGen") {
 					generateParticles(tokens);
+					acmd.printInputMessage();
 				}
 				else if (command == "moveShutter") {
+					acmd.printInputMessage();
 				}
 				else if (command == "simulate") {
 					simulate(tokens);
+					acmd.printInputMessage();
 				}
 				else if (command == "render")
 				{
 					render();
+					acmd.printInputMessage();
+				}
+				else if (command == "loadConfig")
+				{
+					loadConfig(tokens);
+					acmd.printInputMessage();
 				}
 				else if (command == "help" || command == "?") {
 					showHelp();
+					acmd.printInputMessage();
 				}
 				else if (command == "exit") {
-					acmd.aWriteCmd(CUI::ConsoleCommand::EXIT);
+					if(broadcastExitCmd)
+						acmd.writeCmd(CUI::ConsoleCommand::EXIT);
+					break;
 				}
 				else {
 					std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
@@ -171,29 +230,57 @@ namespace CUI {
 	{
 	}
 
-	ConsoleCommand AsyncCommand::aReadCmd()
+	ConsoleCommand AsyncCommand::readCmd()
 	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		return this->command;
+		std::string temp = "";
+		return readCmd(temp);
 	}
 
-	void AsyncCommand::aWriteCmd(ConsoleCommand cmd)
+	void AsyncCommand::writeCmd(ConsoleCommand cmd)
 	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		this->command = cmd;
+		std::string temp = "";
+		writeCmd(cmd, temp);
 	}
 
-	ConsoleCommand AsyncCommand::aReadCmd(std::string & param)
+	ConsoleCommand AsyncCommand::readCmd(std::string & param)
 	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		param = this->param;
-		return this->command;
+		CUI::ConsoleCommand cmd;
+		{
+			std::unique_lock<std::mutex> guard(this->cmdLock);
+			cv.wait(guard, [this] { return !this->commandEmpty(); });
+		}
+
+		{
+			std::lock_guard<std::mutex> guard(this->cmdLock);
+			param = this->param;
+			cmd = this->command;
+			this->command = CUI::ConsoleCommand::NONE;
+		}
+		cv.notify_one();
+
+		return cmd;
 	}
 
-	void AsyncCommand::aWriteCmd(ConsoleCommand cmd, std::string param)
+	void AsyncCommand::writeCmd(ConsoleCommand cmd, std::string param)
 	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		this->command = cmd;
-		this->param = param;
+		if (cmd == CUI::ConsoleCommand::NONE)
+			return;
+
+		{
+			std::lock_guard<std::mutex> guard(this->cmdLock);
+
+			this->command = cmd;
+			this->param = param;
+		}
+		this->cv.notify_one();
+
+		{
+			std::unique_lock<std::mutex> guard(this->cmdLock);
+			cv.wait(guard, [this] { return this->commandEmpty(); });
+		}
+	}
+
+	bool AsyncCommand::commandEmpty() {
+		return this->command == CUI::ConsoleCommand::NONE;
 	}
 }

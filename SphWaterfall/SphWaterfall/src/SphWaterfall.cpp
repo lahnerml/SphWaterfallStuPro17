@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 
 	while (cmd != CUI::ConsoleCommand::EXIT) {
 		if (rank == 0) {
-			cmd = CUI::acmd.aReadCmd(cmdParam);
+			cmd = CUI::acmd.readCmd(cmdParam);
 		}
 		MPI_Bcast(&cmd, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -208,12 +208,6 @@ int main(int argc, char** argv)
 		default:
 			break;
 		}
-
-		if (cmd != CUI::ConsoleCommand::EXIT && cmd != CUI::ConsoleCommand::NONE) {
-			CUI::acmd.aWriteCmd(CUI::ConsoleCommand::NONE);
-		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
 	if (rank == 0) {

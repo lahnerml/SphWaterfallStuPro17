@@ -29,14 +29,16 @@ namespace CUI {
 	public:
 		AsyncCommand();
 
-		ConsoleCommand aReadCmd();
-		void aWriteCmd(ConsoleCommand cmd);
+		ConsoleCommand readCmd();
+		void writeCmd(ConsoleCommand cmd);
 
-		ConsoleCommand aReadCmd(std::string& param);
-		void aWriteCmd(ConsoleCommand cmd, std::string param);
+		ConsoleCommand readCmd(std::string& param);
+		void writeCmd(ConsoleCommand cmd, std::string param);
 		void printInputMessage();
+		bool commandEmpty();
 	private:
 		std::mutex cmdLock;
+		std::condition_variable cv;
 		ConsoleCommand command;
 		std::string param;
 	};
@@ -45,4 +47,5 @@ namespace CUI {
 
 	void trim(std::string &str);
 	void startCUI();
+	void startWithStream(std::istream&, bool);
 }
