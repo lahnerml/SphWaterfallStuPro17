@@ -27,7 +27,7 @@ namespace CUI {
 	}
 
 	bool readNextCombinedToken(std::queue<std::string> &tokens, std::string &nextToken) {
-		string tempToken = "", resultToken = "";
+		std::string tempToken = "", resultToken = "";
 
 		//Read first token
 		if (!readNextToken(tokens, tempToken))
@@ -75,7 +75,7 @@ namespace CUI {
 
 	void loadMesh(std::queue<std::string> &tokens)
 	{
-		string paramName, fileName;
+		std::string paramName, fileName;
 
 		//Read fileName Parameter
 		if (readNextToken(tokens, paramName) && paramName == "-p") {
@@ -86,7 +86,7 @@ namespace CUI {
 		}
 		else
 		{
-			cout << "Missing path parameter '-p'" << endl;
+			std::cout << "Missing path parameter '-p'" << std::endl;
 		}
 	}
 
@@ -108,7 +108,7 @@ namespace CUI {
 
 	void loadConfig(std::queue<std::string> &tokens)
 	{
-		string paramName, fileName;
+		std::string paramName, fileName;
 
 		if (!readNextToken(tokens, paramName) || paramName != "-p")
 			return;
@@ -131,26 +131,29 @@ namespace CUI {
 
 	void showHelp()
 	{
-		cout << "loadMesh -p" << endl
-			<< "particleGen [-w] [-f] [-e]" << endl
-			<< "moveShutter -t (-u/-d) [-l]" << endl
-			<< "simulate -s -e -r -g -m -t" << endl
-			<< "render" << endl
-			<< "help" << endl
-			<< "exit" << endl;
+		std::cout 
+			<< "print" << std::endl
+			<< "loadMesh -p ..." << std::endl
+			<< "particleGen [-w] [-f] [-e]" << std::endl
+			<< "moveShutter -t (-u/-d) [-l]" << std::endl
+			<< "simulate -s -e -r -g -m -t" << std::endl
+			<< "render" << std::endl
+			<< "loadConfig -p ..." << std::endl
+			<< "help" << std::endl
+			<< "exit" << std::endl;
 	}
 
 	/* -_-_-_Comands End_-_-_- */
 
 	void startCUI()
 	{
-		startWithStream(cin, true);
+		startWithStream(std::cin, true);
 	}
 
 	void startWithStream(std::istream &inputStream, bool broadcastExitCmd)
 	{
-		string inputLine, command;
-		queue<string> tokens;
+		std::string inputLine, command;
+		std::queue<std::string> tokens;
 		acmd.printInputMessage();
 
 		while (true)
@@ -162,8 +165,8 @@ namespace CUI {
 			//Tokenize command
 			if (inputLine == "")
 				continue;
-			istringstream tokenStream(inputLine);
-			tokens = queue<string>();
+			std::istringstream tokenStream(inputLine);
+			tokens = std::queue<std::string>();
 			while (tokenStream >> command)
 				tokens.push(command);
 
@@ -221,7 +224,7 @@ namespace CUI {
 	}
 
 	void AsyncCommand::printInputMessage() {
-		cout << endl << "Please enter a command or enter 'help' to show a list of all commands" << endl;
+		std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
 	}
 
 	//AsyncCommand

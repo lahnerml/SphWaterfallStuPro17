@@ -9,8 +9,6 @@
 #include "../geometry/TerrainParser.h"
 #include "../simulation/SphManager.h"
 
-using namespace std;
-
 namespace CUI {
 
 	enum ConsoleCommand
