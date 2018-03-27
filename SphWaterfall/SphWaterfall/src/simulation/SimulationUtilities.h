@@ -20,7 +20,6 @@
 // particle mass
 #define STATIC_MASS 5.0
 
-
 // Number of simulation timesteps
 #define TIMESTEPS 1000
 

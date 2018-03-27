@@ -40,17 +40,19 @@ void createExport(int rank, SphManager& sph_manager) {
 		unordered_map<int, vector<SphParticle>> export_map;
 
 		while (current_timestep <= TIMESTEPS) {
-			MPI_Barrier(MPI_COMM_WORLD);
-
 			std::unordered_map<int, std::vector<SphParticle>> allParticles;
 
 			std::vector<SphParticle> allParticlesOfTimestep;
-			//std::pair <int, std::vector<SphParticle>> incomingPair;
 
 			// receive until there is nothing left
-			int flag;
+			int flag = 0;
 			MPI_Status status;
-			MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
+
+			// custom "barrier" to fix MPI_Send in SphManager from deadlocking the programm
+			while (!flag) {
+				MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			}
 
 			int count = 0;
 			int source;

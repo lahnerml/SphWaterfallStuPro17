@@ -2,7 +2,7 @@
 #include "StaticParticleGenerator.h"
 
 // density of how much the distance between static particles is
-#define STATIC_PARTICLE_GENERATION_DENSITY 0.02
+#define STATIC_PARTICLE_GENERATION_DENSITY 0.4
 
 StaticParticleGenerator::StaticParticleGenerator()
 {
@@ -156,7 +156,7 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
 
 			particlePosition = face.a + ((face.b - face.a) * x_perc) + ((face.c - face.a) * y_perc);
 			generatedParticles.push_back(StaticParticle(particlePosition));
-			std::cout << particlePosition << std::endl;
+			//std::cout << particlePosition << std::endl;
 			//TODO Debug output
 		}
 

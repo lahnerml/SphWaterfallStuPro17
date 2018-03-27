@@ -27,7 +27,7 @@ private:
 	Vector3 const gravity_acceleration;
 	std::unordered_map<int, ParticleDomain> domains;
 	std::unordered_map<int, std::vector<SphParticle>> add_particles_map;
-	std::unordered_map<int, std::pair<SphParticle, std::vector<SphParticle>>> neighbour_particles;
+	std::vector<std::pair<SphParticle, std::vector<SphParticle>>> neighbour_particles;
 	ISphKernel* kernel;
 	ISphNeighbourSearch* neighbour_search;
 	SphKernelFactory kernel_factory;
@@ -36,6 +36,9 @@ private:
 	ParticleDomain& getParticleDomain(const int&);
 	ParticleDomain& getParticleDomain(const Vector3&);
 	
+	void cleanUpAllParticles();
+	void cleanUpFluidParticles();
+	void cleanUpStaticParticles();
 
 	void update();
 	void updateVelocity(SphParticle& particle);

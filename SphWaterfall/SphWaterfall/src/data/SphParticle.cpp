@@ -38,16 +38,22 @@ SphParticle::SphParticle(Vector3 position, SphParticle::ParticleType particle_ty
 	position(position),
 	velocity(Vector3()),
 	particle_type(particle_type) {
-	this->mass = STATIC_MASS;
-	this->local_density = STATIC_REFERENCE_DENSITY;
+	if (particle_type == SphParticle::ParticleType::STATIC) {
+		this->mass = STATIC_MASS;
+		this->local_density = STATIC_REFERENCE_DENSITY;
+	}
+	else {
+		this->mass = FLUID_MASS;
+		this->local_density = FLUID_REFERENCE_DENSITY;
+	}
 }
 
 SphParticle::~SphParticle() {
 
 }
 
-bool operator==(const SphParticle a, const SphParticle b) {
-	return ((a.position == b.position) && (a.velocity == b.velocity)); // TODO: local density can't be a value because otherwise calculation won't work
+bool operator==(const SphParticle& a, const SphParticle& b) {
+	return ((a.position == b.position) && (a.velocity == b.velocity));
 }
 
 std::ostream& operator<<(std::ostream & out, const SphParticle& particle) {

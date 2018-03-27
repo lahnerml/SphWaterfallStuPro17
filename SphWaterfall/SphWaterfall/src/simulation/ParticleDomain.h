@@ -24,8 +24,14 @@ public:
 
 	void addParticle(const SphParticle&);
 	std::vector<SphParticle>& getParticles();
-	bool hasFluidParticles();
+
+	void clearParticles();
+	void clearParticles(SphParticle::ParticleType);
+	const bool& hasFluidParticles() const;
+	const bool& hasStaticParticles() const;
+
 	std::unordered_map<int, std::vector<SphParticle>> getRimParticleTargetMap(SphParticle::ParticleType particle_type);
+	void clearNeighbourRimParticles();
 	void clearNeighbourRimParticles(SphParticle::ParticleType);
 	void addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
 	std::unordered_map<int, std::vector<SphParticle>>& getNeighbourRimParticles();
@@ -34,6 +40,7 @@ private:
 	std::vector<SphParticle> particles;
 	std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_particles;
 	std::vector<int> neighbour_domains;
+	bool has_static_particles;
 	int number_of_fluid_particles;
 	int particles_outside_domain;
 	Vector3 origin;
