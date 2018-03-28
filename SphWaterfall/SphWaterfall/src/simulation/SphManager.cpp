@@ -288,7 +288,7 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 				}
 				else {
 					// target domain id, source domain id, tag der richtigen Nachricht
-					std::array<int, 4> meta = { target.first, source.first, count, source.second.size()};
+					std::array<int, 4> meta = { target.first, source.first, count, static_cast<int>(source.second.size())};
 					MPI_Send(meta.data(), meta.size(), MPI_INT, target_process_id, META_TAG, slave_comm);
 
 					//for (auto particle : source.second) { std::cout << particle << std::endl; } // debug
