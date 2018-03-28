@@ -118,7 +118,7 @@ std::vector<SphParticle>& ParticleDomain::getParticles() {
 	return particles;
 }
 
-const bool& ParticleDomain::hasFluidParticles() const {
+const bool ParticleDomain::hasFluidParticles() const {
 	return number_of_fluid_particles != 0;
 }
 

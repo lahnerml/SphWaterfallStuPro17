@@ -27,7 +27,7 @@ public:
 
 	void clearParticles();
 	void clearParticles(SphParticle::ParticleType);
-	const bool& hasFluidParticles() const;
+	const bool hasFluidParticles() const;
 	const bool& hasStaticParticles() const;
 
 	std::unordered_map<int, std::vector<SphParticle>> getRimParticleTargetMap(SphParticle::ParticleType particle_type);
