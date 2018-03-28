@@ -8,7 +8,8 @@ SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps
 	domain_dimensions(domain_dimensions),
 	number_of_timesteps(number_of_timesteps),
 	timestep_duration(timestep_duration),
-	gravity_acceleration(Vector3(0.0, -9.81, 0.0))
+	gravity_acceleration(Vector3(0.0, -9.81, 0.0)),
+	sink_height(0.0)
 {
 	half_timestep_duration = timestep_duration / 2.0;
 
@@ -339,6 +340,11 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	MPI_Barrier(slave_comm);
 }
 
+void SphManager::setSink(double sink_height)
+{
+	this->sink_height = sink_height;
+}
+
 void SphManager::exchangeParticles() {
 	std::unordered_map<int, std::vector<SphParticle>> target_map;
 	std::vector<SphParticle> all_new_particles;
@@ -354,7 +360,7 @@ void SphManager::exchangeParticles() {
 	// adds particles from domains
 	for (auto& each_domain : domains) {
 		if (each_domain.second.hasFluidParticles()) {
-			std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
+			std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain(this->sink_height);
 
 			for (auto& each_particle : outside_particles) {
 				target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);

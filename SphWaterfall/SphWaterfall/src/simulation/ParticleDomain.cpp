@@ -65,15 +65,22 @@ void ParticleDomain::clearNeighbourRimParticles(SphParticle::ParticleType partic
 	}
 }
 
-std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
+std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sink_height) {
 	std::vector<SphParticle> outside_particles;
 	int domain_id = SimulationUtilities::computeDomainID(origin, dimensions);
 
 	int number_of_particles_inside_domain = 0;
 	while (number_of_particles_inside_domain < particles.size()) {
 		SphParticle each_particle = particles.at(number_of_particles_inside_domain);
-		if (each_particle.getParticleType() == SphParticle::FLUID && SimulationUtilities::computeDomainID(each_particle.position, dimensions) != domain_id) {
+		if (each_particle.getParticleType() == SphParticle::FLUID && each_particle.position.z <= sink_height) {
+			//Find particles below sink
+			particles.erase(particles.begin() + number_of_particles_inside_domain);
+			number_of_fluid_particles--;
+			std::cout << "-- Particle below sink height deleted." << std::endl;
+		}
+		else if (each_particle.getParticleType() == SphParticle::FLUID && SimulationUtilities::computeDomainID(each_particle.position, dimensions) != domain_id) {
 			//std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl << "debug: " << vector_difference << std::endl; //debug
+			//Find particles outside domain
 			outside_particles.push_back(each_particle);
 			particles.erase(particles.begin() + number_of_particles_inside_domain);
 			number_of_fluid_particles--;

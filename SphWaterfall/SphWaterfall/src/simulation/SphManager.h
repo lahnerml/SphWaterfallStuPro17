@@ -22,6 +22,7 @@ private:
 	int mpi_rank;
 	Vector3 domain_dimensions;
 	int number_of_timesteps;
+	double sink_height;
 	double const timestep_duration;
 	double half_timestep_duration;
 	Vector3 const gravity_acceleration;
@@ -49,4 +50,5 @@ private:
 	double computeLocalPressure(SphParticle&);
 	void exchangeParticles();
 	void exchangeRimParticles(SphParticle::ParticleType);
+	void setSink(double);
 };
