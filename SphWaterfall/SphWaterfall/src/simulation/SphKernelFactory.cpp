@@ -1,4 +1,3 @@
-#pragma once
 #include "SphKernelFactory.h"
 
 SphKernelFactory::SphKernelFactory() {

@@ -1,4 +1,3 @@
-#pragma once
 #include "SimulationUtilities.h"
 
 namespace SimulationUtilities {

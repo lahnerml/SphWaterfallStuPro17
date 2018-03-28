@@ -1,4 +1,3 @@
-#pragma once
 #include "VisualizationManager.h"
 
 void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight) {
@@ -50,7 +49,7 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 		for (int i = 1; i < world_size; i++) {
 			unsigned int buf[1] =
 			{
-				frameParticles.size()
+				static_cast<unsigned int>(frameParticles.size())
 			};
 			MPI_Send(buf, 1, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD);
 		}
@@ -62,7 +61,7 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 				//Send frame size
 				unsigned int buf[1] =
 				{
-					frame.size()
+					static_cast<unsigned int>(frame.size())
 				};
 				MPI_Send(buf, 1, MPI_UNSIGNED, target, 0, MPI_COMM_WORLD);
 

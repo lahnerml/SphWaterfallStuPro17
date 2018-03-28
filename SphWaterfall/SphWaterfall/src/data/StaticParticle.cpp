@@ -1,4 +1,3 @@
-#pragma once
 #include "StaticParticle.h"
 
 StaticParticle::StaticParticle() :

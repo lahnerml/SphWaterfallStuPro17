@@ -1,4 +1,3 @@
-#pragma once
 #include "SphParticle.h"
 
 SphParticle::SphParticle() :

@@ -1,4 +1,3 @@
-#pragma once
 #include "Shader.h"
 
 Frame Shader::applyGaussianSmoothing(Frame f, int shaderDepth, int matrixSize) {

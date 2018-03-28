@@ -1,4 +1,3 @@
-#pragma once
 #include "DomainDecomposer.h"
 
 DomainDecomposer::DomainDecomposer() {

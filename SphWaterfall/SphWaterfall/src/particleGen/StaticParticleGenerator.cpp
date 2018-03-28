@@ -1,4 +1,3 @@
-#pragma once
 #include "StaticParticleGenerator.h"
 
 // density of how much the distance between static particles is

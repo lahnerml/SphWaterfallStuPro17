@@ -1,4 +1,3 @@
-#pragma once
 #include "ParticleIO.h"
 
 using namespace std;

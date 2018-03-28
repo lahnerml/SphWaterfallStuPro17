@@ -6,10 +6,12 @@ find_package(MPI REQUIRED)
 add_definitions(-DOMPI_SKIP_MPICXX)
 
 # uncomment for linux
-# set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# set(CMAKE_CXX_EXTENSIONS OFF)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lstdc++ -lm")
+if(UNIX)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lstdc++ -lm")
+endif(UNIX)
 
 include("SphWaterfall/src/CMakeLists.txt")
 
