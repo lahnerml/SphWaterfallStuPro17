@@ -19,7 +19,9 @@ namespace CUI {
 		GENERATE_PARTICLES = 2,
 		MOVE_SHUTTER = 3,
 		SIMULATE = 4,
-		RENDER = 5
+		RENDER = 5,
+		ADD_SOURCE = 6,
+		ADD_SINK = 7
 	};
 
 	class AsyncCommand

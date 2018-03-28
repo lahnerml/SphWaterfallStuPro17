@@ -90,6 +90,26 @@ namespace CUI {
 		}
 	}
 
+	void moveShutter(std::queue<std::string> &tokens)
+	{
+		std::string paramName, shutterMoveFrame;
+
+		//Read sinkHeight Parameter
+		if (readNextToken(tokens, paramName) && paramName == "-t") {
+			shutterMoveFrame = "";
+			readNextToken(tokens, shutterMoveFrame);
+
+			if (shutterMoveFrame.find_first_not_of("0123456789") == std::string::npos)
+				acmd.writeCmd(CUI::ConsoleCommand::MOVE_SHUTTER, shutterMoveFrame);
+			else
+				std::cout << "'" << shutterMoveFrame << "' is not a number" << std::endl;
+		}
+		else
+		{
+			std::cout << "Missing parameter '-t'" << std::endl;
+		}
+	}
+
 	void loadConfig(std::queue<std::string> &tokens)
 	{
 		std::string paramName, fileName;
@@ -113,16 +133,72 @@ namespace CUI {
 		}
 	}
 
+	void addSource(std::queue<std::string> &tokens)
+	{
+		std::string paramName, sourcePos, sourcePosDim;
+
+		//Read sinkHeight Parameter
+		if (readNextToken(tokens, paramName) && paramName == "-v") {
+			sourcePos = "";
+			for (int i = 0; i < 3; i++)
+			{
+				sourcePosDim = "";
+				if (!readNextToken(tokens, sourcePosDim))
+				{
+					std::cout << "Not enough numbers for param -v" << std::endl;
+					return;
+				}
+
+				if (sourcePosDim.find_first_not_of("+-,.0123456789") != std::string::npos)
+				{
+					std::cout << "'" << sourcePosDim << "' is not a number" << std::endl;
+					return;
+				}
+
+				sourcePos += sourcePosDim + " ";
+			}
+			
+			trim(sourcePos);
+			acmd.writeCmd(CUI::ConsoleCommand::ADD_SOURCE, sourcePos);
+		}
+		else
+		{
+			std::cout << "Missing parameter '-v'" << std::endl;
+		}
+	}
+
+	void addSink(std::queue<std::string> &tokens)
+	{
+		std::string paramName, sinkHeight;
+
+		//Read sinkHeight Parameter
+		if (readNextToken(tokens, paramName) && paramName == "-h") {
+			sinkHeight = "";
+			readNextToken(tokens, sinkHeight);
+
+			if(sinkHeight.find_first_not_of("+-,.0123456789") == std::string::npos)
+				acmd.writeCmd(CUI::ConsoleCommand::ADD_SINK, sinkHeight);
+			else
+				std::cout << "'" << sinkHeight << "' is not a number" << std::endl;
+		}
+		else
+		{
+			std::cout << "Missing parameter '-h'" << std::endl;
+		}
+	}
+
 	void showHelp()
 	{
 		std::cout 
 			<< "print" << std::endl
 			<< "loadMesh -p ..." << std::endl
 			<< "particleGen [-w] [-f] [-e]" << std::endl
-			<< "moveShutter -t (-u/-d) [-l]" << std::endl
-			<< "simulate -s -e -r -g -m -t" << std::endl
+			<< "moveShutter -t 0" << std::endl
+			<< "simulate -t 0" << std::endl
 			<< "render" << std::endl
 			<< "loadConfig -p ..." << std::endl
+			<< "addSource -v 0 0 0" << std::endl
+			<< "addSink -h 0" << std::endl
 			<< "help" << std::endl
 			<< "exit" << std::endl;
 	}
@@ -175,6 +251,7 @@ namespace CUI {
 					acmd.printInputMessage();
 				}
 				else if (command == "moveShutter") {
+					moveShutter(tokens);
 					acmd.printInputMessage();
 				}
 				else if (command == "simulate") {
@@ -189,6 +266,16 @@ namespace CUI {
 				else if (command == "loadConfig")
 				{
 					loadConfig(tokens);
+					acmd.printInputMessage();
+				}
+				else if (command == "addSource")
+				{
+					addSource(tokens);
+					acmd.printInputMessage();
+				}
+				else if (command == "addSink")
+				{
+					addSink(tokens);
 					acmd.printInputMessage();
 				}
 				else if (command == "help" || command == "?") {

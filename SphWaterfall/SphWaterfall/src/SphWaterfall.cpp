@@ -29,10 +29,6 @@ void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
 		gen.receiveAndGenerate(sphManager);
 }
 
-void moveShutter(int rank) {
-	cout << "command is moveShutter" << endl;
-}
-
 void createExport(int rank, SphManager& sph_manager) {
 		int current_timestep = 1;
 		int current_frame = 1;
@@ -82,6 +78,14 @@ void createExport(int rank, SphManager& sph_manager) {
 		std::cout << "Done exporting" << std::endl;
 }
 
+void moveShutter(int rank, SphManager& sphManager, std::string shutterMoveParam)
+{
+	std::istringstream shutterMoveValues(shutterMoveParam);
+	int shutterMoveFrame;
+	shutterMoveValues >> shutterMoveFrame;
+	std::cout << "Shutter opening at frame: " << shutterMoveFrame << std::endl;
+}
+
 void simulate(int rank, SphManager& sph_manager) {
 	cout << "command is simulate" << endl;
 
@@ -121,6 +125,25 @@ void render(int rank) {
 	if (rank == 0) {
 		cout << "Rendering complete" << endl; 
 	}
+}
+
+void addSource(int rank, SphManager& sphManager, std::string sourcePosParam)
+{
+	std::istringstream sourcePosValues(sourcePosParam);
+	double x, y, z;
+	sourcePosValues >> x;
+	sourcePosValues >> y;
+	sourcePosValues >> z;
+	Vector3 sourcePos = Vector3(x, y, z);
+	std::cout << "New source: " << sourcePos << std::endl;
+}
+
+void addSink(int rank, SphManager& sphManager, std::string sinkHeightParam)
+{
+	std::istringstream sinkHeightValues(sinkHeightParam);
+	double sinkHeight;
+	sinkHeightValues >> sinkHeight;
+	std::cout << "New sink height: " << sinkHeight << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -180,7 +203,7 @@ int main(int argc, char** argv)
 			}
 			break;
 		case CUI::ConsoleCommand::MOVE_SHUTTER:
-			moveShutter(rank);
+			moveShutter(rank, sphManager, cmdParam);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Stutter move set." << endl;
@@ -207,6 +230,22 @@ int main(int argc, char** argv)
 				cout << "Rendering finished." << endl;
 				acmd.printInputMessage();
 			}
+		case CUI::ConsoleCommand::ADD_SOURCE:
+			addSource(rank, sphManager, cmdParam);
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Added source." << endl;
+				acmd.printInputMessage();
+			}
+			break;
+		case CUI::ConsoleCommand::ADD_SINK:
+			addSink(rank, sphManager, cmdParam);
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Added sink." << endl;
+				acmd.printInputMessage();
+			}
+			break;
 		default:
 			break;
 		}
