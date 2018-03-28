@@ -1,6 +1,6 @@
 #pragma once
 #include "WendlandKernel.h"
-#include "SimulationUtilities.h";
+#include "SimulationUtilities.h"
 
 class SphKernelFactory {
 public:

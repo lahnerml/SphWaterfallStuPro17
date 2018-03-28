@@ -1,6 +1,6 @@
 #pragma once
 #include "SphNeighbourSearch.h"
-#include "SimulationUtilities.h";
+#include "SimulationUtilities.h"
 
 class SphNeighbourSearchFactory {
 public:

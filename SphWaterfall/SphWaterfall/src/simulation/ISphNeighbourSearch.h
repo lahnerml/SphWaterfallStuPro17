@@ -1,7 +1,7 @@
 #pragma once
 #include "../data/SphParticle.h"
 #include "ParticleDomain.h"
-#include "SimulationUtilities.h";
+#include "SimulationUtilities.h"
 
 #include <unordered_map>
 #include <set>
