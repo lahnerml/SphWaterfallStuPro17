@@ -1,4 +1,3 @@
-#pragma once
 #include "Face.h"
 
 

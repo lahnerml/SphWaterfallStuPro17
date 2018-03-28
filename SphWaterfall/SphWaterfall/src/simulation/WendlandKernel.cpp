@@ -1,4 +1,3 @@
-#pragma once
 #include "WendlandKernel.h"
 
 WendlandKernel::WendlandKernel(double aH, double aQMax) :

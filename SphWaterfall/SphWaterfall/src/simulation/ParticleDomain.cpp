@@ -1,4 +1,3 @@
-#pragma once
 #include "ParticleDomain.h"
 
 ParticleDomain::ParticleDomain() :

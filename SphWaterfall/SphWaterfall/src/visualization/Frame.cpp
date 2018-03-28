@@ -1,4 +1,3 @@
-#pragma once
 #include "Frame.h"
 
 Frame::Frame() {

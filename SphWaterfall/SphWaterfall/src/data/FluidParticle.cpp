@@ -1,4 +1,3 @@
-#pragma once
 #include "FluidParticle.h"
 
 FluidParticle::FluidParticle() {

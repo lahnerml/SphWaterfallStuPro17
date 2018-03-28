@@ -1,4 +1,3 @@
-#pragma once
 #include "SphManager.h"
 #include <chrono>
 

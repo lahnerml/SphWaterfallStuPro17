@@ -1,4 +1,3 @@
-#pragma once
 #include "TerrainParser.h"
 
 Terrain TerrainParser::loadFromFile(std::string fileName) {

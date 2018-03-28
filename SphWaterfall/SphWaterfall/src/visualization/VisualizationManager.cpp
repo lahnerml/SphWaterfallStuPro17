@@ -1,4 +1,3 @@
-#pragma once
 #include "VisualizationManager.h"
 
 void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight) {

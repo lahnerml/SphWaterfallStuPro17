@@ -1,4 +1,3 @@
-#pragma once
 #include "ParticleObject.h"
 
 ParticleObject::ParticleObject() {
