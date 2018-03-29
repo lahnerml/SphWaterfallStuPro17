@@ -21,7 +21,7 @@
 #define STATIC_MASS 5.0
 
 // Number of simulation timesteps
-#define TIMESTEPS 1000
+#define TIMESTEPS 100
 
 // Sph Manager tags
 #define META_TAG 0
@@ -31,9 +31,9 @@
 namespace SimulationUtilities {
 	int hash(const Vector3&);
 	Vector3 unhash(const int&);	
-	int computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int comm_size);
-	int computeProcessID(const int domain_id, const int comm_size);
-	int computeDomainID(const Vector3 position, const Vector3 domain_dimension);
+	int computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int& comm_size);
+	int computeProcessID(const int domain_id, const int& comm_size);
+	int computeDomainID(const Vector3& position, const Vector3& domain_dimension);
 
 	extern MPI_Comm slave_comm;
 	extern int slave_comm_size;

@@ -21,15 +21,15 @@ namespace SimulationUtilities {
 		return Vector3(x, y, z);
 	}
 
-	int computeDomainID(const Vector3 position, const Vector3 domain_dimension) {
+	int computeDomainID(const Vector3& position, const Vector3& domain_dimension) {
 		return hash((position / domain_dimension).roundDownward());
 	}
 
-	int computeProcessID(const int domain_id, const int comm_size) {
+	int computeProcessID(const int domain_id, const int& comm_size) {
 		return abs(domain_id % comm_size);
 	}
 
-	int computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int comm_size) {
+	int computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int& comm_size) {
 		return abs(computeDomainID(position, domain_dimension) % comm_size);
 	}
 

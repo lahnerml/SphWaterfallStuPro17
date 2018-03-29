@@ -101,14 +101,16 @@ void SphManager::update() {
 			for (auto& each_particle : each_domain.second.getParticles()) {
 				if (each_particle.getParticleType() == SphParticle::FLUID) {
 					each_neighbour_particles = each_domain.second.getParticles();
-					for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle, domain_dimensions)) {
+
+					for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle.position, domain_dimensions)) {
 						if (each_neighbour_rim_particles.count(domain_id) != 0) {
 							each_neighbour_particles.insert(each_neighbour_particles.end(),
 								each_neighbour_rim_particles.at(domain_id).begin(),
 								each_neighbour_rim_particles.at(domain_id).end());
 						}
 					}
-					each_neighbour_particles = neighbour_search->findNeigbours(each_particle, each_neighbour_particles);
+
+					each_neighbour_particles = neighbour_search->findNeigbours(each_particle.position, each_neighbour_particles);
 					neighbour_particles.push_back(std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles));
 				}
 			}
@@ -197,13 +199,6 @@ void SphManager::computeLocalDensity(SphParticle& particle) {
 }
 
 Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
-	int if_time, neighbour_assign_time;
-	std::chrono::steady_clock::time_point begin, end;
-	
-	if (mpi_rank == 0) {
-		begin = std::chrono::steady_clock::now();
-	}
-
 	std::vector<SphParticle> neighbours;
 	for (auto& neighbour : neighbour_particles) {
 		if (particle == neighbour.first) {
@@ -258,17 +253,16 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 
 void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	// target domain id, source domain id, rim particles from source in direction of target domain
-	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> target_map;
+	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> target_source_map;
 	int target_domain_id, source_domain_id;
 
 	for (auto& each_domain : domains) {
 		each_domain.second.clearNeighbourRimParticles(particle_type);
 		if (each_domain.second.hasFluidParticles() || (particle_type != SphParticle::FLUID && each_domain.second.size() > 0)) {
 			source_domain_id = each_domain.first;
-			Vector3 source_domain_origin = unhash(source_domain_id);
 
 			for (auto& each_target : each_domain.second.getRimParticleTargetMap(particle_type)) {
-				target_map[each_target.first][source_domain_id] = each_target.second;
+				target_source_map[each_target.first][source_domain_id] = each_target.second;
 			}
 		}
 	}
@@ -277,9 +271,9 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> new_rim_particles;
 	int count = 10;
 
-	//for (auto target : target_map) { for (auto source : target.second) { std::cout << "source: " << unhash(source.first) << "  target: " << unhash(target.first) << std::endl; } }
+	//for (auto target : target_source_map) { for (auto source : target.second) { std::cout << "source: " << unhash(source.first) << "  target: " << unhash(target.first) << std::endl; } }
 
-	for (auto& target : target_map) {
+	for (auto& target : target_source_map) {
 		for (auto& source : target.second) {
 			int target_process_id = computeProcessID(target.first, slave_comm_size);
 			if (!source.second.empty()) {

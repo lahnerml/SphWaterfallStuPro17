@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>> frames, string fileName) {
+void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>>& frames, string fileName) {
 	ofstream file(fileName);
 	if (file.is_open())
 	{
@@ -24,10 +24,10 @@ void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>> frames,
 	else cout << "Unable to open file";
 }
 
-void ParticleIO::exportParticlesToVTK(vector<SphParticle> particles, string name, int time) {
+void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string name, int& timestep) {
 	ofstream myfile;
 	std::ostringstream fileNameStream("");
-	fileNameStream << name << "_" << time << ".vtk";
+	fileNameStream << name << "_" << timestep << ".vtk";
 	std::string fileName = fileNameStream.str();
 	myfile.open(fileName.c_str());
 

@@ -30,14 +30,13 @@ void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
 
 void createExport(int rank, SphManager& sph_manager) {
 		int current_timestep = 1;
-		int current_frame = 1;
 
 		unordered_map<int, vector<SphParticle>> export_map;
 
 		while (current_timestep <= TIMESTEPS) {
-			std::unordered_map<int, std::vector<SphParticle>> allParticles;
+			std::unordered_map<int, std::vector<SphParticle>> all_particles;
 
-			std::vector<SphParticle> allParticlesOfTimestep;
+			std::vector<SphParticle> all_particles_of_timestep;
 
 			// receive until there is nothing left
 			int flag = 0;
@@ -55,21 +54,20 @@ void createExport(int rank, SphManager& sph_manager) {
 			while (flag) {
 				source = status.MPI_SOURCE;
 				MPI_Get_count(&status, MPI_BYTE, &count);
-				std::vector<SphParticle> incomingParticles = std::vector<SphParticle>(count / sizeof(SphParticle));
+				std::vector<SphParticle> incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
 
-				MPI_Recv(incomingParticles.data(), count, MPI_BYTE, source, EXPORT_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				allParticlesOfTimestep.insert(allParticlesOfTimestep.end(), incomingParticles.begin(), incomingParticles.end());
+				MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, EXPORT_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				all_particles_of_timestep.insert(all_particles_of_timestep.end(), incoming_particles.begin(), incoming_particles.end());
 
-				// for (auto particle : allParticlesOfTimestep) { std::cout << current_timestep << " received in export: " << particle << std::endl; } // debug
+				// for (auto particle : all_particles_of_timestep) { std::cout << current_timestep << " received in export: " << particle << std::endl; } // debug
 
 				// next message
 				MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
 			}
 			
-			export_map[current_frame] = allParticlesOfTimestep;
-			ParticleIO::exportParticlesToVTK(allParticlesOfTimestep, "vtk/particles", current_timestep);
+			export_map[current_timestep] = all_particles_of_timestep;
+			ParticleIO::exportParticlesToVTK(all_particles_of_timestep, "vtk/particles", current_timestep);
 
-			current_frame++;
 			current_timestep++;
 		}
 		ParticleIO::exportParticles(export_map, "test.test");

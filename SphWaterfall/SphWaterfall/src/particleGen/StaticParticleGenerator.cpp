@@ -1,7 +1,7 @@
 #include "StaticParticleGenerator.h"
 
 // density of how much the distance between static particles is
-#define STATIC_PARTICLE_GENERATION_DENSITY 0.4
+#define STATIC_PARTICLE_GENERATION_DENSITY 0.3
 
 StaticParticleGenerator::StaticParticleGenerator()
 {

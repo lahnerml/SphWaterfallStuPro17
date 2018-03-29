@@ -68,31 +68,36 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sin
 	std::vector<SphParticle> outside_particles;
 	int domain_id = SimulationUtilities::computeDomainID(origin, dimensions);
 
-	int number_of_particles_inside_domain = 0;
-	while (number_of_particles_inside_domain < particles.size()) {
-		SphParticle each_particle = particles.at(number_of_particles_inside_domain);
-		if (each_particle.getParticleType() == SphParticle::FLUID && each_particle.position.z <= sink_height) {
-			//Find particles below sink
-			particles.erase(particles.begin() + number_of_particles_inside_domain);
-			number_of_fluid_particles--;
-			std::cout << "-- Particle below sink height deleted." << std::endl;
-		}
-		else if (each_particle.getParticleType() == SphParticle::FLUID && SimulationUtilities::computeDomainID(each_particle.position, dimensions) != domain_id) {
-			//std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl << "debug: " << vector_difference << std::endl; //debug
-			//Find particles outside domain
-			outside_particles.push_back(each_particle);
-			particles.erase(particles.begin() + number_of_particles_inside_domain);
-			number_of_fluid_particles--;
+	int particle_index = 0;
+	while (particle_index < particles.size()) {
+		SphParticle each_particle = particles.at(particle_index);
+		if (each_particle.getParticleType() == SphParticle::FLUID) {
+			if (each_particle.position.y <= sink_height) {
+				//Find particles below sink
+				particles.erase(particles.begin() + particle_index);
+				particle_index--;
+				std::cout << "-- Particle below sink height deleted." << std::endl;
+			}
+			else if (SimulationUtilities::computeDomainID(each_particle.position, dimensions) != domain_id) {
+				//std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl << "debug: " << vector_difference << std::endl; //debug
+				//Find particles outside domain
+				outside_particles.push_back(each_particle);
+				particles.erase(particles.begin() + particle_index);
+				particle_index--;
+			}
+			else {
+				particle_index++;
+			}
 		}
 		else {
-			number_of_particles_inside_domain++;
+			particle_index++;
 		}
 	}
 
 	return outside_particles;
 }
 
-void ParticleDomain::addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_map) {
+void ParticleDomain::addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>& neighbour_rim_map) {
 	for (auto& each_neighbour_particles : neighbour_rim_map) {
 		neighbour_rim_particles[each_neighbour_particles.first].insert(neighbour_rim_particles[each_neighbour_particles.first].end(), each_neighbour_particles.second.begin(), each_neighbour_particles.second.end());
 	}
