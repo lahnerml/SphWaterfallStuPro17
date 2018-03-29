@@ -16,13 +16,14 @@ namespace CUI {
 	{
 		NONE = -1,
 		EXIT = 0,
-		LOAD_MESH = 1,
-		GENERATE_PARTICLES = 2,
-		MOVE_SHUTTER = 3,
-		SIMULATE = 4,
-		RENDER = 5,
-		ADD_SOURCE = 6,
-		ADD_SINK = 7
+		LOAD_MESH,
+		LOAD_SHUTTER,
+		GENERATE_PARTICLES,
+		MOVE_SHUTTER,
+		SIMULATE,
+		RENDER,
+		ADD_SOURCE,
+		ADD_SINK
 	};
 
 	class AsyncCommand

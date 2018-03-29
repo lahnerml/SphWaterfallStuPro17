@@ -89,6 +89,23 @@ namespace CUI {
 		}
 	}
 
+	void loadShutter(std::queue<std::string> &tokens)
+	{
+		std::string paramName, fileName;
+
+		//Read fileName Parameter
+		if (readNextToken(tokens, paramName) && paramName == "-p") {
+			fileName = "";
+			readNextCombinedToken(tokens, fileName);
+
+			acmd.writeCmd(CUI::ConsoleCommand::LOAD_SHUTTER, fileName);
+		}
+		else
+		{
+			std::cout << "Missing path parameter '-p'" << std::endl;
+		}
+	}
+
 	void moveShutter(std::queue<std::string> &tokens)
 	{
 		std::string paramName, shutterMoveFrame;
@@ -233,6 +250,7 @@ namespace CUI {
 			if (!tokens.empty())
 			{
 				command = tokens.front();
+				std::transform(command.begin(), command.end(), command.begin(), ::tolower);
 				tokens.pop();
 
 				if (command == "#") {
@@ -241,15 +259,19 @@ namespace CUI {
 				else if (command == "print") {
 					printCommand(tokens);
 				}
-				else if (command == "loadMesh") {
+				else if (command == "loadmesh") {
 					loadMesh(tokens);
 					acmd.printInputMessage();
 				}
-				else if (command == "particleGen") {
+				else if (command == "loadshutter") {
+					loadShutter(tokens);
+					acmd.printInputMessage();
+				}
+				else if (command == "particlegen") {
 					acmd.writeCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
 					acmd.printInputMessage();
 				}
-				else if (command == "moveShutter") {
+				else if (command == "moveshutter") {
 					moveShutter(tokens);
 					acmd.printInputMessage();
 				}
@@ -262,17 +284,17 @@ namespace CUI {
 					acmd.writeCmd(CUI::ConsoleCommand::RENDER);
 					acmd.printInputMessage();
 				}
-				else if (command == "loadConfig")
+				else if (command == "loadconfig")
 				{
 					loadConfig(tokens);
 					acmd.printInputMessage();
 				}
-				else if (command == "addSource")
+				else if (command == "addsource")
 				{
 					addSource(tokens);
 					acmd.printInputMessage();
 				}
-				else if (command == "addSink")
+				else if (command == "addsink")
 				{
 					addSink(tokens);
 					acmd.printInputMessage();

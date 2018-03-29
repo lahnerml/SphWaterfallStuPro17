@@ -8,7 +8,8 @@ class SphParticle {
 		{
 			FLUID,
 			STATIC,
-			MIRRORED
+			MIRRORED,
+			SHUTTER
 		};
 
 		SphParticle();

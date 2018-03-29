@@ -19,13 +19,13 @@ void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
 	VisualizationManager::importTerrain(loadedMesh, false);
 }
 
-void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
+void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh, SphParticle::ParticleType pType) {
 	StaticParticleGenerator gen;
 
 	if (rank == 0)
-		gen.sendAndGenerate(loadedMesh);
+		gen.sendAndGenerate(loadedMesh, pType);
 	else
-		gen.receiveAndGenerate(sphManager);
+		gen.receiveAndGenerate(sphManager, pType);
 }
 
 void createExport(int rank, SphManager& sph_manager) {
@@ -171,6 +171,7 @@ int main(int argc, char** argv)
 
 	SphManager sphManager = SphManager(Vector3(DOMAIN_DIMENSION, DOMAIN_DIMENSION, DOMAIN_DIMENSION), TIMESTEPS, 0.03);
 	Terrain loadedMesh;
+	Terrain loadedShutter;
 
 	if (rank == 0) {
 		cuiThread = std::thread(CUI::startCUI);
@@ -193,8 +194,17 @@ int main(int argc, char** argv)
 				acmd.printInputMessage();
 			}
 			break;
+		case CUI::ConsoleCommand::LOAD_SHUTTER:
+			loadMesh(rank, cmdParam, loadedShutter);
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank == 0) {
+				cout << "Mesh loaded." << endl;
+				acmd.printInputMessage();
+			}
+			break;
 		case CUI::ConsoleCommand::GENERATE_PARTICLES:
-			generateParticles(rank, sphManager, loadedMesh);
+			generateParticles(rank, sphManager, loadedMesh, SphParticle::ParticleType::STATIC);
+			generateParticles(rank, sphManager, loadedShutter, SphParticle::ParticleType::SHUTTER);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Static particles generated." << endl;
