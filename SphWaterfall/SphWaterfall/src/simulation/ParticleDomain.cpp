@@ -71,7 +71,7 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sin
 	int number_of_particles_inside_domain = 0;
 	while (number_of_particles_inside_domain < particles.size()) {
 		SphParticle each_particle = particles.at(number_of_particles_inside_domain);
-		if (each_particle.getParticleType() == SphParticle::FLUID && each_particle.position.z <= sink_height) {
+		if (each_particle.getParticleType() == SphParticle::FLUID && each_particle.position.y <= sink_height) {
 			//Find particles below sink
 			particles.erase(particles.begin() + number_of_particles_inside_domain);
 			number_of_fluid_particles--;
