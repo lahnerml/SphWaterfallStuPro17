@@ -15,8 +15,6 @@ void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
 	std::cout << "Loading Mesh: \"" << fileName << "\"" << std::endl;
 	loadedMesh = TerrainParser::loadFromFile(fileName);
 	cout << "Vertices: " << loadedMesh.getVertexCount() << " Faces: " << loadedMesh.getFaceCount() << endl;
-	VisualizationManager::importTerrain(loadedMesh, true);
-	VisualizationManager::importTerrain(loadedMesh, false);
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh, SphParticle::ParticleType pType) {
@@ -110,11 +108,14 @@ void simulate(int rank, SphManager& sph_manager) {
 }
 
 
-void render(int rank) {
+void render(int rank, Terrain loadedMesh, Terrain loadedShutter, int shutterTime) {
 
 	if (rank == 0) {
 		cout << "Rendering in progress..." << endl;
 	}
+	VisualizationManager::importTerrain(loadedMesh, true);
+	VisualizationManager::importTerrain(loadedShutter, false);
+
 	VisualizationManager::init(Vector3(10, 5, -20), 200, 200);
 	//VisualizationManager::renderFrames("test.test");
 	VisualizationManager::renderFramesDistributed("test.test", rank);
@@ -233,7 +234,7 @@ int main(int argc, char** argv)
 			}
 			break;
 		case CUI::ConsoleCommand::RENDER:
-			render(rank);
+			render(rank, loadedMesh, loadedShutter, 0);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Rendering finished." << endl;
