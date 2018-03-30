@@ -19,7 +19,7 @@ public:
 	static std::vector<SphParticle> generateStaticParticles(Terrain&);
 
 	static void generateParticlesOnFace(Face&, double, std::vector<SphParticle>&, SphParticle::ParticleType);
-	static std::vector<SphParticle> generateParticlesOnFace(Face&, double);
+	static std::vector<SphParticle> generateParticlesOnFace(Face&, double, SphParticle::ParticleType);
   
 	static void detectDuplicate(SphParticle, SphParticle);
 	static void removeDuplicate(SphParticle, SphParticle);
