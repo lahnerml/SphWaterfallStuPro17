@@ -488,8 +488,6 @@ void SphManager::exportParticles() {
 
 	// send number of particles to master
 	int number_of_particles_to_send = static_cast<int>(particles_to_export.size());
-	std::cout << "send: " << number_of_particles_to_send << " from: " << mpi_rank + 1 << std::endl;
-
 	MPI_Send(&number_of_particles_to_send, 1, MPI_INT, 0, EXPORT_PARTICLES_NUMBER_TAG, MPI_COMM_WORLD);
 
 	//send particles to master
