@@ -52,7 +52,7 @@ void createExport(int rank, SphManager& sph_manager) {
 			for (int i = 0; i < slave_comm_size; i++) {
 				MPI_Recv(&number_of_incoming_particles[i], 1, MPI_INT, i + 1, EXPORT_PARTICLES_NUMBER_TAG, MPI_COMM_WORLD, MPI_STATUSES_IGNORE);
 				std::cout << "recv: " << number_of_incoming_particles.at(i) << " from: " << i + 1 << std::endl;
-				incoming_particles[i] = std::vector<SphParticle>(number_of_incoming_particles.at(i) / sizeof(SphParticle));
+				incoming_particles[i] = std::vector<SphParticle>(number_of_incoming_particles.at(i));
 			}
 
 			for (int i = 0; i < slave_comm_size; i++) {
