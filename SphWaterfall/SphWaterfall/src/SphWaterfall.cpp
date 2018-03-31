@@ -30,17 +30,30 @@ void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh) {
 
 void createExport(int rank, SphManager& sph_manager) {
 		int current_timestep = 1;
-
 		unordered_map<int, vector<SphParticle>> export_map;
+		int slave_comm_size;
+		MPI_Comm_size(MPI_COMM_WORLD, &slave_comm_size);
+		slave_comm_size--;
 
 		while (current_timestep <= TIMESTEPS) {
-			std::unordered_map<int, std::vector<SphParticle>> all_particles;
-
 			std::vector<SphParticle> all_particles_of_timestep;
 
-			// receive until there is nothing left
+			std::unordered_map<int, std::vector<SphParticle>> all_particles_of_timestep2;
+			std::vector<int> number_of_incoming_particles = std::vector<int> (slave_comm_size);
+
+			int count = 0;
+			int source;
 			int flag = 0;
 			MPI_Status status;
+			MPI_Request request;
+
+			for (int i = 0; i < slave_comm_size; i++) {
+				MPI_Irecv(&number_of_incoming_particles.data()[i], 1, MPI_INT, i + 1, EXPORT_PARTICLES_NUMBER_TAG, MPI_COMM_WORLD, &request);
+				std::cout << "recv: " << number_of_incoming_particles.at(i) << " from: " << i + 1 << std::endl;
+				std::vector<SphParticle> incoming_particles = std::vector<SphParticle>(number_of_incoming_particles.at(i) / sizeof(SphParticle));
+			}
+
+			MPI_Barrier(MPI_COMM_WORLD);
 
 			// custom "barrier" to fix MPI_Send in SphManager from deadlocking the programm
 			while (!flag) {
@@ -48,9 +61,11 @@ void createExport(int rank, SphManager& sph_manager) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			}
 
-			int count = 0;
-			int source;
+			for (int i = 0; i < slave_comm_size; i++) {
+				std::cout << "recv2: " << number_of_incoming_particles.at(i) << " from: " << i + 1 << std::endl;
+			}
 
+			// receive until there is nothing left
 			while (flag) {
 				source = status.MPI_SOURCE;
 				MPI_Get_count(&status, MPI_BYTE, &count);

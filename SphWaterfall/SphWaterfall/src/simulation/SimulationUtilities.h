@@ -27,6 +27,7 @@
 #define META_TAG 0
 #define EXCHANGE_TAG 1
 #define EXPORT_TAG 2
+#define EXPORT_PARTICLES_NUMBER_TAG 3
 
 namespace SimulationUtilities {
 	int hash(const Vector3&);

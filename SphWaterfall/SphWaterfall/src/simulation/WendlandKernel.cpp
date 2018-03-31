@@ -26,7 +26,3 @@ Vector3 WendlandKernel::computeKernelGradientValue(const Vector3& r) {
 
 	return 21.0 / kernel_gradient_const * (-10.0 * q) * pow(2.0 - q, 3.0) * r.normalize();
 }
-
-double WendlandKernel::getSmoothingLength() {
-	return h;
-}

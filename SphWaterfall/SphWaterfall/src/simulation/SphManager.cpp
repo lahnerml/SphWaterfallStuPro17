@@ -484,6 +484,15 @@ void SphManager::exportParticles() {
 
 	//for (auto each_particle : particles_to_export) { std::cout << "export particle: " << each_particle << std::endl; } // debug 
 
+	// send number of particles to master
+	int number_of_particles_to_send = static_cast<int>(particles_to_export.size());
+	std::cout << "send: " << number_of_particles_to_send << " from: " << mpi_rank + 1 << std::endl;
+	MPI_Request request;
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	MPI_Isend(&number_of_particles_to_send, 1, MPI_INT, 0, EXPORT_PARTICLES_NUMBER_TAG, MPI_COMM_WORLD, &request);
+
 	//send particles to master
 	MPI_Send(particles_to_export.data(), particles_to_export.size() * sizeof(SphParticle), MPI_BYTE, 0, EXPORT_TAG, MPI_COMM_WORLD);
 }
