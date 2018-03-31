@@ -8,7 +8,7 @@ SphNeighbourSearch::~SphNeighbourSearch() {
 
 }
 
-std::vector<SphParticle> SphNeighbourSearch::findNeigbours(const Vector3& particle_position, const std::vector<SphParticle> potential_neighbour_particles) const {
+std::vector<SphParticle> SphNeighbourSearch::findNeigbours(const Vector3& particle_position, const std::vector<SphParticle>& potential_neighbour_particles) const {
 	std::vector<SphParticle> neighbours = std::vector<SphParticle>();
 
 	for (auto each_particle : potential_neighbour_particles) {
