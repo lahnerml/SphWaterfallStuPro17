@@ -38,8 +38,8 @@ void createExport(int rank, SphManager& sph_manager) {
 		while (current_timestep <= TIMESTEPS) {
 			std::vector<SphParticle> all_particles_of_timestep;
 
-			std::unordered_map<int, std::vector<SphParticle>> all_particles_of_timestep2;
 			std::vector<int> number_of_incoming_particles = std::vector<int> (slave_comm_size);
+			std::unordered_map<int, std::vector<SphParticle>> incoming_particles;
 
 			int count = 0;
 			int source;
@@ -47,13 +47,24 @@ void createExport(int rank, SphManager& sph_manager) {
 			MPI_Status status;
 			MPI_Request request;
 
+			MPI_Barrier(MPI_COMM_WORLD);
+
 			for (int i = 0; i < slave_comm_size; i++) {
-				MPI_Irecv(&number_of_incoming_particles.data()[i], 1, MPI_INT, i + 1, EXPORT_PARTICLES_NUMBER_TAG, MPI_COMM_WORLD, &request);
+				MPI_Recv(&number_of_incoming_particles[i], 1, MPI_INT, i + 1, EXPORT_PARTICLES_NUMBER_TAG, MPI_COMM_WORLD, MPI_STATUSES_IGNORE);
 				std::cout << "recv: " << number_of_incoming_particles.at(i) << " from: " << i + 1 << std::endl;
-				std::vector<SphParticle> incoming_particles = std::vector<SphParticle>(number_of_incoming_particles.at(i) / sizeof(SphParticle));
+				incoming_particles[i] = std::vector<SphParticle>(number_of_incoming_particles.at(i) / sizeof(SphParticle));
 			}
 
-			MPI_Barrier(MPI_COMM_WORLD);
+			for (int i = 0; i < slave_comm_size; i++) {
+				if (number_of_incoming_particles.at(i) != 0) {
+					MPI_Recv(incoming_particles[i].data(), number_of_incoming_particles.at(i) * sizeof(SphParticle), MPI_BYTE, i + 1, EXPORT_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					std::cout << "recv partikels: " << incoming_particles.at(i).size() << " from: " << i + 1 << std::endl;
+					all_particles_of_timestep.insert(all_particles_of_timestep.end(), incoming_particles.at(i).begin(), incoming_particles.at(i).end());
+				}
+			}
+
+			/*
+			//MPI_Barrier(MPI_COMM_WORLD);
 
 			// custom "barrier" to fix MPI_Send in SphManager from deadlocking the programm
 			while (!flag) {
@@ -61,9 +72,7 @@ void createExport(int rank, SphManager& sph_manager) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			}
 
-			for (int i = 0; i < slave_comm_size; i++) {
-				std::cout << "recv2: " << number_of_incoming_particles.at(i) << " from: " << i + 1 << std::endl;
-			}
+			MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
 
 			// receive until there is nothing left
 			while (flag) {
@@ -79,7 +88,8 @@ void createExport(int rank, SphManager& sph_manager) {
 				// next message
 				MPI_Iprobe(MPI_ANY_SOURCE, EXPORT_TAG, MPI_COMM_WORLD, &flag, &status);
 			}
-			
+			*/
+
 			export_map[current_timestep] = all_particles_of_timestep;
 			ParticleIO::exportParticlesToVTK(all_particles_of_timestep, "vtk/particles", current_timestep);
 
