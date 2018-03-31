@@ -33,7 +33,7 @@ public:
 	std::unordered_map<int, std::vector<SphParticle>> getRimParticleTargetMap(SphParticle::ParticleType particle_type);
 	void clearNeighbourRimParticles();
 	void clearNeighbourRimParticles(SphParticle::ParticleType);
-	void addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>);
+	void addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>&);
 	std::unordered_map<int, std::vector<SphParticle>>& getNeighbourRimParticles();
 
 private:

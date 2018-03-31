@@ -120,3 +120,7 @@ Vector3 Vector3::cross(const Vector3& a) {
 		this->x * a.y - this->y * a.x
 	);
 }
+
+Vector3 Vector3::absolute() {
+	return Vector3(abs(this->x), abs(this->y), abs(this->z));
+}
