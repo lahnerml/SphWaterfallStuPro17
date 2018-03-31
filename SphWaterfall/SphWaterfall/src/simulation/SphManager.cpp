@@ -97,12 +97,16 @@ void SphManager::update() {
 
 	for (auto& each_domain : domains) {
 		if (each_domain.second.hasFluidParticles()) {
+			// gets neighbour particle map from domain
 			each_neighbour_rim_particles = each_domain.second.getNeighbourRimParticles();
+
 			for (auto& each_particle : each_domain.second.getParticles()) {
 				if (each_particle.getParticleType() == SphParticle::FLUID) {
+					// gets particles of domain the particle is in
 					each_neighbour_particles = each_domain.second.getParticles();
 
 					for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle.position, domain_dimensions)) {
+						// tests if domain of particle has neighbour particles for currently looked at neighbour domain
 						if (each_neighbour_rim_particles.count(domain_id) != 0) {
 							each_neighbour_particles.insert(each_neighbour_particles.end(),
 								each_neighbour_rim_particles.at(domain_id).begin(),

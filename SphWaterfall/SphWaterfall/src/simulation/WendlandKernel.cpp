@@ -1,9 +1,10 @@
 #include "WendlandKernel.h"
 
+#define EPSILON 1e-8
+
 WendlandKernel::WendlandKernel(double aH, double aQMax) :
 	h(aH),
-	qMax(aQMax)
-{
+	qMax(aQMax) {
 	kernel_value_const = (256.0 * M_PI * pow(h, 3.0));
 	kernel_gradient_const = (256.0 * M_PI * pow(h, 4.0));
 }
@@ -19,7 +20,7 @@ double WendlandKernel::computeKernelValue(const Vector3& r) {
 
 Vector3 WendlandKernel::computeKernelGradientValue(const Vector3& r) {
 	double q = r.length() / h;
-	if ((q == 0) || (q >= qMax)) {
+	if ((q < EPSILON) || (q >= qMax)) {
 		return Vector3();
 	}
 

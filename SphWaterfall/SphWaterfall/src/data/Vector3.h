@@ -35,6 +35,7 @@ class Vector3 {
 
 		double dot(const Vector3&);
 		Vector3 cross(const Vector3&);
+		Vector3 absolute();
 
 		bool isInRangeOf(const Vector3&) const;
 		double length() const;
