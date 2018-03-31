@@ -9,7 +9,7 @@ ParticleDomain::ParticleDomain() :
 	particles = std::vector<SphParticle>();
 }
 
-ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& dimension) : 
+ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& dimension) :
 	origin(origin),
 	dimensions(dimension),
 	number_of_fluid_particles(0),
@@ -75,15 +75,14 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sin
 			if (each_particle.position.y <= sink_height) {
 				//Find particles below sink
 				particles.erase(particles.begin() + particle_index);
-				particle_index--;
+				number_of_fluid_particles--;
 				std::cout << "-- Particle below sink height deleted." << std::endl;
 			}
 			else if (SimulationUtilities::computeDomainID(each_particle.position, dimensions) != domain_id) {
-				//std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl << "debug: " << vector_difference << std::endl; //debug
 				//Find particles outside domain
 				outside_particles.push_back(each_particle);
 				particles.erase(particles.begin() + particle_index);
-				particle_index--;
+				number_of_fluid_particles--;
 			}
 			else {
 				particle_index++;
@@ -99,7 +98,8 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sin
 
 void ParticleDomain::addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>& neighbour_rim_map) {
 	for (auto& each_neighbour_particles : neighbour_rim_map) {
-		neighbour_rim_particles[each_neighbour_particles.first].insert(neighbour_rim_particles[each_neighbour_particles.first].end(), each_neighbour_particles.second.begin(), each_neighbour_particles.second.end());
+		neighbour_rim_particles[each_neighbour_particles.first].insert(neighbour_rim_particles[each_neighbour_particles.first].end(),
+			each_neighbour_particles.second.begin(), each_neighbour_particles.second.end());
 	}
 }
 
