@@ -42,7 +42,7 @@ private:
 	void cleanUpStaticParticles();
 
 	void update();
-	void updateVelocity(SphParticle& particle);
+	bool updateVelocity(SphParticle& particle);
 	Vector3 computeAcceleration(SphParticle& particle);
 	Vector3 computeDensityAcceleration(SphParticle& particle);
 	Vector3 computeViscosityAcceleration(SphParticle& particle);

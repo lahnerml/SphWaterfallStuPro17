@@ -64,5 +64,5 @@ bool SphNeighbourSearch::isInInfluentialRadius(const Vector3& particle_position,
 		return true;
 	}
 
-	return ((distance.x * distance.x) + (distance.y * distance.y) + (distance.z) * (distance.z)) <= (R_MAX * R_MAX);
+	return ((distance.x * distance.x) + (distance.y * distance.y) + (distance.z * distance.z)) <= (R_MAX * R_MAX);
 }

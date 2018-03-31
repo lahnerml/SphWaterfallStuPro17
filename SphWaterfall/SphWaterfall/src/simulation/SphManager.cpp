@@ -147,9 +147,11 @@ void SphManager::update() {
 	// compute and update Velocities and position
 	for (auto& each_domain : domains) {
 		if (each_domain.second.hasFluidParticles()) {
-			for (auto& each_particle : each_domain.second.getParticles()) {
-				if (each_particle.getParticleType() == SphParticle::FLUID) {
-					updateVelocity(each_particle);
+			std::vector<SphParticle> &particles = each_domain.second.getParticles();
+			for (int i = 0; i < particles.size(); i++) {
+				if (particles.at(i).getParticleType() == SphParticle::FLUID && updateVelocity(particles.at(i))) {
+					particles.erase(particles.begin() + i);
+					--i;
 					//std::cout << "final particle: " << each_particle << " on processor " << mpi_rank + 1 << std::endl; // debug
 				}
 			}
@@ -165,7 +167,7 @@ void SphManager::update() {
 	
 }
 
-void SphManager::updateVelocity(SphParticle& particle) {
+bool SphManager::updateVelocity(SphParticle& particle) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle);
 	particle.velocity += (half_timestep_duration * accelleration_timestep_start);
 	Vector3 position_timestep_half = particle.position + (half_timestep_duration * particle.velocity);
@@ -173,6 +175,7 @@ void SphManager::updateVelocity(SphParticle& particle) {
 	Vector3 accelleration_timestep_half = computeAcceleration(particle);
 	Vector3 velocity_timestep_end = particle.velocity + (timestep_duration * accelleration_timestep_half);
 	particle.position = position_timestep_half + (half_timestep_duration * velocity_timestep_end);
+	return particle.position.y <= sink_height;
 }
 
 Vector3 SphManager::computeAcceleration(SphParticle& particle) {
@@ -488,6 +491,7 @@ void SphManager::exportParticles() {
 
 	// send number of particles to master
 	int number_of_particles_to_send = static_cast<int>(particles_to_export.size());
+
 	MPI_Send(&number_of_particles_to_send, 1, MPI_INT, 0, EXPORT_PARTICLES_NUMBER_TAG, MPI_COMM_WORLD);
 
 	//send particles to master
