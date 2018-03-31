@@ -68,6 +68,7 @@ std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sin
 	std::vector<SphParticle> outside_particles;
 	int domain_id = SimulationUtilities::computeDomainID(origin, dimensions);
 
+
 	int particle_index = 0;
 	while (particle_index < particles.size()) {
 		SphParticle each_particle = particles.at(particle_index);

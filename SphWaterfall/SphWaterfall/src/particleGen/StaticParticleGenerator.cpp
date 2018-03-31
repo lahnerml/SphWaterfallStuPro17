@@ -7,7 +7,7 @@ StaticParticleGenerator::StaticParticleGenerator()
 {
 }
 
-void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
+void StaticParticleGenerator::sendAndGenerate(Terrain& terrain, SphParticle::ParticleType type)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -49,6 +49,7 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 
 			//Send face
 			Face::MpiSendFace(terrain.getFace(f), currentProcessor);
+
 		}
 	}
 	//TODO Debug output
@@ -66,7 +67,7 @@ void StaticParticleGenerator::sendAndGenerate(Terrain terrain)
 	}
 }
 
-void StaticParticleGenerator::receiveAndGenerate(SphManager& manager)
+void StaticParticleGenerator::receiveAndGenerate(SphManager& manager, SphParticle::ParticleType type)
 {
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -98,7 +99,7 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager& manager)
 
 	for (auto face : faces)
 	{
-		generateParticlesOnFace(face, STATIC_PARTICLE_GENERATION_DENSITY, generatedParticles);
+		generateParticlesOnFace(face, STATIC_PARTICLE_GENERATION_DENSITY, generatedParticles, type);
 	}
 
 	//for (auto each_particle : generatedParticles) { std::cout << "static particle: " << each_particle << std::endl; } //debug
@@ -109,7 +110,7 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager& manager)
 
 
 
-std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrain source)
+std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrain& source)
 {	
 	std::vector<SphParticle> staticParticles = std::vector<SphParticle>();
 
@@ -122,9 +123,8 @@ std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrai
 
 
 
-void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, std::vector<SphParticle>& generatedParticles)
+void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, std::vector<SphParticle>& generatedParticles, SphParticle::ParticleType type)
 {
-	//New version
 	if (particleDensity < 0.0)
 		return;
 
@@ -169,10 +169,10 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
  * particleDensity: How much space lies between 2 particles 0.0 < density <= 1.0
  * A particleDenisty of 1.0 means that there will only be particles on the corners of the Face
  */
-std::vector<SphParticle> StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity)
+std::vector<SphParticle> StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, SphParticle::ParticleType pType)
 {
 	std::vector<SphParticle> result = std::vector<SphParticle>();
-	generateParticlesOnFace(face, particleDensity, result);
+	generateParticlesOnFace(face, particleDensity, result, pType);
 	return result;
 }
 
