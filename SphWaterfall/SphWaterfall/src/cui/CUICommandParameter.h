@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
 
-class CommandParameter {
+class CUICommandParameter {
 	public:
-		CommandParameter();
-		CommandParameter(std::string parameter_name, std::string value);
+		CUICommandParameter();
+		CUICommandParameter(std::string parameter_name, std::string value);
 
 		std::string& getParameterName();
 		std::string& getValue();

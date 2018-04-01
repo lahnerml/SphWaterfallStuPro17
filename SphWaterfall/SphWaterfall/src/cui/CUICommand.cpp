@@ -7,7 +7,7 @@ CUICommand::CUICommand() {
 CUICommand::CUICommand(std::string command, std::string input_line) :
 	command(command),
 	input_line(input_line),
-	parameter_list(std::vector<CommandParameter>()) {
+	parameter_list(std::vector<CUICommandParameter>()) {
 
 }
 
@@ -19,10 +19,10 @@ std::string& CUICommand::getCommand() {
 	return this->command;
 }
 
-std::vector<CommandParameter>& CUICommand::getParameterList() {
+std::vector<CUICommandParameter>& CUICommand::getParameterList() {
 	return this->parameter_list;
 }
 
-void CUICommand::addParameter(CommandParameter parameter) {
+void CUICommand::addParameter(CUICommandParameter parameter) {
 	parameter_list.push_back(parameter);
 }

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include "CommandParameter.h"
+#include "CUICommandParameter.h"
 
 class CUICommand {
 	public:
@@ -11,11 +11,11 @@ class CUICommand {
 
 		std::string& getInputLine();
 		std::string& getCommand();
-		std::vector<CommandParameter>& getParameterList();
+		std::vector<CUICommandParameter>& getParameterList();
 
-		void addParameter(CommandParameter parameter);
+		void addParameter(CUICommandParameter parameter);
 	private:
 		std::string input_line;
 		std::string command;
-		std::vector<CommandParameter> parameter_list;
+		std::vector<CUICommandParameter> parameter_list;
 };

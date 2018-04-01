@@ -6,13 +6,11 @@ namespace CUI {
 	AsyncCommand asyncCommand;
 	CUICommand current_command;
 
-	void startCUI()
-	{
-		startWithStream(std::cin, true);
+	void startCUI() {
+		startCUIWithStream(std::cin, true);
 	}
 
-	void startWithStream(std::istream &inputStream, bool broadcastExitCmd)
-	{
+	void startCUIWithStream(std::istream &inputStream, bool broadcastExitCmd) {
 		std::string input_line, command;
 		printInputMessage();
 
@@ -51,7 +49,7 @@ namespace CUI {
 				}
 
 				if ((command_token_stream.rdbuf()->in_avail() == 0) || (!last_read_parameter_name.isNull() && isNewParameter)) {
-					current_command.addParameter(CommandParameter(last_read_parameter_name.getInternal(), trimQuotemarks(last_read_parameter_value.getInternal())));
+					current_command.addParameter(CUICommandParameter(last_read_parameter_name.getInternal(), trimQuotemarks(last_read_parameter_value.getInternal())));
 					last_read_parameter_name.reset();
 					last_read_parameter_value.reset();
 				}
@@ -136,56 +134,11 @@ namespace CUI {
 		}
 	}
 
-	std::string trimQuotemarks(std::string string) {
+	std::string trimQuotemarks(std::string& string) {
 		int positionLeft = string.find_first_not_of("\"");
 		int positionRight = string.find_last_not_of("\"");
 		if (!(positionLeft == -1 || positionRight == -1)) {
-			return string.substr(positionLeft, positionRight - positionLeft + 1);
-		}
-	}
-
-	bool readNextToken(std::queue<std::string> &tokens, std::string &nextToken) {
-		if (!tokens.empty()) {
-			nextToken = tokens.front();
-			tokens.pop();
-			return true;
-		}
-		return false;
-	}
-
-	bool readNextCombinedToken(std::queue<std::string> &tokens, std::string &nextToken) {
-		std::string tempToken = "", resultToken = "";
-
-		//Read first token
-		if (!readNextToken(tokens, tempToken)) {
-			return false;
-		}
-
-		if (tempToken.find_first_of('\"') != 0) {
-			//No combined token
-			nextToken = tempToken;
-			return true;
-		}
-		if (tempToken.find_last_of('\"') == tempToken.length() - 1) {
-			//Combined token without spaces
-			nextToken = tempToken.substr(1, tempToken.length() - 2);
-			return true;
-		}
-
-		//Read following tokens
-		do {
-			resultToken += tempToken + " ";
-			if (!readNextToken(tokens, tempToken)) {
-				// No second quotation mark
-				nextToken = resultToken.substr(1);
-				return true;
-			}
-		} while (tempToken.find_last_of('\"') != tempToken.length() - 1);
-
-		//Return combined token
-		resultToken += tempToken;
-		nextToken = resultToken.substr(1, resultToken.length() - 2);
-		return true;
+			return string.substr(positionLeft, positionRight - positionLeft + 1);		}
 	}
 
 	void printInputMessage() {
@@ -194,8 +147,7 @@ namespace CUI {
 	
 	/* -_-_-_Commands Begin_-_-_- */
 
-	void printCommand()
-	{
+	void printCommand() {
 		if (current_command.getInputLine().substr(0, 6) == "print ") {
 			std::cout << "-> " << current_command.getInputLine().replace(0, 6, "") << std::endl;
 		}
@@ -204,9 +156,8 @@ namespace CUI {
 		}
 	}
 
-	void loadMesh()
-	{
-		for (CommandParameter& parameter : current_command.getParameterList()) {
+	void loadMesh() {
+		for (CUICommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-p") {
 				std::string file_path = parameter.getValue();
 				asyncCommand.writeCommand(AsyncCommand::LOAD_MESH, file_path);
@@ -218,9 +169,8 @@ namespace CUI {
 		}
 	}
 
-	void loadShutter()
-	{
-		for (CommandParameter& parameter : current_command.getParameterList()) {
+	void loadShutter() {
+		for (CUICommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-p") {
 				std::string file_path = parameter.getValue();
 				asyncCommand.writeCommand(AsyncCommand::LOAD_SHUTTER, file_path);
@@ -232,9 +182,8 @@ namespace CUI {
 		}
 	}
 
-	void moveShutter()
-	{
-		for (CommandParameter& parameter : current_command.getParameterList()) {
+	void moveShutter() {
+		for (CUICommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-t") {
 				std::string time_for_move = parameter.getValue();
 				if (time_for_move.find_first_not_of("0123456789") == std::string::npos) {
@@ -251,9 +200,8 @@ namespace CUI {
 		}
 	}
 
-	void loadConfig()
-	{
-		for (CommandParameter& parameter : current_command.getParameterList()) {
+	void loadConfig() {
+		for (CUICommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-p") {
 				std::string file_path = parameter.getValue();
 				std::ifstream in(file_path);
@@ -264,7 +212,7 @@ namespace CUI {
 				else
 				{
 					std::cerr << "Config file \"" << file_path << "\" loaded and running..." << std::endl;
-					startWithStream(in, false);
+					startCUIWithStream(in, false);
 					std::cout << "Done reading config file." << std::endl;
 				}
 			}
@@ -275,9 +223,8 @@ namespace CUI {
 		}
 	}
 
-	void addSource()
-	{
-		for (CommandParameter& parameter : current_command.getParameterList()) {
+	void addSource() {
+		for (CUICommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-v") {
 				std::string source_position = parameter.getValue();
 
@@ -308,9 +255,8 @@ namespace CUI {
 		}
 	}
 
-	void addSink()
-	{
-		for (CommandParameter& parameter : current_command.getParameterList()) {
+	void addSink() {
+		for (CUICommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-h") {
 				std::string sink_height = parameter.getValue();
 				if (sink_height.find_first_not_of("+-,.0123456789") == std::string::npos) {
@@ -327,8 +273,7 @@ namespace CUI {
 		}
 	}
 
-	void showHelp()
-	{
+	void showHelp() {
 		std::cout
 			<< "print" << std::endl
 			<< "loadmesh -p ..." << std::endl

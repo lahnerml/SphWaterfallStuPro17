@@ -179,13 +179,13 @@ int main(int argc, char** argv) {
 			MPI_Barrier(MPI_COMM_WORLD);
 			break;
 		case AsyncCommand::LOAD_SHUTTER:
-			loadedShutter = loadMesh(rank, commandParameter);
-			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
+				loadedShutter = loadMesh(rank, commandParameter);
 				cout << "Mesh loaded." << endl;
 				cout << "Vertices: " << loadedShutter.getVertexCount() << " Faces: " << loadedShutter.getFaceCount() << endl;
 				CUI::printInputMessage();
 			}
+			MPI_Barrier(MPI_COMM_WORLD);
 			break;
 		case AsyncCommand::GENERATE_PARTICLES:
 			generateParticles(rank, sphManager, loadedMesh, SphParticle::ParticleType::STATIC);

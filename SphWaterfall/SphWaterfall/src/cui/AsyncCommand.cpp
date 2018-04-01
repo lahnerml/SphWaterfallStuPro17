@@ -37,16 +37,18 @@ void AsyncCommand::writeCommand(ConsoleCommand command)
 
 void AsyncCommand::writeCommand(ConsoleCommand command, std::string parameter)
 {
-	if (command == ConsoleCommand::NONE)
+	if (command == ConsoleCommand::NONE) {
 		return;
+	}
+
 	{
-		std::lock_guard<std::mutex> guard(this->commandLock);
+		std::lock_guard<std::mutex> guard (this->commandLock);
 		this->command = command;
 		this->parameter = parameter;
 	}
 	this->conditionVariable.notify_one();
 	{
-		std::unique_lock<std::mutex> guard(this->commandLock);
+		std::unique_lock<std::mutex> guard = std::unique_lock<std::mutex>(this->commandLock);
 		conditionVariable.wait(guard, [this] { return this->isCommandEmpty(); });
 	}
 }

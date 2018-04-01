@@ -11,7 +11,7 @@
 #include "../geometry/TerrainParser.h"
 #include "../simulation/SphManager.h"
 #include "AsyncCommand.h"
-#include "CommandParameter.h"
+#include "CUICommandParameter.h"
 #include "CUICommand.h"
 
 namespace CUI {
@@ -19,12 +19,10 @@ namespace CUI {
 	extern CUICommand current_command;
 
 	void startCUI();
-	void startWithStream(std::istream&, bool);
+	void startCUIWithStream(std::istream&, bool);
 
-	bool readNextToken(std::queue<std::string> &tokens, std::string &nextToken);
-	bool readNextCombinedToken(std::queue<std::string> &tokens, std::string &nextToken);
-	void trim(std::string &string);
-	std::string trimQuotemarks(std::string string);
+	void trim(std::string& string);
+	std::string trimQuotemarks(std::string& string);
 
 	void printInputMessage();
 
