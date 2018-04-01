@@ -1,12 +1,17 @@
 #include "CUICommand.h"
 
-CUICommand::CUICommand() {
+CUICommand::CUICommand() :
+	command(Command::NONE),
+	input_line(""),
+	command_name(""),
+	parameter_list(std::vector<CUICommandParameter>()) {
 
 }
 
 CUICommand::CUICommand(std::string command, std::string input_line) :
-	command_name(command),
+	command(Command::NONE),
 	input_line(input_line),
+	command_name(command),
 	parameter_list(std::vector<CUICommandParameter>()) {
 
 }
@@ -17,6 +22,10 @@ std::string& CUICommand::getInputLine() {
 
 CUICommand::Command& CUICommand::getCommand() {
 	return this->command;
+}
+
+void CUICommand::setCommand(Command command) {
+	this->command = command;
 }
 
 std::string& CUICommand::getCommandName() {

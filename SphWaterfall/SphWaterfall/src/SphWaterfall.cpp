@@ -12,11 +12,15 @@ int main(int argc, char** argv) {
 	if (mpi_rank == 0) {
 		CUI cui = CUI();
 		cui.start();
+		MPI_Barrier(MPI_COMM_WORLD);
 	}
 	else {
 		CommandHandler command_handler = CommandHandler(mpi_rank);
 		command_handler.start();
+		MPI_Barrier(MPI_COMM_WORLD);
 	}
+
+	std::cout << "test " << mpi_rank << std::endl;
 
 	MPI_Finalize();
 

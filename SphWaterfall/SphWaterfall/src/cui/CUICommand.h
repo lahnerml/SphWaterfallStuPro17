@@ -25,6 +25,7 @@ class CUICommand {
 
 		std::string& getInputLine();
 		Command& getCommand();
+		void setCommand(Command command);
 		std::string& getCommandName();
 		std::vector<CUICommandParameter>& getParameterList();
 		CUICommandParameter& getParameter(int index);

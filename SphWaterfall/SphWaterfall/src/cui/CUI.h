@@ -6,14 +6,11 @@
 
 #include "../geometry/TerrainParser.h"
 #include "../data/NullableWrapper.h"
-//#include "AsyncCommand.h"
 #include "CUICommand.h"
 #include "CommandHandler.h"
 
 class CUI {
 	public:
-		//AsyncCommand asyncCommand;
-
 		CUI();
 
 		void start();
@@ -30,7 +27,7 @@ class CUI {
 		void cleanAndExecuteCommand(bool);
 
 		void trim(std::string& string);
-		std::string trimQuotemarks(std::string& string);
+		std::string trimQuotemarks(std::string string);
 
 		/* -_-_-_Commands Begin_-_-_- */
 		void printCommand();

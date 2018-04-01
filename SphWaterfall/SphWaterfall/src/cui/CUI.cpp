@@ -79,42 +79,53 @@ void CUI::cleanAndExecuteCommand(bool broadcastExitCmd) {
 		printCommand();
 	}
 	else if (command == "loadmesh") {
-		cleanLoadMesh();
-		command_handler.handleCUICommand(current_command);
+		if (cleanLoadMesh()) {
+			current_command.setCommand(CUICommand::LOAD_MESH);
+			command_handler.handleCUICommand(current_command);
+		}
 		printInputMessage();
 	}
 	else if (command == "loadshutter") {
-		cleanLoadShutter();
-		command_handler.handleCUICommand(current_command);
+		if (cleanLoadShutter()) {
+			current_command.setCommand(CUICommand::LOAD_SHUTTER);
+			command_handler.handleCUICommand(current_command);
+		}
 		printInputMessage();
 	}
 	else if (command == "moveshutter") {
-		cleanMoveShutter();
-		command_handler.handleCUICommand(current_command);
+		if (cleanMoveShutter()) {
+			current_command.setCommand(CUICommand::MOVE_SHUTTER);
+			command_handler.handleCUICommand(current_command);
+		}
 		printInputMessage();
 	}
-	else if (command == "addsource")
-	{
-		cleanAddSource();
-		command_handler.handleCUICommand(current_command);
+	else if (command == "addsource") {
+		if (cleanAddSource()) {
+			current_command.setCommand(CUICommand::ADD_SOURCE);
+			command_handler.handleCUICommand(current_command);
+		}
 		printInputMessage();
 	}
-	else if (command == "addsink")
-	{
-		cleanAddSink();
-		command_handler.handleCUICommand(current_command);
+	else if (command == "addsink") {
+		if (cleanAddSink()) {
+			current_command.setCommand(CUICommand::ADD_SINK);
+			command_handler.handleCUICommand(current_command);
+		}
 		printInputMessage();
 	}
 	else if (command == "particlegen") {
+		current_command.setCommand(CUICommand::GENERATE_PARTICLES);
 		command_handler.handleCUICommand(current_command);
 		printInputMessage();
 	}
 	else if (command == "simulate") {
+		current_command.setCommand(CUICommand::SIMULATE);
 		command_handler.handleCUICommand(current_command);
 		printInputMessage();
 	}
 	else if (command == "render")
 	{
+		current_command.setCommand(CUICommand::RENDER);
 		command_handler.handleCUICommand(current_command);
 		printInputMessage();
 	}
@@ -130,6 +141,7 @@ void CUI::cleanAndExecuteCommand(bool broadcastExitCmd) {
 	else if (command == "exit") {
 		if (broadcastExitCmd) {
 			exit_programm = true;
+			current_command.setCommand(CUICommand::EXIT);
 			command_handler.handleCUICommand(current_command);
 		}
 	}
@@ -146,7 +158,7 @@ void CUI::trim(std::string &string) {
 	}
 }
 
-std::string CUI::trimQuotemarks(std::string& string) {
+std::string CUI::trimQuotemarks(std::string string) {
 	int positionLeft = string.find_first_not_of("\"");
 	int positionRight = string.find_last_not_of("\"");
 	if (!(positionLeft == -1 || positionRight == -1)) {

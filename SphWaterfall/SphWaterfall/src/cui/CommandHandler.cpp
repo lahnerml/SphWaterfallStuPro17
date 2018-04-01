@@ -25,6 +25,8 @@ void CommandHandler::start() {
 		//Execute console input
 		executeCommand(cui_command);
 	} while (cui_command.getCommand() != CUICommand::EXIT);
+
+	std::cout << cui_command.getCommand() << std::endl;
 }
 
 void CommandHandler::handleCUICommand(CUICommand cui_command) {
@@ -34,6 +36,7 @@ void CommandHandler::handleCUICommand(CUICommand cui_command) {
 
 void CommandHandler::executeCommand(CUICommand cui_command) {
 	std::string file_path, time_for_move, source_position, sink_height;
+
 	switch (cui_command.getCommand())
 	{
 	case (CUICommand::LOAD_MESH):
