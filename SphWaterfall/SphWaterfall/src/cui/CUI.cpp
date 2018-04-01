@@ -74,11 +74,11 @@ namespace CUI {
 				printCommand();
 			}
 			else if (current_command.getCommand() == "loadmesh") {
-				loadMesh(tokens);
+				loadMesh();
 				printInputMessage();
 			}
 			else if (current_command.getCommand() == "loadshutter") {
-				loadShutter(tokens);
+				loadShutter();
 				printInputMessage();
 			}
 			else if (current_command.getCommand() == "particlegen") {
@@ -86,7 +86,7 @@ namespace CUI {
 				printInputMessage();
 			}
 			else if (current_command.getCommand() == "moveshutter") {
-				moveShutter(tokens);
+				moveShutter();
 				printInputMessage();
 			}
 			else if (current_command.getCommand() == "simulate") {
@@ -100,17 +100,17 @@ namespace CUI {
 			}
 			else if (current_command.getCommand() == "loadconfig")
 			{
-				loadConfig(tokens);
+				loadConfig();
 				printInputMessage();
 			}
 			else if (current_command.getCommand() == "addsource")
 			{
-				addSource(tokens);
+				addSource();
 				printInputMessage();
 			}
 			else if (current_command.getCommand() == "addsink")
 			{
-				addSink(tokens);
+				addSink();
 				printInputMessage();
 			}
 			else if (current_command.getCommand() == "help" || current_command.getCommand() == "?") {
@@ -204,12 +204,12 @@ namespace CUI {
 		}
 	}
 
-	void loadMesh(std::queue<std::string> &tokens)
+	void loadMesh()
 	{
 		for (CommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-p") {
-				//asyncCommand.writeCommand(AsyncCommand::LOAD_MESH, parameter.getValue());
-				asyncCommand.writeCommand(AsyncCommand::LOAD_MESH, "D:\\StuPro Waterfall\\SphWaterfallStuPro17\\cube_30.obj");
+				std::string file_path = parameter.getValue();
+				asyncCommand.writeCommand(AsyncCommand::LOAD_MESH, file_path);
 			}
 			else
 			{
@@ -218,11 +218,12 @@ namespace CUI {
 		}
 	}
 
-	void loadShutter(std::queue<std::string> &tokens)
+	void loadShutter()
 	{
 		for (CommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-p") {
-				asyncCommand.writeCommand(AsyncCommand::LOAD_SHUTTER, parameter.getValue());
+				std::string file_path = parameter.getValue();
+				asyncCommand.writeCommand(AsyncCommand::LOAD_SHUTTER, file_path);
 			}
 			else
 			{
@@ -231,112 +232,98 @@ namespace CUI {
 		}
 	}
 
-	void moveShutter(std::queue<std::string> &tokens)
+	void moveShutter()
+	{
+		for (CommandParameter& parameter : current_command.getParameterList()) {
+			if (parameter.getParameterName() == "-t") {
+				std::string time_for_move = parameter.getValue();
+				if (time_for_move.find_first_not_of("0123456789") == std::string::npos) {
+					asyncCommand.writeCommand(AsyncCommand::MOVE_SHUTTER, time_for_move);
+				}
+				else {
+					std::cout << "'" << parameter.getValue() << "' is not a number" << std::endl;
+				}
+			}
+			else
+			{
+				std::cout << "Missing path parameter '-t'" << std::endl;
+			}
+		}
+	}
+
+	void loadConfig()
 	{
 		for (CommandParameter& parameter : current_command.getParameterList()) {
 			if (parameter.getParameterName() == "-p") {
-				asyncCommand.writeCommand(AsyncCommand::LOAD_SHUTTER, parameter.getValue());
-			}
-			else
-			{
-				std::cout << "Missing path parameter '-p'" << std::endl;
-			}
-		}
-
-
-
-		std::string paramName, shutterMoveFrame;
-
-		//Read sinkHeight Parameter
-		if (readNextToken(tokens, paramName) && paramName == "-t") {
-			shutterMoveFrame = "";
-			readNextToken(tokens, shutterMoveFrame);
-
-			if (shutterMoveFrame.find_first_not_of("0123456789") == std::string::npos)
-				asyncCommand.writeCommand(AsyncCommand::MOVE_SHUTTER, shutterMoveFrame);
-			else
-				std::cout << "'" << shutterMoveFrame << "' is not a number" << std::endl;
-		}
-		else
-		{
-			std::cout << "Missing parameter '-t'" << std::endl;
-		}
-	}
-
-	void loadConfig(std::queue<std::string> &tokens)
-	{
-		std::string paramName, fileName;
-
-		if (!readNextToken(tokens, paramName) || paramName != "-p")
-			return;
-
-		fileName = "";
-		readNextCombinedToken(tokens, fileName);
-
-		std::ifstream in(fileName);
-		if (!in)
-		{
-			std::cerr << "Cannot open \"" << fileName << "\"" << std::endl;
-		}
-		else
-		{
-			std::cerr << "Config file \"" << fileName << "\" loaded and running..." << std::endl;
-			startWithStream(in, false);
-			std::cout << "Done reading config file." << std::endl;
-		}
-	}
-
-	void addSource(std::queue<std::string> &tokens)
-	{
-		std::string paramName, sourcePos, sourcePosDim;
-
-		//Read sinkHeight Parameter
-		if (readNextToken(tokens, paramName) && paramName == "-v") {
-			sourcePos = "";
-			for (int i = 0; i < 3; i++)
-			{
-				sourcePosDim = "";
-				if (!readNextToken(tokens, sourcePosDim))
+				std::string file_path = parameter.getValue();
+				std::ifstream in(file_path);
+				if (!in)
 				{
-					std::cout << "Not enough numbers for param -v" << std::endl;
+					std::cerr << "Cannot open \"" << file_path << "\"" << std::endl;
+				}
+				else
+				{
+					std::cerr << "Config file \"" << file_path << "\" loaded and running..." << std::endl;
+					startWithStream(in, false);
+					std::cout << "Done reading config file." << std::endl;
+				}
+			}
+			else
+			{
+				std::cout << "Missing path parameter '-p'" << std::endl;
+			}
+		}
+	}
+
+	void addSource()
+	{
+		for (CommandParameter& parameter : current_command.getParameterList()) {
+			if (parameter.getParameterName() == "-v") {
+				std::string source_position = parameter.getValue();
+
+				if (source_position.find_first_not_of("+-,.0123456789 ") != std::string::npos)
+				{
+					std::cout << "'" << source_position << "' is not a valid input" << std::endl;
 					return;
 				}
 
-				if (sourcePosDim.find_first_not_of("+-,.0123456789") != std::string::npos)
-				{
-					std::cout << "'" << sourcePosDim << "' is not a number" << std::endl;
+				int spaces = 0;
+				for (char character : source_position) {
+					if (character == ' ') {
+						spaces++;
+					}
+				}
+
+				if (spaces != 2) {
+					std::cout << "'" << source_position << "' is not a valid input" << std::endl;
 					return;
 				}
 
-				sourcePos += sourcePosDim + " ";
+				asyncCommand.writeCommand(AsyncCommand::ADD_SOURCE, source_position);
 			}
-
-			trim(sourcePos);
-			asyncCommand.writeCommand(AsyncCommand::ADD_SOURCE, sourcePos);
-		}
-		else
-		{
-			std::cout << "Missing parameter '-v'" << std::endl;
+			else
+			{
+				std::cout << "Missing path parameter '-v'" << std::endl;
+			}
 		}
 	}
 
-	void addSink(std::queue<std::string> &tokens)
+	void addSink()
 	{
-		std::string paramName, sinkHeight;
-
-		//Read sinkHeight Parameter
-		if (readNextToken(tokens, paramName) && paramName == "-h") {
-			sinkHeight = "";
-			readNextToken(tokens, sinkHeight);
-
-			if (sinkHeight.find_first_not_of("+-,.0123456789") == std::string::npos)
-				asyncCommand.writeCommand(AsyncCommand::ADD_SINK, sinkHeight);
+		for (CommandParameter& parameter : current_command.getParameterList()) {
+			if (parameter.getParameterName() == "-h") {
+				std::string sink_height = parameter.getValue();
+				if (sink_height.find_first_not_of("+-,.0123456789") == std::string::npos) {
+					asyncCommand.writeCommand(AsyncCommand::ADD_SINK, sink_height);
+				}
+				else {
+					std::cout << "'" << sink_height << "' is not a number" << std::endl;
+				}
+			}
 			else
-				std::cout << "'" << sinkHeight << "' is not a number" << std::endl;
-		}
-		else
-		{
-			std::cout << "Missing parameter '-h'" << std::endl;
+			{
+				std::cout << "Missing path parameter '-h'" << std::endl;
+			}
 		}
 	}
 
@@ -344,14 +331,14 @@ namespace CUI {
 	{
 		std::cout
 			<< "print" << std::endl
-			<< "loadMesh -p ..." << std::endl
-			<< "particleGen [-w] [-f] [-e]" << std::endl
-			<< "moveShutter -t 0" << std::endl
+			<< "loadmesh -p ..." << std::endl
+			<< "particlegen" << std::endl
+			<< "moveshutter -t 0" << std::endl
 			<< "simulate -t 0" << std::endl
 			<< "render" << std::endl
-			<< "loadConfig -p ..." << std::endl
-			<< "addSource -v 0 0 0" << std::endl
-			<< "addSink -h 0" << std::endl
+			<< "loadconfig -p ..." << std::endl
+			<< "addsource -v x y z" << std::endl
+			<< "addsink -h 0" << std::endl
 			<< "help" << std::endl
 			<< "exit" << std::endl;
 	}

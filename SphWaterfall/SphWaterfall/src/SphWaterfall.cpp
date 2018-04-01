@@ -9,10 +9,9 @@
 #include "visualization/VisualizationManager.h"
 #include "data/ParticleIO.h"
 
-Terrain& loadMesh(int rank, std::string fileName) {
+Terrain loadMesh(int rank, std::string fileName) {
 	std::cout << "Loading Mesh: \"" << fileName << "\"" << std::endl;
 	return TerrainParser::loadFromFile(fileName);
-	
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh, SphParticle::ParticleType pType) {

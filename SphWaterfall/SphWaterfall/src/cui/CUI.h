@@ -30,12 +30,12 @@ namespace CUI {
 
 	/* -_-_-_Commands Begin_-_-_- */
 	void printCommand();
-	void loadMesh(std::queue<std::string> &tokens);
-	void loadShutter(std::queue<std::string> &tokens);
-	void moveShutter(std::queue<std::string> &tokens);
-	void loadConfig(std::queue<std::string> &tokens);
-	void addSource(std::queue<std::string> &tokens);
-	void addSink(std::queue<std::string> &tokens);
+	void loadMesh();
+	void loadShutter();
+	void moveShutter();
+	void loadConfig();
+	void addSource();
+	void addSink();
 	void showHelp();
 	/* -_-_-_Commands End_-_-_- */
 }
