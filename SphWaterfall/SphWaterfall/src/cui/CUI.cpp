@@ -3,34 +3,164 @@
 
 namespace CUI {
 
-	AsyncCommand acmd;
+	AsyncCommand asyncCommand;
+	CUICommand current_command;
 
-	void trim(std::string &str) {
-		int pos1 = str.find_first_not_of(" ");
-		int pos2 = str.find_last_not_of(" ");
-		if (pos1 == -1 || pos2 == -1)
-			return;
-		str = str.substr(pos1, pos2 - pos1 + 1);
+	void startCUI()
+	{
+		startWithStream(std::cin, true);
 	}
 
-	bool readNextToken(std::queue<std::string> &tokens, std::string &nextToken)
+	void startWithStream(std::istream &inputStream, bool broadcastExitCmd)
 	{
-		if (tokens.empty()) {
-			return false;
+		std::string input_line, command;
+		printInputMessage();
+
+		while (true) {
+			//Read command
+			getline(inputStream, input_line);
+			trim(input_line);
+
+			if (input_line == "") {
+				continue;
+			}
+
+			std::cout << "Input line: " << input_line << std::endl;
+
+			//Tokenize command
+			std::istringstream command_token_stream = std::istringstream(input_line);
+			NullableWrapper<std::string> last_read_parameter_name, last_read_parameter_value;
+			bool first_loop_done = false;
+			while (command_token_stream >> command) {
+				if (!first_loop_done) {
+					std::transform(command.begin(), command.end(), command.begin(), ::tolower);
+					current_command = CUICommand(command, input_line);
+					first_loop_done = true;
+					continue;
+				}
+
+				bool isNewParameter = command.front() == '-';
+
+				if (!isNewParameter) {
+					if (!last_read_parameter_value.isNull()) {
+						last_read_parameter_value.set(last_read_parameter_value.getInternal() + " " + command);
+					}
+					else {
+						last_read_parameter_value.set(command);
+					}
+				}
+
+				if ((command_token_stream.rdbuf()->in_avail() == 0) || (!last_read_parameter_name.isNull() && isNewParameter)) {
+					current_command.addParameter(CommandParameter(last_read_parameter_name.getInternal(), trimQuotemarks(last_read_parameter_value.getInternal())));
+					last_read_parameter_name.reset();
+					last_read_parameter_value.reset();
+				}
+				if (isNewParameter) {
+					last_read_parameter_name.set(command);
+					last_read_parameter_value.reset();
+				}
+			}
+
+			//for (auto parameter : current_command.getParameterList()) {
+			//	std::cout << "command: " << current_command.getCommand() << " parameter name: " << parameter.getParameterName() 
+			//		<< " parameter value: " << parameter.getValue() << std::endl;
+			//}
+			std::queue<std::string> tokens;
+			//Execute command
+			if (current_command.getCommand().front() == '#') {
+				//Comment
+			}
+			else if (current_command.getCommand() == "print") {
+				printCommand();
+			}
+			else if (current_command.getCommand() == "loadmesh") {
+				loadMesh(tokens);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "loadshutter") {
+				loadShutter(tokens);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "particlegen") {
+				asyncCommand.writeCommand(AsyncCommand::GENERATE_PARTICLES);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "moveshutter") {
+				moveShutter(tokens);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "simulate") {
+				asyncCommand.writeCommand(AsyncCommand::SIMULATE);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "render")
+			{
+				asyncCommand.writeCommand(AsyncCommand::RENDER);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "loadconfig")
+			{
+				loadConfig(tokens);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "addsource")
+			{
+				addSource(tokens);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "addsink")
+			{
+				addSink(tokens);
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "help" || current_command.getCommand() == "?") {
+				showHelp();
+				printInputMessage();
+			}
+			else if (current_command.getCommand() == "exit") {
+				if (broadcastExitCmd)
+					asyncCommand.writeCommand(AsyncCommand::EXIT);
+				break;
+			}
+			else {
+				std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
+			}
 		}
-		else {
+	}
+
+	void trim(std::string &string) {
+		int positionLeft = string.find_first_not_of(" ");
+		int positionRight = string.find_last_not_of(" ");
+		if (!(positionLeft == -1 || positionRight == -1)) {
+			string = string.substr(positionLeft, positionRight - positionLeft + 1);
+		}
+	}
+
+	std::string trimQuotemarks(std::string string) {
+		int positionLeft = string.find_first_not_of("\"");
+		int positionRight = string.find_last_not_of("\"");
+		if (!(positionLeft == -1 || positionRight == -1)) {
+			return string.substr(positionLeft, positionRight - positionLeft + 1);
+		}
+	}
+
+	bool readNextToken(std::queue<std::string> &tokens, std::string &nextToken) {
+		if (!tokens.empty()) {
 			nextToken = tokens.front();
 			tokens.pop();
 			return true;
 		}
+		return false;
 	}
 
 	bool readNextCombinedToken(std::queue<std::string> &tokens, std::string &nextToken) {
 		std::string tempToken = "", resultToken = "";
 
 		//Read first token
-		if (!readNextToken(tokens, tempToken))
+		if (!readNextToken(tokens, tempToken)) {
 			return false;
+		}
+
 		if (tempToken.find_first_of('\"') != 0) {
 			//No combined token
 			nextToken = tempToken;
@@ -58,56 +188,63 @@ namespace CUI {
 		return true;
 	}
 
+	void printInputMessage() {
+		std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
+	}
+	
+	/* -_-_-_Commands Begin_-_-_- */
 
-	/* -_-_-_Comands Begin_-_-_- */
-
-	void printCommand(std::queue<std::string> &tokens)
+	void printCommand()
 	{
-		std::string token;
-
-		std::cout << "-> ";
-		while(readNextToken(tokens, token)) {
-			std::cout << token << " ";
+		if (current_command.getInputLine().substr(0, 6) == "print ") {
+			std::cout << "-> " << current_command.getInputLine().replace(0, 6, "") << std::endl;
 		}
-		std::cout << std::endl;
+		else {
+			std::cout << "-> " << current_command.getInputLine() << std::endl;
+		}
 	}
 
 	void loadMesh(std::queue<std::string> &tokens)
 	{
-		std::string paramName, fileName;
-
-		//Read fileName Parameter
-		if (readNextToken(tokens, paramName) && paramName == "-p") {
-			fileName = "";
-			readNextCombinedToken(tokens, fileName);
-
-			acmd.writeCmd(CUI::ConsoleCommand::LOAD_MESH, fileName);
-		}
-		else
-		{
-			std::cout << "Missing path parameter '-p'" << std::endl;
+		for (CommandParameter& parameter : current_command.getParameterList()) {
+			if (parameter.getParameterName() == "-p") {
+				//asyncCommand.writeCommand(AsyncCommand::LOAD_MESH, parameter.getValue());
+				asyncCommand.writeCommand(AsyncCommand::LOAD_MESH, "D:\\StuPro Waterfall\\SphWaterfallStuPro17\\cube_30.obj");
+			}
+			else
+			{
+				std::cout << "Missing path parameter '-p'" << std::endl;
+			}
 		}
 	}
 
 	void loadShutter(std::queue<std::string> &tokens)
 	{
-		std::string paramName, fileName;
-
-		//Read fileName Parameter
-		if (readNextToken(tokens, paramName) && paramName == "-p") {
-			fileName = "";
-			readNextCombinedToken(tokens, fileName);
-
-			acmd.writeCmd(CUI::ConsoleCommand::LOAD_SHUTTER, fileName);
-		}
-		else
-		{
-			std::cout << "Missing path parameter '-p'" << std::endl;
+		for (CommandParameter& parameter : current_command.getParameterList()) {
+			if (parameter.getParameterName() == "-p") {
+				asyncCommand.writeCommand(AsyncCommand::LOAD_SHUTTER, parameter.getValue());
+			}
+			else
+			{
+				std::cout << "Missing path parameter '-p'" << std::endl;
+			}
 		}
 	}
 
 	void moveShutter(std::queue<std::string> &tokens)
 	{
+		for (CommandParameter& parameter : current_command.getParameterList()) {
+			if (parameter.getParameterName() == "-p") {
+				asyncCommand.writeCommand(AsyncCommand::LOAD_SHUTTER, parameter.getValue());
+			}
+			else
+			{
+				std::cout << "Missing path parameter '-p'" << std::endl;
+			}
+		}
+
+
+
 		std::string paramName, shutterMoveFrame;
 
 		//Read sinkHeight Parameter
@@ -116,7 +253,7 @@ namespace CUI {
 			readNextToken(tokens, shutterMoveFrame);
 
 			if (shutterMoveFrame.find_first_not_of("0123456789") == std::string::npos)
-				acmd.writeCmd(CUI::ConsoleCommand::MOVE_SHUTTER, shutterMoveFrame);
+				asyncCommand.writeCommand(AsyncCommand::MOVE_SHUTTER, shutterMoveFrame);
 			else
 				std::cout << "'" << shutterMoveFrame << "' is not a number" << std::endl;
 		}
@@ -135,7 +272,7 @@ namespace CUI {
 
 		fileName = "";
 		readNextCombinedToken(tokens, fileName);
-		
+
 		std::ifstream in(fileName);
 		if (!in)
 		{
@@ -173,9 +310,9 @@ namespace CUI {
 
 				sourcePos += sourcePosDim + " ";
 			}
-			
+
 			trim(sourcePos);
-			acmd.writeCmd(CUI::ConsoleCommand::ADD_SOURCE, sourcePos);
+			asyncCommand.writeCommand(AsyncCommand::ADD_SOURCE, sourcePos);
 		}
 		else
 		{
@@ -192,8 +329,8 @@ namespace CUI {
 			sinkHeight = "";
 			readNextToken(tokens, sinkHeight);
 
-			if(sinkHeight.find_first_not_of("+-,.0123456789") == std::string::npos)
-				acmd.writeCmd(CUI::ConsoleCommand::ADD_SINK, sinkHeight);
+			if (sinkHeight.find_first_not_of("+-,.0123456789") == std::string::npos)
+				asyncCommand.writeCommand(AsyncCommand::ADD_SINK, sinkHeight);
 			else
 				std::cout << "'" << sinkHeight << "' is not a number" << std::endl;
 		}
@@ -205,7 +342,7 @@ namespace CUI {
 
 	void showHelp()
 	{
-		std::cout 
+		std::cout
 			<< "print" << std::endl
 			<< "loadMesh -p ..." << std::endl
 			<< "particleGen [-w] [-f] [-e]" << std::endl
@@ -218,164 +355,5 @@ namespace CUI {
 			<< "help" << std::endl
 			<< "exit" << std::endl;
 	}
-
-	/* -_-_-_Comands End_-_-_- */
-
-	void startCUI()
-	{
-		startWithStream(std::cin, true);
-	}
-
-	void startWithStream(std::istream &inputStream, bool broadcastExitCmd)
-	{
-		std::string inputLine, command;
-		std::queue<std::string> tokens;
-		acmd.printInputMessage();
-
-		while (true)
-		{
-			//Read command
-			getline(inputStream, inputLine);
-			trim(inputLine);
-
-			//Tokenize command
-			if (inputLine == "")
-				continue;
-			std::istringstream tokenStream(inputLine);
-			tokens = std::queue<std::string>();
-			while (tokenStream >> command)
-				tokens.push(command);
-
-			//Execute command
-			if (!tokens.empty())
-			{
-				command = tokens.front();
-				std::transform(command.begin(), command.end(), command.begin(), ::tolower);
-				tokens.pop();
-
-				if (command == "#") {
-					//Comment
-				}
-				else if (command == "print") {
-					printCommand(tokens);
-				}
-				else if (command == "loadmesh") {
-					loadMesh(tokens);
-					acmd.printInputMessage();
-				}
-				else if (command == "loadshutter") {
-					loadShutter(tokens);
-					acmd.printInputMessage();
-				}
-				else if (command == "particlegen") {
-					acmd.writeCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
-					acmd.printInputMessage();
-				}
-				else if (command == "moveshutter") {
-					moveShutter(tokens);
-					acmd.printInputMessage();
-				}
-				else if (command == "simulate") {
-					acmd.writeCmd(CUI::ConsoleCommand::SIMULATE);
-					acmd.printInputMessage();
-				}
-				else if (command == "render")
-				{
-					acmd.writeCmd(CUI::ConsoleCommand::RENDER);
-					acmd.printInputMessage();
-				}
-				else if (command == "loadconfig")
-				{
-					loadConfig(tokens);
-					acmd.printInputMessage();
-				}
-				else if (command == "addsource")
-				{
-					addSource(tokens);
-					acmd.printInputMessage();
-				}
-				else if (command == "addsink")
-				{
-					addSink(tokens);
-					acmd.printInputMessage();
-				}
-				else if (command == "help" || command == "?") {
-					showHelp();
-					acmd.printInputMessage();
-				}
-				else if (command == "exit") {
-					if(broadcastExitCmd)
-						acmd.writeCmd(CUI::ConsoleCommand::EXIT);
-					break;
-				}
-				else {
-					std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
-				}
-			}
-		}
-	}
-
-	void AsyncCommand::printInputMessage() {
-		std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
-	}
-
-	//AsyncCommand
-	AsyncCommand::AsyncCommand() :
-		command(ConsoleCommand::NONE), param("")
-	{
-	}
-
-	ConsoleCommand AsyncCommand::readCmd()
-	{
-		std::string temp = "";
-		return readCmd(temp);
-	}
-
-	void AsyncCommand::writeCmd(ConsoleCommand cmd)
-	{
-		std::string temp = "";
-		writeCmd(cmd, temp);
-	}
-
-	ConsoleCommand AsyncCommand::readCmd(std::string & param)
-	{
-		CUI::ConsoleCommand cmd;
-		{
-			std::unique_lock<std::mutex> guard(this->cmdLock);
-			cv.wait(guard, [this] { return !this->commandEmpty(); });
-		}
-
-		{
-			std::lock_guard<std::mutex> guard(this->cmdLock);
-			param = this->param;
-			cmd = this->command;
-			this->command = CUI::ConsoleCommand::NONE;
-		}
-		cv.notify_one();
-
-		return cmd;
-	}
-
-	void AsyncCommand::writeCmd(ConsoleCommand cmd, std::string param)
-	{
-		if (cmd == CUI::ConsoleCommand::NONE)
-			return;
-
-		{
-			std::lock_guard<std::mutex> guard(this->cmdLock);
-
-			this->command = cmd;
-			this->param = param;
-		}
-		this->cv.notify_one();
-
-		{
-			std::unique_lock<std::mutex> guard(this->cmdLock);
-			cv.wait(guard, [this] { return this->commandEmpty(); });
-		}
-	}
-
-	bool AsyncCommand::commandEmpty() {
-		return this->command == CUI::ConsoleCommand::NONE;
-	}
+	/* -_-_-_Commands End_-_-_- */
 }

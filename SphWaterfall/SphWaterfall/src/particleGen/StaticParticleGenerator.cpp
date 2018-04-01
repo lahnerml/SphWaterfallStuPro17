@@ -154,7 +154,7 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
 				continue;
 
 			particlePosition = face.a + ((face.b - face.a) * x_perc) + ((face.c - face.a) * y_perc);
-			generatedParticles.push_back(StaticParticle(particlePosition));
+			generatedParticles.push_back(SphParticle(particlePosition, SphParticle::STATIC));
 			//std::cout << particlePosition << std::endl;
 			//TODO Debug output
 		}

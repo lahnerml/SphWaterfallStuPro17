@@ -9,12 +9,10 @@
 #include "visualization/VisualizationManager.h"
 #include "data/ParticleIO.h"
 
-CUI::AsyncCommand acmd;
-
-void loadMesh(int rank, std::string fileName, Terrain& loadedMesh) {
+Terrain& loadMesh(int rank, std::string fileName) {
 	std::cout << "Loading Mesh: \"" << fileName << "\"" << std::endl;
-	loadedMesh = TerrainParser::loadFromFile(fileName);
-	cout << "Vertices: " << loadedMesh.getVertexCount() << " Faces: " << loadedMesh.getFaceCount() << endl;
+	return TerrainParser::loadFromFile(fileName);
+	
 }
 
 void generateParticles(int rank, SphManager& sphManager, Terrain& loadedMesh, SphParticle::ParticleType pType) {
@@ -135,15 +133,11 @@ void addSink(int rank, SphManager& sphManager, std::string sinkHeightParam)
 	std::cout << "New sink height: " << sinkHeight << std::endl;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	MPI_Init(&argc, &argv);
 
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	int world_size;
-	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 	// generate slave_comm and slave_comm_size for simulation
 	int color = 1337;
@@ -156,8 +150,8 @@ int main(int argc, char** argv)
 	}
 
 	std::thread cuiThread;
-	int cmd = CUI::ConsoleCommand::NONE;
-	std::string cmdParam;
+	int command = AsyncCommand::NONE;
+	std::string commandParameter;
 
 	SphManager sphManager = SphManager(Vector3(DOMAIN_DIMENSION, DOMAIN_DIMENSION, DOMAIN_DIMENSION), TIMESTEPS, 0.03);
 	Terrain loadedMesh;
@@ -167,49 +161,51 @@ int main(int argc, char** argv)
 		cuiThread = std::thread(CUI::startCUI);
 	}
 
-	while (cmd != CUI::ConsoleCommand::EXIT) {
+	while (command != AsyncCommand::EXIT) {
 		if (rank == 0) {
-			cmd = CUI::acmd.readCmd(cmdParam);
+			command = CUI::asyncCommand.readCommand(commandParameter);
 		}
-		MPI_Bcast(&cmd, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&command, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 		//Execute console input
-		switch (cmd)
+		switch (command)
 		{
-		case CUI::ConsoleCommand::LOAD_MESH:
-			loadMesh(rank, cmdParam, loadedMesh);
+		case AsyncCommand::LOAD_MESH:
+			if (rank == 0) {
+				loadedMesh = loadMesh(rank, commandParameter);
+				cout << "Mesh loaded." << endl;
+				cout << "Vertices: " << loadedMesh.getVertexCount() << " Faces: " << loadedMesh.getFaceCount() << endl;
+				CUI::printInputMessage();
+			}
+			MPI_Barrier(MPI_COMM_WORLD);
+			break;
+		case AsyncCommand::LOAD_SHUTTER:
+			loadedShutter = loadMesh(rank, commandParameter);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Mesh loaded." << endl;
-				acmd.printInputMessage();
+				cout << "Vertices: " << loadedShutter.getVertexCount() << " Faces: " << loadedShutter.getFaceCount() << endl;
+				CUI::printInputMessage();
 			}
 			break;
-		case CUI::ConsoleCommand::LOAD_SHUTTER:
-			loadMesh(rank, cmdParam, loadedShutter);
-			MPI_Barrier(MPI_COMM_WORLD);
-			if (rank == 0) {
-				cout << "Mesh loaded." << endl;
-				acmd.printInputMessage();
-			}
-			break;
-		case CUI::ConsoleCommand::GENERATE_PARTICLES:
+		case AsyncCommand::GENERATE_PARTICLES:
 			generateParticles(rank, sphManager, loadedMesh, SphParticle::ParticleType::STATIC);
 			generateParticles(rank, sphManager, loadedShutter, SphParticle::ParticleType::SHUTTER);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Static particles generated." << endl;
-				acmd.printInputMessage();
+				CUI::printInputMessage();
 			}
 			break;
-		case CUI::ConsoleCommand::MOVE_SHUTTER:
-			moveShutter(rank, sphManager, cmdParam);
+		case AsyncCommand::MOVE_SHUTTER:
+			moveShutter(rank, sphManager, commandParameter);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Stutter move set." << endl;
-				acmd.printInputMessage();
+				CUI::printInputMessage();
 			}
 			break;
-		case CUI::ConsoleCommand::SIMULATE:
+		case AsyncCommand::SIMULATE:
 			if (rank != 0) {
 				simulate(rank, sphManager);
 			}
@@ -219,30 +215,30 @@ int main(int argc, char** argv)
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Simulation finished." << endl;
-				acmd.printInputMessage();
+				CUI::printInputMessage();
 			}
 			break;
-		case CUI::ConsoleCommand::RENDER:
+		case AsyncCommand::RENDER:
 			render(rank, loadedMesh, loadedShutter, 0);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Rendering finished." << endl;
-				acmd.printInputMessage();
+				CUI::printInputMessage();
 			}
-		case CUI::ConsoleCommand::ADD_SOURCE:
-			addSource(rank, sphManager, cmdParam);
+		case AsyncCommand::ADD_SOURCE:
+			addSource(rank, sphManager, commandParameter);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Added source." << endl;
-				acmd.printInputMessage();
+				CUI::printInputMessage();
 			}
 			break;
-		case CUI::ConsoleCommand::ADD_SINK:
-			addSink(rank, sphManager, cmdParam);
+		case AsyncCommand::ADD_SINK:
+			addSink(rank, sphManager, commandParameter);
 			MPI_Barrier(MPI_COMM_WORLD);
 			if (rank == 0) {
 				cout << "Added sink." << endl;
-				acmd.printInputMessage();
+				CUI::printInputMessage();
 			}
 			break;
 		default:
