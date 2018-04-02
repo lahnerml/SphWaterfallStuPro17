@@ -10,7 +10,7 @@ void CommandHandler::start() {
 
 	do {
 		cui_command = recieveCommand();
-		std::cout << "recieved command: " << cui_command << std::endl;
+		//std::cout << "process " << mpi_rank <<  " recieved command: " << cui_command << std::endl;
 
 		//Execute console input
 		executeCommand(cui_command);
@@ -18,29 +18,24 @@ void CommandHandler::start() {
 }
 
 void CommandHandler::handleCUICommand(CUICommand& cui_command) {
-	std::cout << "send command: " << cui_command << std::endl;
+	//std::cout << "process " << mpi_rank << "sent command: " << cui_command << std::endl;
 	sendCommand(cui_command);
 	executeCommand(cui_command);
 }
 
 CUICommand CommandHandler::recieveCommand() {
-	std::string recieved_input_line;
-	std::string recieved_command_name;
 	CUICommand::Command recieved_command;
-
-	std::string recieved_parameter_name;
-	std::string recieved_parameter_value;
-
-	int string_length;
+	std::string recieved_input_line, recieved_command_name, recieved_parameter_name, recieved_parameter_value;
+	int recieved_string_length;
 
 	// command
 	MPI_Bcast(&recieved_command, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 	// input line
-	MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	if (string_length > 0) {
-		std::vector<char> input_line_buffer(string_length);
-		MPI_Bcast(input_line_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&recieved_string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	if (recieved_string_length > 0) {
+		std::vector<char> input_line_buffer(recieved_string_length);
+		MPI_Bcast(input_line_buffer.data(), recieved_string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
 		recieved_input_line = std::string(input_line_buffer.begin(), input_line_buffer.end());
 	}
 	else {
@@ -48,10 +43,10 @@ CUICommand CommandHandler::recieveCommand() {
 	}
 
 	// command name
-	MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	if (string_length > 0) {
-		std::vector<char> command_name_buffer(string_length);
-		MPI_Bcast(command_name_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&recieved_string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	if (recieved_string_length > 0) {
+		std::vector<char> command_name_buffer(recieved_string_length);
+		MPI_Bcast(command_name_buffer.data(), recieved_string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
 		recieved_command_name = std::string(command_name_buffer.begin(), command_name_buffer.end());
 	}
 	else {
@@ -66,10 +61,10 @@ CUICommand CommandHandler::recieveCommand() {
 	MPI_Bcast(&number_of_parameters, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	for (int i = 0; i < number_of_parameters; i++) {
 		// send parameter name
-		MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		if (string_length > 0) {
-			std::vector<char> parameter_name_buffer(string_length);
-			MPI_Bcast(parameter_name_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&recieved_string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		if (recieved_string_length > 0) {
+			std::vector<char> parameter_name_buffer(recieved_string_length);
+			MPI_Bcast(parameter_name_buffer.data(), recieved_string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
 			recieved_parameter_name = std::string(parameter_name_buffer.begin(), parameter_name_buffer.end());
 		}
 		else {
@@ -77,10 +72,10 @@ CUICommand CommandHandler::recieveCommand() {
 		}
 
 		// send parameter value
-		MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		if (string_length > 0) {
-			std::vector<char> parameter_value_buffer(string_length);
-			MPI_Bcast(parameter_value_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&recieved_string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		if (recieved_string_length > 0) {
+			std::vector<char> parameter_value_buffer(recieved_string_length);
+			MPI_Bcast(parameter_value_buffer.data(), recieved_string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
 			recieved_parameter_value = std::string(parameter_value_buffer.begin(), parameter_value_buffer.end());
 		}
 		else {
@@ -248,10 +243,12 @@ Terrain CommandHandler::loadMesh(std::string file_path) {
 void CommandHandler::generateParticles(Terrain& loaded_mesh, SphParticle::ParticleType particle_type) {
 	StaticParticleGenerator static_particle_generator;
 
-	if (mpi_rank == 0)
+	if (mpi_rank == 0) {
 		static_particle_generator.sendAndGenerate(loaded_mesh, particle_type);
-	else
+	}
+	else {
 		static_particle_generator.receiveAndGenerate(sph_manager, particle_type);
+	}
 }
 
 void CommandHandler::createExport() {
@@ -308,10 +305,8 @@ void CommandHandler::simulate() {
 		for (int i = 0; i < 20; i++) {
 			for (int j = 0; j < 20; j++) {
 				for (int k = 0; k < 20; k++) {
-					//SphParticle particle = SphParticle(Vector3(1000.0 + (i/10.0), 1000.0 + (j/10.0), 1000.0 + (k/10.0)));
 					SphParticle particle = SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k));
 					particles.push_back(particle);
-					//cout << particle.position << endl;
 				}
 			}
 		}
