@@ -9,6 +9,8 @@ class CUICommandParameter {
 
 		friend bool operator==(const CUICommandParameter&, const CUICommandParameter&);
 
+		int sizeInByte();
+
 		std::string getParameterName() const;
 		std::string getValue() const;
 	private:

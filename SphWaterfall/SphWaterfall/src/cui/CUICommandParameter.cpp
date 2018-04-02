@@ -16,6 +16,10 @@ bool operator==(const CUICommandParameter& first_parameter, const CUICommandPara
 	return ((first_parameter.getValue() == second_parameter.getValue()) && (first_parameter.getParameterName() == second_parameter.getParameterName()));
 }
 
+int CUICommandParameter::sizeInByte() {
+	return sizeof(parameter_name) + sizeof(value);
+}
+
 std::string CUICommandParameter::getParameterName() const {
 	return this->parameter_name;
 }

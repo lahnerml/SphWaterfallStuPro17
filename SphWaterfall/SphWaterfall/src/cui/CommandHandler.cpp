@@ -9,20 +9,137 @@ void CommandHandler::start() {
 	CUICommand cui_command;
 
 	do {
-		MPI_Bcast(&cui_command, sizeof(CUICommand), MPI_BYTE, 0, MPI_COMM_WORLD);
-		std::cout << "command: " << cui_command << std::endl;
+		cui_command = recieveCommand();
+		std::cout << "recieved command: " << cui_command << std::endl;
 
 		//Execute console input
 		executeCommand(cui_command);
-		std::cout << "command executed" << std::endl;
 	} while (cui_command.getCommand() != CUICommand::EXIT);
-
-	std::cout << "at command handler leave start method" << std::endl;
 }
 
 void CommandHandler::handleCUICommand(CUICommand& cui_command) {
-	MPI_Bcast(&cui_command, sizeof(CUICommand), MPI_BYTE, 0, MPI_COMM_WORLD);
+	std::cout << "send command: " << cui_command << std::endl;
+	sendCommand(cui_command);
 	executeCommand(cui_command);
+}
+
+CUICommand CommandHandler::recieveCommand() {
+	std::string recieved_input_line;
+	std::string recieved_command_name;
+	CUICommand::Command recieved_command;
+
+	std::string recieved_parameter_name;
+	std::string recieved_parameter_value;
+
+	int string_length;
+
+	// command
+	MPI_Bcast(&recieved_command, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	// input line
+	MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	if (string_length > 0) {
+		std::vector<char> input_line_buffer(string_length);
+		MPI_Bcast(input_line_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+		recieved_input_line = std::string(input_line_buffer.begin(), input_line_buffer.end());
+	}
+	else {
+		recieved_input_line = "";
+	}
+
+	// command name
+	MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	if (string_length > 0) {
+		std::vector<char> command_name_buffer(string_length);
+		MPI_Bcast(command_name_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+		recieved_command_name = std::string(command_name_buffer.begin(), command_name_buffer.end());
+	}
+	else {
+		recieved_command_name = "";
+	}
+
+	// create return command to add parameters
+	CUICommand cui_command = CUICommand(recieved_command_name, recieved_input_line, recieved_command);
+
+	// parameter
+	int number_of_parameters;
+	MPI_Bcast(&number_of_parameters, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	for (int i = 0; i < number_of_parameters; i++) {
+		// send parameter name
+		MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		if (string_length > 0) {
+			std::vector<char> parameter_name_buffer(string_length);
+			MPI_Bcast(parameter_name_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+			recieved_parameter_name = std::string(parameter_name_buffer.begin(), parameter_name_buffer.end());
+		}
+		else {
+			recieved_parameter_name = "";
+		}
+
+		// send parameter value
+		MPI_Bcast(&string_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		if (string_length > 0) {
+			std::vector<char> parameter_value_buffer(string_length);
+			MPI_Bcast(parameter_value_buffer.data(), string_length, MPI_CHAR, 0, MPI_COMM_WORLD);
+			recieved_parameter_value = std::string(parameter_value_buffer.begin(), parameter_value_buffer.end());
+		}
+		else {
+			recieved_parameter_value = "";
+		}
+		cui_command.addParameter(CUICommandParameter(recieved_parameter_name, recieved_parameter_value));
+	}
+
+	return cui_command;
+}
+
+void CommandHandler::sendCommand(CUICommand& cui_command) {
+	CUICommand::Command send_command = cui_command.getCommand();
+	std::string send_input_line = cui_command.getInputLine();
+	std::string send_command_name = cui_command.getCommandName();
+	std::vector<CUICommandParameter> send_parameter_list = cui_command.getParameterList();
+	std::string send_parameter_name, send_parameter_value;
+
+	// send command
+	MPI_Bcast(&send_command, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	// send input line
+	int input_line_length = send_input_line.size();
+	MPI_Bcast(&input_line_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	if (input_line_length > 0) {
+		std::vector<char> input_line_buffer(send_input_line.begin(), send_input_line.end());
+		MPI_Bcast(input_line_buffer.data(), send_input_line.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+	}
+
+	// send command name
+	int command_name_length = send_command_name.size();
+	MPI_Bcast(&command_name_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	if (command_name_length > 0) {
+		std::vector<char> command_name_buffer(send_command_name.begin(), send_command_name.end());
+		MPI_Bcast(command_name_buffer.data(), send_command_name.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+	}
+
+	// send parameter
+	int number_of_parameters = send_parameter_list.size();
+	MPI_Bcast(&number_of_parameters, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	for (auto& parameter : send_parameter_list) {
+		// send parameter name
+		send_parameter_name = parameter.getParameterName();
+		int parameter_name_length = send_parameter_name.size();
+		MPI_Bcast(&parameter_name_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		if (parameter_name_length > 0) {
+			std::vector<char> parameter_name_buffer(send_parameter_name.begin(), send_parameter_name.end());
+			MPI_Bcast(parameter_name_buffer.data(), send_parameter_name.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+		}
+
+		// send parameter value
+		send_parameter_value = parameter.getValue();
+		int parameter_value_length = send_parameter_value.size();
+		MPI_Bcast(&parameter_value_length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		if (parameter_value_length > 0) {
+			std::vector<char> parameter_value_buffer(send_parameter_value.begin(), send_parameter_value.end());
+			MPI_Bcast(parameter_value_buffer.data(), send_parameter_value.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+		}
+	}
 }
 
 void CommandHandler::executeCommand(CUICommand& cui_command) {

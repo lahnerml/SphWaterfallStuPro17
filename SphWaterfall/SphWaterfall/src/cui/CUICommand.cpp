@@ -8,10 +8,18 @@ CUICommand::CUICommand() :
 
 }
 
-CUICommand::CUICommand(std::string command, std::string input_line) :
+CUICommand::CUICommand(std::string command_name, std::string input_line) :
 	command(Command::NONE),
 	input_line(input_line),
-	command_name(command),
+	command_name(command_name),
+	parameter_list(std::vector<CUICommandParameter>()) {
+
+}
+
+CUICommand::CUICommand(std::string command_name, std::string input_line, Command command) :
+	command(command),
+	input_line(input_line),
+	command_name(command_name),
 	parameter_list(std::vector<CUICommandParameter>()) {
 
 }
@@ -24,6 +32,14 @@ std::ostream& operator<<(std::ostream& out, const CUICommand& command) {
 	}
 
 	return out << "]}";
+}
+
+int CUICommand::sizeInByte() {
+	int size = sizeof(input_line) + sizeof(command) + sizeof(command_name);
+	for (auto& parameter : parameter_list) {
+		size += parameter.sizeInByte();
+	}
+	return size;
 }
 
 std::string CUICommand::getInputLine() const {

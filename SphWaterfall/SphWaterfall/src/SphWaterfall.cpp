@@ -26,10 +26,7 @@ int main(int argc, char** argv) {
 	}
 	else {
 		command_handler.start();
-		std::cout << "after command handler leave start method" << std::endl;
 	}
-
-	std::cout << "test " << mpi_rank << std::endl;
 
 	MPI_Finalize();
 

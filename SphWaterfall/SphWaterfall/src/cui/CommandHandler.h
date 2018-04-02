@@ -19,7 +19,6 @@ class CommandHandler {
 		void start();
 		void handleCUICommand(CUICommand&);
 
-
 		void printInputMessage();
 	private:
 		const int mpi_rank;
@@ -27,6 +26,8 @@ class CommandHandler {
 		SphManager sph_manager;
 		Terrain loaded_mesh, loaded_shutter;
 
+		CUICommand recieveCommand();
+		void sendCommand(CUICommand&);
 		void executeCommand(CUICommand&);
 
 		Terrain loadMesh(std::string);

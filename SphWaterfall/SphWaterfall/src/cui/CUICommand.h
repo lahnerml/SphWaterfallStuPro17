@@ -22,9 +22,12 @@ class CUICommand {
 		};
 
 		CUICommand();
-		CUICommand(std::string parameter_name, std::string input_line);
+		CUICommand(std::string command_name, std::string input_line);
+		CUICommand(std::string command_name, std::string input_line, Command command);
 
 		friend std::ostream& operator<<(std::ostream& out, const CUICommand&);
+
+		int sizeInByte();
 
 		std::string getInputLine() const;
 		Command getCommand() const;
