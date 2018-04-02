@@ -134,7 +134,7 @@ void CUI::cleanAndExecuteCommand(bool broadcastExitCmd) {
 		loadConfig();
 		printInputMessage();
 	}
-	else if (command == "help" || command == "?") {
+	else if (command == "help") {
 		showHelp();
 		printInputMessage();
 	}
@@ -181,18 +181,53 @@ void CUI::printCommand() {
 }
 
 void CUI::showHelp() {
-	std::cout
-		<< "print" << std::endl
-		<< "loadmesh -p ..." << std::endl
-		<< "particlegen" << std::endl
-		<< "moveshutter -t 0" << std::endl
-		<< "simulate -t 0" << std::endl
-		<< "render" << std::endl
-		<< "loadconfig -p ..." << std::endl
-		<< "addsource -v x y z" << std::endl
-		<< "addsink -h 0" << std::endl
-		<< "help" << std::endl
-		<< "exit" << std::endl;
+	cout << endl
+		<< "usage: <command> [<flags>]" << endl << endl
+
+		<< "Flags:" << endl
+		<< "   -p | file path to the file you want to load " << endl
+		<< "   -t | defines at what time a command specific event occurs  " << endl
+		<< "      | simulate: simulation time" << endl
+		<< "      | moveshutter: time at which the shutter is moved" << endl
+		<< "   -v | followed by 3 numbers x y z, who stand for the coordinates of a point in 3D space" << endl
+		<< "   -h | for addsink which determines the sink height" << endl << endl
+
+		<< "Commands:" << endl
+		<< "   print" << endl
+		<< "      echo the give input." << endl << endl
+
+		<< "   loadconfig -p" << endl
+		<< "      load a configuration from a given file path, the file has to ba a .cfg-file." << endl << endl
+
+		<< "   loadmesh -p" << endl
+		<< "      load a mesh from a give file path, the mash has to be a .obj-file." << endl << endl
+
+		<< "   loadshutter -p" << endl
+		<< "      load a shutter mesh from a give file path, the mash has to be a .obj-file." << endl << endl
+		
+		<< "   moveshutter -t" << endl
+		<< "      set the time at which the shutter will move." << endl << endl
+
+		<< "   particlegen" << endl
+		<< "      generate wall particles on the loaded mesh and shutter." << endl << endl
+
+		<< "   simulate -t" << endl
+		<< "      start a sph simulation, time can be set with '-t' parameter." << endl << endl
+
+		<< "   render" << endl
+		<< "      start the rendering process." << endl << endl
+
+		<< "   addsource -v" << endl
+		<< "      add a water source at a given point." << endl << endl
+
+		<< "   addsink -h" << endl
+		<< "      add a senk at a given height" << endl << endl
+
+		<< "   help" << endl
+		<< "      show help" << endl << endl
+
+		<< "   exit" << endl
+		<< "      quit the application" << endl << endl;
 }
 
 void CUI::loadConfig() {

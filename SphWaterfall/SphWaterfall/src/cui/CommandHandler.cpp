@@ -9,6 +9,7 @@ void CommandHandler::start() {
 	CUICommand cui_command;
 
 	do {
+		MPI_Barrier(MPI_COMM_WORLD);
 		cui_command = recieveCommand();
 		//std::cout << "process " << mpi_rank <<  " recieved command: " << cui_command << std::endl;
 
@@ -19,6 +20,7 @@ void CommandHandler::start() {
 
 void CommandHandler::handleCUICommand(CUICommand& cui_command) {
 	//std::cout << "process " << mpi_rank << "sent command: " << cui_command << std::endl;
+	MPI_Barrier(MPI_COMM_WORLD);
 	sendCommand(cui_command);
 	executeCommand(cui_command);
 }
