@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "CUICommandParameter.h"
 
@@ -23,12 +24,14 @@ class CUICommand {
 		CUICommand();
 		CUICommand(std::string parameter_name, std::string input_line);
 
-		std::string& getInputLine();
-		Command& getCommand();
+		friend std::ostream& operator<<(std::ostream& out, const CUICommand&);
+
+		std::string getInputLine() const;
+		Command getCommand() const;
 		void setCommand(Command command);
-		std::string& getCommandName();
-		std::vector<CUICommandParameter>& getParameterList();
-		CUICommandParameter& getParameter(int index);
+		std::string getCommandName() const;
+		std::vector<CUICommandParameter> getParameterList() const;
+		CUICommandParameter getParameter(int index) const;
 		void addParameter(CUICommandParameter parameter);
 		bool removeParameter(CUICommandParameter parameter);
 		bool removeParameter(std::string parameter_name);

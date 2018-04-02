@@ -16,11 +16,21 @@ CUICommand::CUICommand(std::string command, std::string input_line) :
 
 }
 
-std::string& CUICommand::getInputLine() {
+std::ostream& operator<<(std::ostream& out, const CUICommand& command) {
+	out << "{" << "input_line:" << command.getInputLine() << " | command:" << command.getCommand()
+		<< " | command_name:" << command.getCommandName() << " | parmeter_list:[";
+	for (auto parameter : command.getParameterList()) {
+		out << "(parameter_name:" << parameter.getParameterName() << " | parameter_value:" << parameter.getValue() <<  ")";
+	}
+
+	return out << "]}";
+}
+
+std::string CUICommand::getInputLine() const {
 	return this->input_line;
 }
 
-CUICommand::Command& CUICommand::getCommand() {
+CUICommand::Command CUICommand::getCommand() const{
 	return this->command;
 }
 
@@ -28,16 +38,15 @@ void CUICommand::setCommand(Command command) {
 	this->command = command;
 }
 
-std::string& CUICommand::getCommandName() {
+std::string CUICommand::getCommandName() const {
 	return this->command_name;
 }
 
-std::vector<CUICommandParameter>& CUICommand::getParameterList() {
+std::vector<CUICommandParameter> CUICommand::getParameterList() const {
 	return this->parameter_list;
 }
 
-CUICommandParameter& CUICommand::getParameter(int index)
-{
+CUICommandParameter CUICommand::getParameter(int index) const {
 	return parameter_list.at(index);
 }
 

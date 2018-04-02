@@ -10,6 +10,7 @@ void CommandHandler::start() {
 
 	do {
 		MPI_Bcast(&cui_command, sizeof(CUICommand), MPI_BYTE, 0, MPI_COMM_WORLD);
+		std::cout << "command: " << cui_command << std::endl;
 
 		//Execute console input
 		executeCommand(cui_command);
@@ -115,7 +116,7 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			break;
 		default:
 			break;
-		}
+	}
 }
 
 void CommandHandler::printInputMessage() {
