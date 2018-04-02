@@ -1,8 +1,7 @@
 #include "CUI.h"
 
-CUI::CUI() : 
-	command_handler(CommandHandler(0)),
-	current_command(CUICommand()){
+CUI::CUI(CommandHandler command_handler) :
+	command_handler(command_handler){
 
 }
 

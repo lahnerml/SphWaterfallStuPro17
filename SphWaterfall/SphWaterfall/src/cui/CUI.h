@@ -4,14 +4,13 @@
 #include <vector>
 #include <algorithm>
 
-#include "../geometry/TerrainParser.h"
 #include "../data/NullableWrapper.h"
 #include "CUICommand.h"
 #include "CommandHandler.h"
 
 class CUI {
 	public:
-		CUI();
+		CUI(CommandHandler);
 
 		void start();
 		void printInputMessage();

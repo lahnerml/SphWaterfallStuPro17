@@ -408,7 +408,7 @@ void SphManager::exchangeParticles() {
 	}
 
 	//for (auto particle : all_new_particles) { std::cout << "all new: " << particle << std::endl; } // debug
-	
+
 	add_particles(all_new_particles);
 	MPI_Barrier(slave_comm);
 }
