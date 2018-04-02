@@ -34,14 +34,6 @@ std::ostream& operator<<(std::ostream& out, const CUICommand& command) {
 	return out << "]}";
 }
 
-int CUICommand::sizeInByte() {
-	int size = sizeof(input_line) + sizeof(command) + sizeof(command_name);
-	for (auto& parameter : parameter_list) {
-		size += parameter.sizeInByte();
-	}
-	return size;
-}
-
 std::string CUICommand::getInputLine() const {
 	return this->input_line;
 }

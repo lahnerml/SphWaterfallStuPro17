@@ -46,7 +46,8 @@ void CUI::parseCommand(std::string input_line) {
 			continue;
 		}
 
-		bool isNewParameter = command.front() == '-';
+		// is new parameter when string starts with '-' and there are no numbers in it
+		bool isNewParameter = ((command.front() == '-') && (command.find_first_of("0123456789") == std::string::npos));
 
 		if (!isNewParameter) {
 			if (!last_read_parameter_value.isNull()) {

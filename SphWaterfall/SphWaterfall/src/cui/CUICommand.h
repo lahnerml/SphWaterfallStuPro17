@@ -27,8 +27,6 @@ class CUICommand {
 
 		friend std::ostream& operator<<(std::ostream& out, const CUICommand&);
 
-		int sizeInByte();
-
 		std::string getInputLine() const;
 		Command getCommand() const;
 		void setCommand(Command command);

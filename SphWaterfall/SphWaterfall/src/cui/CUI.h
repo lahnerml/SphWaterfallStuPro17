@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "../data/NullableWrapper.h"
-#include "CUICommand.h"
 #include "CommandHandler.h"
 
 class CUI {
@@ -28,7 +27,6 @@ class CUI {
 		void trim(std::string& string);
 		std::string trimQuotemarks(std::string string);
 
-		/* -_-_-_Commands Begin_-_-_- */
 		void printCommand();
 		void loadConfig();
 		void showHelp();
@@ -37,5 +35,4 @@ class CUI {
 		bool cleanMoveShutter();
 		bool cleanAddSource();
 		bool cleanAddSink();
-		/* -_-_-_Commands End_-_-_- */
 };
