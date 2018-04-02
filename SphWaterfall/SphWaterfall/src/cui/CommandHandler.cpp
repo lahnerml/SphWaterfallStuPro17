@@ -9,18 +9,12 @@ void CommandHandler::start() {
 	CUICommand cui_command;
 
 	do {
-		MPI_Barrier(MPI_COMM_WORLD);
 		cui_command = recieveCommand();
-		//std::cout << "process " << mpi_rank <<  " recieved command: " << cui_command << std::endl;
-
-		//Execute console input
 		executeCommand(cui_command);
 	} while (cui_command.getCommand() != CUICommand::EXIT);
 }
 
 void CommandHandler::handleCUICommand(CUICommand& cui_command) {
-	//std::cout << "process " << mpi_rank << "sent command: " << cui_command << std::endl;
-	MPI_Barrier(MPI_COMM_WORLD);
 	sendCommand(cui_command);
 	executeCommand(cui_command);
 }
@@ -299,16 +293,13 @@ void CommandHandler::moveShutter(std::string shutter_move_param) {
 }
 
 void CommandHandler::simulate() {
-	cout << "command is simulate" << endl;
-
 	if (mpi_rank == 1) {
 		std::vector<SphParticle> particles;
 
 		for (int i = 0; i < 20; i++) {
 			for (int j = 0; j < 20; j++) {
 				for (int k = 0; k < 20; k++) {
-					SphParticle particle = SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k));
-					particles.push_back(particle);
+					particles.push_back(SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k)));
 				}
 			}
 		}

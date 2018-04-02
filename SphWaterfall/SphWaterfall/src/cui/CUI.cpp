@@ -6,10 +6,10 @@ CUI::CUI(CommandHandler command_handler) :
 }
 
 void CUI::start() {
-	startWithStream(std::cin, true);
+	startWithStream(std::cin, false);
 }
 
-void CUI::startWithStream(std::istream &inputStream, bool broadcastExitCmd) {
+void CUI::startWithStream(std::istream &input_stream, bool is_config_execution) {
 	std::string input_line;
 
 	printInputMessage();
@@ -17,7 +17,7 @@ void CUI::startWithStream(std::istream &inputStream, bool broadcastExitCmd) {
 	exit_programm = false;
 	while (!exit_programm) {
 		// read command_name
-		getline(inputStream, input_line);
+		getline(input_stream, input_line);
 		trim(input_line);
 
 		if (input_line == "") {
@@ -28,7 +28,7 @@ void CUI::startWithStream(std::istream &inputStream, bool broadcastExitCmd) {
 		parseCommand(input_line);
 
 		// clean command from not relevant parameters for each command and executes them
-		cleanAndExecuteCommand(broadcastExitCmd);
+		cleanAndExecuteCommand(is_config_execution);
 	}
 }
 
@@ -70,7 +70,7 @@ void CUI::parseCommand(std::string input_line) {
 	}
 }
 
-void CUI::cleanAndExecuteCommand(bool broadcastExitCmd) {
+void CUI::cleanAndExecuteCommand(bool is_config_execution) {
 	std::string command = current_command.getCommandName();
 	if (command.front() == '#') {
 		//Comment
@@ -139,7 +139,7 @@ void CUI::cleanAndExecuteCommand(bool broadcastExitCmd) {
 		printInputMessage();
 	}
 	else if (command == "exit") {
-		if (broadcastExitCmd) {
+		if (!is_config_execution) {
 			exit_programm = true;
 			current_command.setCommand(CUICommand::EXIT);
 			command_handler.handleCUICommand(current_command);
@@ -242,7 +242,7 @@ void CUI::loadConfig() {
 			else
 			{
 				std::cerr << "Config file \"" << file_path << "\" loaded and running..." << std::endl;
-				startWithStream(in, false);
+				startWithStream(in, true);
 				std::cout << "Done reading config file." << std::endl;
 			}
 		}
