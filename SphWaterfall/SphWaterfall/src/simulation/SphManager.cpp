@@ -32,6 +32,9 @@ void SphManager::simulate() {
 	}
 
 	exchangeParticles();
+	if (mpi_rank == 0) {
+		std::cout << "finished exchange" << std::endl;
+	}
 	exchangeRimParticles(SphParticle::STATIC);
 
 	if (mpi_rank == 0) {
@@ -359,7 +362,7 @@ const Vector3& SphManager::getDomainDimensions() const
 void SphManager::exchangeParticles() {
 	std::unordered_map<int, std::vector<SphParticle>> target_map;
 	std::vector<SphParticle> all_new_particles;
-	std::vector<SphParticle> incoming_particles;
+	std::vector<std::vector<SphParticle>> incoming_particles;
 	int target_id;
 
 	// adds particles that are provided by the addParticles method
@@ -391,37 +394,43 @@ void SphManager::exchangeParticles() {
 		all_new_particles = target_map.at(mpi_rank);
 		target_map.erase(mpi_rank);
 	}
-	MPI_Request request;
+
+	// send meta data
+	for (int i = 0; i < slave_comm_size; i++) {
+		int size = target_map[i].size();
+		if (i != mpi_rank) {
+			MPI_Send(&size, 1, MPI_INT, i, META_EXCHANGE_TAG, slave_comm);
+		}
+	}
+
+	MPI_Barrier(slave_comm);
+
+	// receive meta from all other processors and post receives
+	for (int i = 0; i < slave_comm_size; i++) {
+		if (i != mpi_rank) {
+			int size;
+			MPI_Recv(&size, 1, MPI_INT, i, META_EXCHANGE_TAG, slave_comm, MPI_STATUS_IGNORE);
+			if (size != 0) {
+				incoming_particles.push_back(std::vector<SphParticle>(size));
+				MPI_Request request;
+				MPI_Irecv(incoming_particles.back().data(), size * sizeof(SphParticle), MPI_BYTE, i, EXCHANGE_TAG, slave_comm, &request);
+			}
+		}
+	}
+	MPI_Barrier(slave_comm);
+
+	// send particles
 	for (auto& vector : target_map) {
-		//for (auto particle : vector.second) { std::cout << "sending: " << particle << std::endl; } // debug
-		MPI_Isend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, EXCHANGE_TAG, slave_comm, &request);
+		if (vector.second.size() != 0) {
+			MPI_Send(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, EXCHANGE_TAG, slave_comm);
+		}		
 	}
 
 	MPI_Barrier(slave_comm);
-
-	// receive until there is nothing left
-	int flag;
-	MPI_Status status;
-	MPI_Iprobe(MPI_ANY_SOURCE, EXCHANGE_TAG, slave_comm, &flag, &status);
-
-	int source;
-	while (flag) {
-		source = status.MPI_SOURCE;
-		MPI_Get_count(&status, MPI_BYTE, &count);
-		incoming_particles = std::vector<SphParticle>(count / sizeof(SphParticle));
-
-		MPI_Recv(incoming_particles.data(), count, MPI_BYTE, source, EXCHANGE_TAG, slave_comm, MPI_STATUS_IGNORE);
-		all_new_particles.insert(all_new_particles.end(), incoming_particles.begin(), incoming_particles.end());
-		//for (auto particle : incoming_particles) { std::cout << "incoming: " << particle << std::endl; } // debug
-
-		// next message
-		MPI_Iprobe(MPI_ANY_SOURCE, EXCHANGE_TAG, slave_comm, &flag, &status);
-	}
-
-	//for (auto particle : all_new_particles) { std::cout << "all new: " << particle << std::endl; } // debug
-
 	add_particles(all_new_particles);
-	MPI_Barrier(slave_comm);
+	for (auto& each_new_particle_list : incoming_particles) {
+		add_particles(each_new_particle_list);
+	}
 }
 
 void SphManager::cleanUpAllParticles() {
