@@ -20,8 +20,11 @@
 // particle mass
 #define STATIC_MASS 5.0
 
+// size of the sources cubic spawn are
+#define SOURCE_SIZE  Q_MAX * 4.0
+
 // Number of simulation timesteps
-#define TIMESTEPS 100
+#define TIMESTEPS 1000
 
 // Sph Manager tags
 #define META_TAG 0
@@ -32,7 +35,7 @@
 namespace SimulationUtilities {
 	int hash(const Vector3&);
 	Vector3 unhash(const int&);	
-	int computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int& comm_size);
+	int computeProcessID(const Vector3 position, const Vector3 domain_dimension);
 	int computeProcessID(const int domain_id, const int& comm_size);
 	int computeDomainID(const Vector3& position, const Vector3& domain_dimension);
 

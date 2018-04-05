@@ -203,8 +203,10 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::ADD_SOURCE:
-			source_position = cui_command.getParameter(0).getValue();
-			addSource(source_position);
+			if (mpi_rank != 0) {
+				source_position = cui_command.getParameter(0).getValue();
+				addSource(source_position);
+			}
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -213,8 +215,10 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::ADD_SINK:
-			sink_height = cui_command.getParameter(0).getValue();
-			addSink(sink_height);
+			if (mpi_rank != 0) {
+				sink_height = cui_command.getParameter(0).getValue();
+				addSink(sink_height);
+			}
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -293,7 +297,7 @@ void CommandHandler::moveShutter(std::string shutter_move_param) {
 }
 
 void CommandHandler::simulate() {
-	if (mpi_rank == 1) {
+	if (false) {
 		std::vector<SphParticle> particles;
 
 		for (int i = 0; i < 20; i++) {
@@ -334,12 +338,16 @@ void CommandHandler::addSource(std::string source_position_string) {
 	source_position_stream >> y;
 	source_position_stream >> z;
 	Vector3 source_position = Vector3(x, y, z);
-	std::cout << "New source: " << source_position << std::endl;
+	cout << source_position << endl;
+	int proccess_id = SimulationUtilities::computeProcessID(source_position, sph_manager.getDomainDimensions());
+	if (proccess_id == mpi_rank) {
+		sph_manager.addSource(source_position);
+	}
 }
 
 void CommandHandler::addSink(std::string sink_height_string) {
 	std::istringstream sink_height_stream(sink_height_string);
 	double sink_height;
 	sink_height_stream >> sink_height;
-	std::cout << "New sink height: " << sink_height << std::endl;
+	sph_manager.setSink(sink_height);
 }

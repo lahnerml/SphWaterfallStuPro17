@@ -59,6 +59,7 @@ void SphManager::simulate() {
 			std::cout << "finished update in " << update_particles_time << "ms" << std::endl;
 			begin = std::chrono::steady_clock::now();
 		}
+		spawnSourceParticles();
 		exchangeParticles();
 		if (mpi_rank == 0) {
 			end = std::chrono::steady_clock::now();
@@ -340,9 +341,19 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	MPI_Barrier(slave_comm);
 }
 
-void SphManager::setSink(double sink_height)
+void SphManager::setSink(const double& sink_height)
 {
 	this->sink_height = sink_height;
+}
+
+void SphManager::addSource(const Vector3& source)
+{
+	sources.push_back(source);
+}
+
+const Vector3& SphManager::getDomainDimensions() const
+{
+	return domain_dimensions;
 }
 
 void SphManager::exchangeParticles() {
@@ -363,7 +374,7 @@ void SphManager::exchangeParticles() {
 			std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 
 			for (auto& each_particle : outside_particles) {
-				target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);
+				target_id = computeProcessID(each_particle.position, domain_dimensions);
 
 				if (target_map.at(target_id).empty()) {
 					target_map[target_id] = std::vector<SphParticle>();
@@ -470,6 +481,24 @@ void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
 		}
 		//std::cout << particle.position << std::endl; // debug
 	}
+}
+
+void SphManager::spawnSourceParticles() {
+
+	if (sources.empty()) {
+		return;
+	}
+
+	std::vector<SphParticle> new_particles;
+	std::random_device rd;
+	std::default_random_engine generator(rd());
+	std::uniform_real_distribution<double> distribution(-SOURCE_SIZE, SOURCE_SIZE);
+	auto random = std::bind(distribution, generator);
+
+	for (auto& each_source : sources) {
+		new_particles.push_back(SphParticle(each_source + Vector3(random(), random(), random())));
+	}
+	add_particles(new_particles);
 }
 
 void SphManager::exportParticles() {

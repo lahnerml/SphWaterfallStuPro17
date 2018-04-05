@@ -8,6 +8,8 @@
 #include <array>
 #include <unordered_map>
 #include <iterator>
+#include <random>
+#include <functional>
 
 class SphManager {
 public:
@@ -17,6 +19,9 @@ public:
 	void simulate();
 	void add_particles(const std::vector<SphParticle>&);
 	void exportParticles();
+	void setSink(const double&);
+	void addSource(const Vector3&);
+	const Vector3& getDomainDimensions() const;
 
 private:
 	int mpi_rank;
@@ -29,6 +34,7 @@ private:
 	std::unordered_map<int, ParticleDomain> domains;
 	std::unordered_map<int, std::vector<SphParticle>> add_particles_map;
 	std::vector<std::pair<SphParticle, std::vector<SphParticle>>> neighbour_particles;
+	std::vector<Vector3> sources;
 	ISphKernel* kernel;
 	ISphNeighbourSearch* neighbour_search;
 	SphKernelFactory kernel_factory;
@@ -50,5 +56,5 @@ private:
 	double computeLocalPressure(SphParticle&);
 	void exchangeParticles();
 	void exchangeRimParticles(SphParticle::ParticleType);
-	void setSink(double);
+	void spawnSourceParticles();
 };
