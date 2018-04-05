@@ -312,7 +312,7 @@ void CommandHandler::createExport(int simulation_timesteps) {
 
 		current_timestep++;
 	}
-	ParticleIO::exportParticles(export_map, "test.test");
+	ParticleIO::exportParticles(export_map, "sph.ptcl");
 
 	std::cout << "Done exporting" << std::endl;
 }
@@ -347,8 +347,8 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 	VisualizationManager::importTerrain(loaded_shutter, false);
 
 	VisualizationManager::init(Vector3(10, 5, -20), 200, 200);
-	//VisualizationManager::renderFrames("test.test");
-	VisualizationManager::renderFramesDistributed("test.test", mpi_rank);
+	//VisualizationManager::renderFrames("sph.ptcl");
+	VisualizationManager::renderFramesDistributed("sph.ptcl", mpi_rank);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
