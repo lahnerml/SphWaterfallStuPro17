@@ -16,7 +16,7 @@ public:
 	ParticleDomain(const Vector3& origin, const Vector3& dimension);
 	~ParticleDomain();
 
-	std::vector<SphParticle> removeParticlesOutsideDomain(double);
+	std::vector<SphParticle> removeParticlesOutsideDomain();
 
 	int size() const;
 	const Vector3& getDimensions() const;

@@ -360,7 +360,7 @@ void SphManager::exchangeParticles() {
 	// adds particles from domains
 	for (auto& each_domain : domains) {
 		if (each_domain.second.hasFluidParticles()) {
-			std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain(this->sink_height);
+			std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
 
 			for (auto& each_particle : outside_particles) {
 				target_id = computeProcessID(each_particle.position, domain_dimensions, slave_comm_size);

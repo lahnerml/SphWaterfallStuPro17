@@ -64,7 +64,7 @@ void ParticleDomain::clearNeighbourRimParticles(SphParticle::ParticleType partic
 	}
 }
 
-std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sink_height) {
+std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
 	std::vector<SphParticle> outside_particles;
 	int domain_id = SimulationUtilities::computeDomainID(origin, dimensions);
 
