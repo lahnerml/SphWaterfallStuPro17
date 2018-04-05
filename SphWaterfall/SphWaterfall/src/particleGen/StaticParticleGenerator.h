@@ -5,7 +5,6 @@
 
 #include "../geometry/Terrain.h"
 #include "../data/SphParticle.h"
-#include "../data/StaticParticle.h"
 #include "../data/Vector3.h"
 #include "../simulation/SphManager.h"
 

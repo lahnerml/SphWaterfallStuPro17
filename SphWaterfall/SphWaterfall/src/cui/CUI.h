@@ -1,53 +1,38 @@
 #pragma once
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
+#include <algorithm>
 
-#include "../geometry/TerrainParser.h"
-#include "../simulation/SphManager.h"
+#include "../data/NullableWrapper.h"
+#include "CommandHandler.h"
 
-namespace CUI {
-
-	enum ConsoleCommand
-	{
-		NONE = -1,
-		EXIT = 0,
-		LOAD_MESH,
-		LOAD_SHUTTER,
-		GENERATE_PARTICLES,
-		MOVE_SHUTTER,
-		SIMULATE,
-		RENDER,
-		ADD_SOURCE,
-		ADD_SINK
-	};
-
-	class AsyncCommand
-	{
+class CUI {
 	public:
-		AsyncCommand();
+		CUI(CommandHandler);
 
-		ConsoleCommand readCmd();
-		void writeCmd(ConsoleCommand cmd);
-
-		ConsoleCommand readCmd(std::string& param);
-		void writeCmd(ConsoleCommand cmd, std::string param);
+		void start();
 		void printInputMessage();
-		bool commandEmpty();
+
 	private:
-		std::mutex cmdLock;
-		std::condition_variable cv;
-		ConsoleCommand command;
-		std::string param;
-	};
+		CommandHandler command_handler;
+		CUICommand current_command;
+		bool exit_programm;
 
-	extern AsyncCommand acmd;
+		void startWithStream(std::istream&, bool);
 
-	void trim(std::string &str);
-	void startCUI();
-	void startWithStream(std::istream&, bool);
-}
+		void parseCommand(std::string);
+		void cleanAndExecuteCommand(bool);
+
+		void trim(std::string& string);
+		std::string trimQuotemarks(std::string string);
+
+		void printCommand();
+		void loadConfig();
+		void showHelp();
+		bool cleanLoadMesh();
+		bool cleanLoadShutter();
+		bool cleanMoveShutter();
+		bool cleanAddSource();
+		bool cleanAddSink();
+};
