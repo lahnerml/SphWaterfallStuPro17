@@ -12,8 +12,9 @@ public:
 	WendlandKernel(double aH, double aQMax);
 	double computeKernelValue(const Vector3&);
 	Vector3 computeKernelGradientValue(const Vector3&);
-	double getSmoothingLength();
 private:
-	double h;
-	double qMax;
+	double kernel_value_const;
+	double kernel_gradient_const;
+	const double h;
+	const double qMax;
 };

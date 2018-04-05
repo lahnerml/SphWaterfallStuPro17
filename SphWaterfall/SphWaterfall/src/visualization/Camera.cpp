@@ -1,4 +1,3 @@
-#pragma once
 #define _USE_MATH_DEFINES
 #include "Camera.h"
 
@@ -263,7 +262,7 @@ Pixel Camera::castGeometryRay(Ray ray, Terrain& terrain) {
 	return initColor;
 }
 
-Frame Camera::getCurrentlyUsedBaseFrame(unsigned int frameID) {
+Frame& Camera::getCurrentlyUsedBaseFrame(unsigned int frameID) {
 	return frameID >= switchFrameID ? baseFrameOpen : baseFrameClosed;
 }
 

@@ -1,20 +1,19 @@
-#pragma once
 #include "ParticleDomain.h"
-
-#define RIM_DISTANCE Q_MAX
 
 ParticleDomain::ParticleDomain() :
 	origin(Vector3()),
 	dimensions(Vector3()),
-	number_of_fluid_particles(0)
+	number_of_fluid_particles(0),
+	has_static_particles(false)
 {
 	particles = std::vector<SphParticle>();
 }
 
-ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& dimension) : 
+ParticleDomain::ParticleDomain(const Vector3& origin, const Vector3& dimension) :
 	origin(origin),
 	dimensions(dimension),
-	number_of_fluid_particles(0)
+	number_of_fluid_particles(0),
+	has_static_particles(false)
 {
 	particles = std::vector<SphParticle>();
 }
@@ -27,35 +26,71 @@ int ParticleDomain::size() const {
 	return particles.size();
 }
 
-
-void ParticleDomain::clearRimParticles() {
-	neighbour_rim_particles = std::unordered_map<int, std::vector<SphParticle>>();
+void ParticleDomain::clearParticles() {
+	particles.clear();
+	has_static_particles = false;
+	number_of_fluid_particles = 0;
 }
 
-std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain() {
+void ParticleDomain::clearParticles(SphParticle::ParticleType particle_type) {
+	for (int i = 0; i < particles.size(); i++) {
+		SphParticle& each_particle = particles.at(i);
+		if (each_particle.getParticleType() == particle_type) {
+			particles.erase(particles.begin() + i);
+			i--;
+		}
+	}
+	if (particle_type == SphParticle::STATIC) {
+		has_static_particles = false;
+	}
+	else if (particle_type == SphParticle::FLUID) {
+		number_of_fluid_particles = 0;
+	}
+}
+
+void ParticleDomain::clearNeighbourRimParticles() {
+	neighbour_rim_particles.clear();
+}
+
+void ParticleDomain::clearNeighbourRimParticles(SphParticle::ParticleType particle_type) {
+	for (auto& each_rim : neighbour_rim_particles) {
+		for (int i = 0; i < each_rim.second.size(); i++) {
+			SphParticle& each_particle = each_rim.second.at(i);
+			if (each_particle.getParticleType() == particle_type) {
+				each_rim.second.erase(each_rim.second.begin() + i);
+				--i;
+			}
+		}
+	}
+}
+
+std::vector<SphParticle> ParticleDomain::removeParticlesOutsideDomain(double sink_height) {
 	std::vector<SphParticle> outside_particles;
 	int domain_id = SimulationUtilities::computeDomainID(origin, dimensions);
 
-	int number_of_particles_inside_domain = 0;
-	while (number_of_particles_inside_domain < particles.size()) {
-		SphParticle each_particle = particles.at(number_of_particles_inside_domain);
-		Vector3 vector_difference = each_particle.position - origin;
+
+	int particle_index = 0;
+	while (particle_index < particles.size()) {
+		SphParticle each_particle = particles.at(particle_index);
 		if (each_particle.getParticleType() == SphParticle::FLUID && SimulationUtilities::computeDomainID(each_particle.position, dimensions) != domain_id) {
-			//std::cout << "outside particle: " << each_particle << " origin: " << origin << "  dimension: " << dimensions << std::endl << "debug: " << vector_difference << std::endl; //debug
+			//Find particles outside domain
 			outside_particles.push_back(each_particle);
-			particles.erase(particles.begin() + number_of_particles_inside_domain);
+			particles.erase(particles.begin() + particle_index);
 			number_of_fluid_particles--;
 		}
 		else {
-			number_of_particles_inside_domain++;
+			particle_index++;
 		}
 	}
 
 	return outside_particles;
 }
 
-void ParticleDomain::setNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_map) {
-	neighbour_rim_particles = neighbour_rim_map;
+void ParticleDomain::addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>& neighbour_rim_map) {
+	for (auto& each_neighbour_particles : neighbour_rim_map) {
+		neighbour_rim_particles[each_neighbour_particles.first].insert(neighbour_rim_particles[each_neighbour_particles.first].end(),
+			each_neighbour_particles.second.begin(), each_neighbour_particles.second.end());
+	}
 }
 
 std::unordered_map<int, std::vector<SphParticle>>& ParticleDomain::getNeighbourRimParticles() {
@@ -71,8 +106,11 @@ const Vector3& ParticleDomain::getOrigin() const {
 }
 
 void ParticleDomain::addParticle(const SphParticle& particle) {
-	if (particle.getParticleType() == SphParticle::ParticleType::FLUID) {
+	if (particle.getParticleType() == SphParticle::FLUID) {
 		number_of_fluid_particles++;
+	}
+	if (!has_static_particles && particle.getParticleType() == SphParticle::STATIC) {
+		has_static_particles = true;
 	}
 	particles.push_back(particle);
 }
@@ -81,372 +119,31 @@ std::vector<SphParticle>& ParticleDomain::getParticles() {
 	return particles;
 }
 
-bool ParticleDomain::hasFluidParticles() {
+const bool ParticleDomain::hasFluidParticles() const {
 	return number_of_fluid_particles != 0;
 }
 
-std::vector<SphParticle> ParticleDomain::getTopRimParticles() {
-	if (top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : particles) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		top_rim_particles.set(rim_particles);
-	}
-	return top_rim_particles.getInternal();
+const bool& ParticleDomain::hasStaticParticles() const {
+	return has_static_particles;
 }
 
-std::vector<SphParticle> ParticleDomain::getBottomRimParticles() {
-	if (bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : particles) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
+std::unordered_map<int, std::vector<SphParticle>> ParticleDomain::getRimParticleTargetMap(SphParticle::ParticleType particle_type) {
+	std::unordered_map<int, std::vector<SphParticle>> target_map;
+	int domain_id = SimulationUtilities::computeDomainID(origin, dimensions);
+	for (SphParticle& particle : particles) {
+		if (particle.getParticleType() == particle_type) {
+			for (int x = -1; x <= 1; x++) {
+				for (int y = -1; y <= 1; y++) {
+					for (int z = -1; z <= 1; z++) {
+						int id = SimulationUtilities::computeDomainID(particle.position + ((Vector3(x, y, z).normalize() * R_MAX)), dimensions);
+						if (id != domain_id) {
+							target_map[id].push_back(particle);
+						}
+					}
+				}
 			}
 		}
-		bottom_rim_particles.set(rim_particles);
 	}
-	return bottom_rim_particles.getInternal();
-}
 
-std::vector<SphParticle> ParticleDomain::getFrontRimParticles() {
-	if (front_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : particles) {
-			if (particle.position.z - origin.z < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_rim_particles.set(rim_particles);
-	}
-	return front_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackRimParticles() {
-	if (back_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : particles) {
-			if (particle.position.z - origin.z > dimensions.z - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_rim_particles.set(rim_particles);
-	}
-	return back_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getLeftRimParticles() {
-	if (left_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : particles) {
-			if (particle.position.x - origin.x < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		left_rim_particles.set(rim_particles);
-	}
-	return left_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getRightRimParticles() {
-	if (right_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : particles) {
-			if (particle.position.x - origin.x > dimensions.x - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		right_rim_particles.set(rim_particles);
-	}
-	return right_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontBottomRimParticles() {
-	if (front_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_bottom_rim_particles.set(rim_particles);
-	}
-	return front_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontTopRimParticles() {
-	if (front_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontRimParticles()) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_top_rim_particles.set(rim_particles);
-	}
-	return front_top_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackBottomRimParticles() {
-	if (back_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getBackRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_bottom_rim_particles.set(rim_particles);
-	}
-	return back_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackTopRimParticles() {
-	if (back_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getBackRimParticles()) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_top_rim_particles.set(rim_particles);
-	}
-	return back_top_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontLeftRimParticles() {
-	if (front_left_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontRimParticles()) {
-			if (particle.position.x - origin.x < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_left_rim_particles.set(rim_particles);
-	}
-	return front_left_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontRightRimParticles() {
-	if (front_right_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontRimParticles()) {
-			if (particle.position.x - origin.x > dimensions.x - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_right_rim_particles.set(rim_particles);
-	}
-	return front_right_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackLeftRimParticles() {
-	if (back_left_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getBackRimParticles()) {
-			if (particle.position.x - origin.x < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_left_rim_particles.set(rim_particles);
-	}
-	return back_left_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackRightRimParticles() {
-	if (back_right_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getBackRimParticles()) {
-			if (particle.position.x - origin.x > dimensions.x - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_right_rim_particles.set(rim_particles);
-	}
-	return back_right_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getLeftBottomRimParticles() {
-	if (left_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getLeftRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		left_bottom_rim_particles.set(rim_particles);
-	}
-	return left_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getLeftTopRimParticles() {
-	if (left_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getLeftRimParticles()) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		left_top_rim_particles.set(rim_particles);
-	}
-	return left_top_rim_particles.getInternal();
-}
-std::vector<SphParticle> ParticleDomain::getRightBottomRimParticles() {
-	if (right_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getRightRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		right_bottom_rim_particles.set(rim_particles);
-	}
-	return right_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getRightTopRimParticles() {
-	if (right_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getRightRimParticles()) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		right_top_rim_particles.set(rim_particles);
-	}
-	return right_top_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontLeftBottomRimParticles() {
-	if (front_left_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontLeftRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_left_bottom_rim_particles.set(rim_particles);
-	}
-	return front_left_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontRightBottomRimParticles() {
-	if (front_right_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontRightRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_right_bottom_rim_particles.set(rim_particles);
-	}
-	return front_right_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontLeftTopRimParticles() {
-	if (front_left_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontLeftRimParticles()) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_left_top_rim_particles.set(rim_particles);
-	}
-	return front_left_top_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getFrontRightTopRimParticles() {
-	if (front_right_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getFrontRightRimParticles()) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		front_right_top_rim_particles.set(rim_particles);
-	}
-	return front_right_top_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackLeftBottomRimParticles() {
-	if (back_left_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getBackLeftRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_left_bottom_rim_particles.set(rim_particles);
-	}
-	return back_left_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackRightBottomRimParticles() {
-	if (back_right_bottom_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getBackRightRimParticles()) {
-			if (particle.position.y - origin.y < RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_right_bottom_rim_particles.set(rim_particles);
-	}
-	return back_right_bottom_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackLeftTopRimParticles() {
-	if (back_left_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : getBackLeftRimParticles()) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_left_top_rim_particles.set(rim_particles);
-	}
-	return back_left_top_rim_particles.getInternal();
-}
-
-std::vector<SphParticle> ParticleDomain::getBackRightTopRimParticles() {
-	if (back_right_top_rim_particles.isNull()) {
-		std::vector<SphParticle> rim_particles;
-		for (SphParticle particle : particles) {
-			if (particle.position.y - origin.y > dimensions.y - RIM_DISTANCE) {
-				rim_particles.push_back(particle);
-			}
-		}
-		back_right_top_rim_particles.set(rim_particles);
-	}
-	return back_right_top_rim_particles.getInternal();
-}
-
-void ParticleDomain::resetRimParticles() {
-	front_rim_particles.reset();
-	back_rim_particles.reset();
-	left_rim_particles.reset();
-	right_rim_particles.reset();
-	top_rim_particles.reset();
-	bottom_rim_particles.reset();
-	front_bottom_rim_particles.reset();
-	front_top_rim_particles.reset();
-	back_bottom_rim_particles.reset();
-	back_top_rim_particles.reset();
-	front_left_rim_particles.reset();
-	front_right_rim_particles.reset();
-	back_left_rim_particles.reset();
-	back_right_rim_particles.reset();
-	left_bottom_rim_particles.reset();
-	left_top_rim_particles.reset();
-	right_bottom_rim_particles.reset();
-	right_top_rim_particles.reset();
-	front_left_bottom_rim_particles.reset();
-	front_right_bottom_rim_particles.reset();
-	front_left_top_rim_particles.reset();
-	front_right_top_rim_particles.reset();
-	back_left_bottom_rim_particles.reset();
-	back_right_bottom_rim_particles.reset();
-	back_left_top_rim_particles.reset();
-	back_right_top_rim_particles.reset();
+	return target_map;
 }

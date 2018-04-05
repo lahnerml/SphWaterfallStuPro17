@@ -1,5 +1,4 @@
 #pragma once
-#include "Vector3.h"
 #include "../simulation/SimulationUtilities.h"
 
 class SphParticle {
@@ -8,7 +7,8 @@ class SphParticle {
 		{
 			FLUID,
 			STATIC,
-			MIRRORED
+			MIRRORED,
+			SHUTTER
 		};
 
 		SphParticle();
@@ -18,9 +18,9 @@ class SphParticle {
 		SphParticle(Vector3 position, ParticleType particle_type);
 		~SphParticle();
 
-		friend bool operator==(const SphParticle, const SphParticle);
+		friend bool operator==(const SphParticle&, const SphParticle&);
 
-		friend std::ostream& operator<<(std::ostream &, const SphParticle&);
+		friend std::ostream& operator<<(std::ostream&, const SphParticle&);
 
 		Vector3 position;
 		Vector3 velocity;

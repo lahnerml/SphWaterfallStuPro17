@@ -22,12 +22,13 @@ private:
 	int mpi_rank;
 	Vector3 domain_dimensions;
 	int number_of_timesteps;
+	double sink_height;
 	double const timestep_duration;
 	double half_timestep_duration;
 	Vector3 const gravity_acceleration;
 	std::unordered_map<int, ParticleDomain> domains;
 	std::unordered_map<int, std::vector<SphParticle>> add_particles_map;
-	std::unordered_map<int, std::pair<SphParticle, std::vector<SphParticle>>> neighbour_particles;
+	std::vector<std::pair<SphParticle, std::vector<SphParticle>>> neighbour_particles;
 	ISphKernel* kernel;
 	ISphNeighbourSearch* neighbour_search;
 	SphKernelFactory kernel_factory;
@@ -36,14 +37,18 @@ private:
 	ParticleDomain& getParticleDomain(const int&);
 	ParticleDomain& getParticleDomain(const Vector3&);
 	
+	void cleanUpAllParticles();
+	void cleanUpFluidParticles();
+	void cleanUpStaticParticles();
 
 	void update();
-	void updateVelocity(SphParticle& particle);
+	bool updateVelocity(SphParticle& particle);
 	Vector3 computeAcceleration(SphParticle& particle);
 	Vector3 computeDensityAcceleration(SphParticle& particle);
 	Vector3 computeViscosityAcceleration(SphParticle& particle);
 	void computeLocalDensity(SphParticle&);
 	double computeLocalPressure(SphParticle&);
 	void exchangeParticles();
-	void exchangeRimParticles();
+	void exchangeRimParticles(SphParticle::ParticleType);
+	void setSink(double);
 };

@@ -1,195 +1,362 @@
-#pragma once
 #include "CUI.h"
-//#include "../visualization/VisualizationManager.h"
 
-namespace CUI {
+CUI::CUI(CommandHandler command_handler) :
+	command_handler(command_handler){
 
-	AsyncCommand acmd;
+}
 
-	void trim(std::string &str) {
-		int pos1 = str.find_first_not_of(" ");
-		int pos2 = str.find_last_not_of(" ");
-		str = str.substr(pos1, pos2 - pos1 + 1);
+void CUI::start() {
+	startWithStream(std::cin, false);
+}
+
+void CUI::startWithStream(std::istream &input_stream, bool is_config_execution) {
+	std::string input_line;
+
+	printInputMessage();
+
+	exit_programm = false;
+	while (!exit_programm) {
+		// read command_name
+		getline(input_stream, input_line);
+		trim(input_line);
+
+		if (input_line == "") {
+			continue;
+		}
+
+		// parses command to CUICommand object
+		parseCommand(input_line);
+
+		// clean command from not relevant parameters for each command and executes them
+		cleanAndExecuteCommand(is_config_execution);
 	}
+}
 
-	bool readNextToken(std::queue<std::string> &tokens, std::string &nextToken)
-	{
-		if (tokens.empty()) {
-			return false;
-		}
-		else {
-			nextToken = tokens.front();
-			tokens.pop();
-			return true;
-		}
-	}
+void CUI::parseCommand(std::string input_line) {
+	std::string command;
+	std::istringstream command_token_stream = std::istringstream(input_line);
+	NullableWrapper<std::string> last_read_parameter_name, last_read_parameter_value;
+	bool first_loop_done = false;
 
-	bool readNextCombinedToken(std::queue<std::string> &tokens, std::string &nextToken) {
-		string tempToken = "", resultToken = "";
-
-		//Read first token
-		if (!readNextToken(tokens, tempToken))
-			return false;
-		if (tempToken.find_first_of('\"') != 0) {
-			//No combined token
-			nextToken = tempToken;
-			return true;
-		}
-		if (tempToken.find_last_of('\"') == tempToken.length() - 1) {
-			//Combined token without spaces
-			nextToken = tempToken.substr(1, tempToken.length() - 2);
-			return true;
+	while (command_token_stream >> command) {
+		if (!first_loop_done) {
+			std::transform(command.begin(), command.end(), command.begin(), ::tolower);
+			current_command = CUICommand(command, input_line);
+			first_loop_done = true;
+			continue;
 		}
 
-		//Read following tokens
-		do {
-			resultToken += tempToken + " ";
-			if (!readNextToken(tokens, tempToken)) {
-				// No second quotation mark
-				nextToken = resultToken.substr(1);
-				return true;
+		// is new parameter when string starts with '-' and there are no numbers in it
+		bool isNewParameter = ((command.front() == '-') && (command.find_first_of("0123456789") == std::string::npos));
+
+		if (!isNewParameter) {
+			if (!last_read_parameter_value.isNull()) {
+				last_read_parameter_value.set(last_read_parameter_value.getInternal() + " " + command);
 			}
-		} while (tempToken.find_last_of('\"') != tempToken.length() - 1);
+			else {
+				last_read_parameter_value.set(command);
+			}
+		}
 
-		//Return combined token
-		resultToken += tempToken;
-		nextToken = resultToken.substr(1, resultToken.length() - 2);
-		return true;
+		if ((command_token_stream.rdbuf()->in_avail() == 0) || (!last_read_parameter_name.isNull() && isNewParameter)) {
+			current_command.addParameter(CUICommandParameter(last_read_parameter_name.getInternal(), trimQuotemarks(last_read_parameter_value.getInternal())));
+			last_read_parameter_name.reset();
+			last_read_parameter_value.reset();
+		}
+		if (isNewParameter) {
+			last_read_parameter_name.set(command);
+			last_read_parameter_value.reset();
+		}
 	}
+}
 
-
-	/* -_-_-_Comands Begin_-_-_- */
-
-	void loadMesh(std::queue<std::string> &tokens)
+void CUI::cleanAndExecuteCommand(bool is_config_execution) {
+	std::string command = current_command.getCommandName();
+	if (command.front() == '#') {
+		//Comment
+	}
+	else if (command == "print") {
+		printCommand();
+	}
+	else if (command == "loadmesh") {
+		if (cleanLoadMesh()) {
+			current_command.setCommand(CUICommand::LOAD_MESH);
+			command_handler.handleCUICommand(current_command);
+		}
+		printInputMessage();
+	}
+	else if (command == "loadshutter") {
+		if (cleanLoadShutter()) {
+			current_command.setCommand(CUICommand::LOAD_SHUTTER);
+			command_handler.handleCUICommand(current_command);
+		}
+		printInputMessage();
+	}
+	else if (command == "moveshutter") {
+		if (cleanMoveShutter()) {
+			current_command.setCommand(CUICommand::MOVE_SHUTTER);
+			command_handler.handleCUICommand(current_command);
+		}
+		printInputMessage();
+	}
+	else if (command == "addsource") {
+		if (cleanAddSource()) {
+			current_command.setCommand(CUICommand::ADD_SOURCE);
+			command_handler.handleCUICommand(current_command);
+		}
+		printInputMessage();
+	}
+	else if (command == "addsink") {
+		if (cleanAddSink()) {
+			current_command.setCommand(CUICommand::ADD_SINK);
+			command_handler.handleCUICommand(current_command);
+		}
+		printInputMessage();
+	}
+	else if (command == "particlegen") {
+		current_command.setCommand(CUICommand::GENERATE_PARTICLES);
+		command_handler.handleCUICommand(current_command);
+		printInputMessage();
+	}
+	else if (command == "simulate") {
+		current_command.setCommand(CUICommand::SIMULATE);
+		command_handler.handleCUICommand(current_command);
+		printInputMessage();
+	}
+	else if (command == "render")
 	{
-		string paramName, fileName;
+		current_command.setCommand(CUICommand::RENDER);
+		command_handler.handleCUICommand(current_command);
+		printInputMessage();
+	}
+	else if (command == "loadconfig")
+	{
+		loadConfig();
+		printInputMessage();
+	}
+	else if (command == "help") {
+		showHelp();
+		printInputMessage();
+	}
+	else if (command == "exit") {
+		if (!is_config_execution) {
+			exit_programm = true;
+			current_command.setCommand(CUICommand::EXIT);
+			command_handler.handleCUICommand(current_command);
+		}
+	}
+	else {
+		std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
+	}
+}
 
-		//Read fileName Parameter
-		if (readNextToken(tokens, paramName) && paramName == "-p") {
-			fileName = "";
-			readNextCombinedToken(tokens, fileName);
+void CUI::trim(std::string &string) {
+	int positionLeft = string.find_first_not_of(" ");
+	int positionRight = string.find_last_not_of(" ");
+	if (!(positionLeft == -1 || positionRight == -1)) {
+		string = string.substr(positionLeft, positionRight - positionLeft + 1);
+	}
+}
 
-			acmd.aWriteCmd(CUI::ConsoleCommand::LOAD_MESH, fileName);
+std::string CUI::trimQuotemarks(std::string string) {
+	int positionLeft = string.find_first_not_of("\"");
+	int positionRight = string.find_last_not_of("\"");
+	if (!(positionLeft == -1 || positionRight == -1)) {
+		return string.substr(positionLeft, positionRight - positionLeft + 1);		}
+}
+
+void CUI::printInputMessage() {
+	std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
+}
+	
+/* -_-_-_Commands Begin_-_-_- */
+
+void CUI::printCommand() {
+	if (current_command.getInputLine().substr(0, 6) == "print ") {
+		std::cout << "-> " << current_command.getInputLine().replace(0, 6, "") << std::endl;
+	}
+	else {
+		std::cout << "-> " << current_command.getInputLine() << std::endl;
+	}
+}
+
+void CUI::showHelp() {
+	cout << endl
+		<< "usage: <command> [<flags>]" << endl << endl
+
+		<< "Flags:" << endl
+		<< "   -p | file path to the file you want to load " << endl
+		<< "   -t | defines at what time a command specific event occurs  " << endl
+		<< "      | simulate: simulation time" << endl
+		<< "      | moveshutter: time at which the shutter is moved" << endl
+		<< "   -v | followed by 3 numbers x y z, who stand for the coordinates of a point in 3D space" << endl
+		<< "   -h | for addsink which determines the sink height" << endl << endl
+
+		<< "Commands:" << endl
+		<< "   print" << endl
+		<< "      echo the give input." << endl << endl
+
+		<< "   loadconfig -p" << endl
+		<< "      load a configuration from a given file path, the file has to ba a .cfg-file." << endl << endl
+
+		<< "   loadmesh -p" << endl
+		<< "      load a mesh from a give file path, the mash has to be a .obj-file." << endl << endl
+
+		<< "   loadshutter -p" << endl
+		<< "      load a shutter mesh from a give file path, the mash has to be a .obj-file." << endl << endl
+		
+		<< "   moveshutter -t" << endl
+		<< "      set the time at which the shutter will move." << endl << endl
+
+		<< "   particlegen" << endl
+		<< "      generate wall particles on the loaded mesh and shutter." << endl << endl
+
+		<< "   simulate -t" << endl
+		<< "      start a sph simulation, time can be set with '-t' parameter." << endl << endl
+
+		<< "   render" << endl
+		<< "      start the rendering process." << endl << endl
+
+		<< "   addsource -v" << endl
+		<< "      add a water source at a given point." << endl << endl
+
+		<< "   addsink -h" << endl
+		<< "      add a senk at a given height" << endl << endl
+
+		<< "   help" << endl
+		<< "      show help" << endl << endl
+
+		<< "   exit" << endl
+		<< "      quit the application" << endl << endl;
+}
+
+void CUI::loadConfig() {
+	for (CUICommandParameter& parameter : current_command.getParameterList()) {
+		if (parameter.getParameterName() == "-p") {
+			std::string file_path = parameter.getValue();
+			std::ifstream in(file_path);
+			if (!in)
+			{
+				std::cerr << "Cannot open \"" << file_path << "\"" << std::endl;
+			}
+			else
+			{
+				std::cerr << "Config file \"" << file_path << "\" loaded and running..." << std::endl;
+				startWithStream(in, true);
+				std::cout << "Done reading config file." << std::endl;
+			}
 		}
 		else
 		{
-			cout << "Missing path parameter '-p'" << endl;
+			current_command.removeParameter(parameter);
+			std::cout << "Missing path parameter '-p'" << std::endl;
 		}
-	}
-
-	void generateParticles(std::queue<std::string> &tokens)
-	{
-		// TODO add correct dimensions
-		// SphManager sph_manager = SphManager::SphManager(Vector3(10, 10, 10), 10, 1);
-		acmd.aWriteCmd(CUI::ConsoleCommand::GENERATE_PARTICLES);
-	}
-
-	void simulate(std::queue<std::string> &tokens)
-	{
-		// TODO add correct dimensions
-		acmd.aWriteCmd(CUI::ConsoleCommand::SIMULATE);
-	}
-
-	void render()
-	{
-
-		acmd.aWriteCmd(CUI::ConsoleCommand::RENDER);
-	}
-
-	void showHelp()
-	{
-		cout << "loadMesh -p" << endl
-			<< "particleGen [-w] [-f] [-e]" << endl
-			<< "moveShutter -t (-u/-d) [-l]" << endl
-			<< "simulate -s -e -r -g -m -t" << endl
-			<< "render" << endl
-			<< "help" << endl
-			<< "exit" << endl;
-	}
-
-	/* -_-_-_Comands End_-_-_- */
-
-	void startCUI()
-	{
-		string inputLine, command;
-		queue<string> tokens;
-
-		while (acmd.aReadCmd() != CUI::ConsoleCommand::EXIT)
-		{
-			//Read command
-			cout << endl << "Please enter a command or enter 'help' to show a list of all commands" << endl;
-			getline(cin, inputLine);
-			trim(inputLine);
-
-			//Tokenize command
-			istringstream tokenStream(inputLine);
-			tokens = queue<string>();
-			while (tokenStream >> command)
-				tokens.push(command);
-
-			//Execute command
-			if (!tokens.empty())
-			{
-				command = tokens.front();
-				tokens.pop();
-
-				if (command == "loadMesh") {
-					loadMesh(tokens);
-				}
-				else if (command == "particleGen") {
-					generateParticles(tokens);
-				}
-				else if (command == "moveShutter") {
-				}
-				else if (command == "simulate") {
-					simulate(tokens);
-				}
-				else if (command == "render")
-				{
-					render();
-				}
-				else if (command == "help" || command == "?") {
-					showHelp();
-				}
-				else if (command == "exit") {
-					acmd.aWriteCmd(CUI::ConsoleCommand::EXIT);
-				}
-				else {
-					std::cout << "Unknown command. Enter 'help' to view a list of all available commands." << std::endl;
-				}
-			}
-		}
-	}
-
-	//AsyncCommand
-	AsyncCommand::AsyncCommand() :
-		command(ConsoleCommand::NONE), param("")
-	{
-	}
-
-	ConsoleCommand AsyncCommand::aReadCmd()
-	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		return this->command;
-	}
-
-	void AsyncCommand::aWriteCmd(ConsoleCommand cmd)
-	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		this->command = cmd;
-	}
-
-	ConsoleCommand AsyncCommand::aReadCmd(std::string & param)
-	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		param = this->param;
-		return this->command;
-	}
-
-	void AsyncCommand::aWriteCmd(ConsoleCommand cmd, std::string param)
-	{
-		std::lock_guard<std::mutex> guard(this->cmdLock);
-		this->command = cmd;
-		this->param = param;
 	}
 }
+
+bool CUI::cleanLoadMesh() {
+	bool hasOnlyValidParameters = true;
+
+	for (CUICommandParameter& parameter : current_command.getParameterList()) {
+		if (parameter.getParameterName() != "-p") {
+			current_command.removeParameter(parameter);
+			hasOnlyValidParameters = false;
+			std::cout << "Missing path parameter '-p'" << std::endl;
+		}
+	}
+
+	return hasOnlyValidParameters;
+}
+
+bool CUI::cleanLoadShutter() {
+	bool hasOnlyValidParameters = true;
+
+	for (CUICommandParameter& parameter : current_command.getParameterList()) {
+		if (parameter.getParameterName() != "-p") {
+			current_command.removeParameter(parameter);
+			hasOnlyValidParameters = false;
+			std::cout << "Missing path parameter '-p'" << std::endl;
+		}
+	}
+
+	return hasOnlyValidParameters;
+}
+
+bool CUI::cleanMoveShutter() {
+	bool hasOnlyValidParameters = true;
+
+	for (CUICommandParameter& parameter : current_command.getParameterList()) {
+		if (parameter.getParameterName() == "-t") {
+			std::string time_for_move = parameter.getValue();
+			if (time_for_move.find_first_not_of("0123456789") != std::string::npos) {
+				hasOnlyValidParameters = false;
+				std::cout << "'" << parameter.getValue() << "' is not a number" << std::endl;
+			}
+		}
+		else {
+			current_command.removeParameter(parameter);
+			hasOnlyValidParameters = false;
+			std::cout << "Missing path parameter '-t'" << std::endl;
+		}
+	}
+
+	return hasOnlyValidParameters;
+}
+
+bool CUI::cleanAddSource() {
+	bool hasOnlyValidParameters = true;
+
+	for (CUICommandParameter& parameter : current_command.getParameterList()) {
+		if (parameter.getParameterName() == "-v") {
+			std::string source_position = parameter.getValue();
+
+			if (source_position.find_first_not_of("+-,.0123456789 ") != std::string::npos)
+			{
+				std::cout << "'" << source_position << "' is not a valid input" << std::endl;
+				hasOnlyValidParameters = false;
+			}
+
+			int spaces = 0;
+			for (char character : source_position) {
+				if (character == ' ') {
+					spaces++;
+				}
+			}
+
+			if (spaces != 2) {
+				std::cout << "'" << source_position << "' is not a valid input" << std::endl;
+				hasOnlyValidParameters = false;
+			}
+		}
+		else {
+			current_command.removeParameter(parameter);
+			hasOnlyValidParameters = false;
+			std::cout << "Missing path parameter '-v'" << std::endl;
+		}
+	}
+
+	return hasOnlyValidParameters;
+}
+
+bool CUI::cleanAddSink() {
+	bool hasOnlyValidParameters = true;
+
+	for (CUICommandParameter& parameter : current_command.getParameterList()) {
+		if (parameter.getParameterName() == "-h") {
+			std::string sink_height = parameter.getValue();
+			if (sink_height.find_first_not_of("+-,.0123456789") != std::string::npos) {
+				hasOnlyValidParameters = false;
+				std::cout << "'" << sink_height << "' is not a number" << std::endl;
+			}
+		}
+		else
+		{
+			current_command.removeParameter(parameter);
+			hasOnlyValidParameters = false;
+			std::cout << "Missing path parameter '-h'" << std::endl;
+		}
+	}
+
+	return hasOnlyValidParameters;
+}
+/* -_-_-_Commands End_-_-_- */

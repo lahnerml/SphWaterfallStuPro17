@@ -1,9 +1,8 @@
-#pragma once
 #include "ParticleIO.h"
 
 using namespace std;
 
-void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>> frames, string fileName) {
+void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>>& frames, string fileName) {
 	ofstream file(fileName);
 	if (file.is_open())
 	{
@@ -23,6 +22,51 @@ void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>> frames,
 		file.close();
 	}
 	else cout << "Unable to open file";
+}
+
+void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string name, int& timestep) {
+	ofstream myfile;
+	std::ostringstream fileNameStream("");
+	fileNameStream << name << "_" << timestep << ".vtk";
+	std::string fileName = fileNameStream.str();
+	myfile.open(fileName.c_str());
+
+	if (!myfile.is_open()) {
+		return;
+	}
+
+	myfile << "# vtk DataFile Version 3.0\n";
+	myfile << "vtk output\nASCII\nDATASET POLYDATA\n";
+
+	int count = particles.size();
+
+	myfile << "POINTS " << count << " float\n";
+	for (auto& each_particle : particles) {
+		myfile << each_particle.position.x << " " << each_particle.position.y << " " << each_particle.position.z << "\n";
+	}
+	myfile << "VERTICES " << count << " " << count * 2 << "\n";
+	for (int i = 0; i < count; i++) {
+		myfile << "1 " << i << "\n";
+	}
+	myfile << "POINT_DATA " << count << "\n";
+	myfile << "SCALARS Norm FLOAT" << "\n";
+	myfile << "LOOKUP_TABLE default" << "\n";
+	for (auto& each_particle : particles) {
+		myfile << each_particle.position.length() << "\n";
+	}
+	//myfile << "POINT_DATA " << nodes << "\n";
+	myfile << "SCALARS Velocity FLOAT" << "\n";
+	myfile << "LOOKUP_TABLE default" << "\n";
+	for (auto& each_particle : particles) {
+		myfile << each_particle.velocity.length() << "\n";
+	}
+
+	myfile << "SCALARS Density FLOAT" << "\n";
+	myfile << "LOOKUP_TABLE default" << "\n";
+	for (auto& each_particle : particles) {
+		myfile << each_particle.local_density << "\n";
+	}
+	myfile.close();
 }
 
 vector<vector<SphParticle>> ParticleIO::importParticles(string fileName) {

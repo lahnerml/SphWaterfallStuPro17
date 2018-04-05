@@ -1,4 +1,3 @@
-#pragma once
 #include "TerrainParser.h"
 
 Terrain TerrainParser::loadFromFile(std::string fileName) {
@@ -18,7 +17,7 @@ void TerrainParser::readObjFile(std::string fileName, std::vector<Vector3> &vert
 	std::ifstream in(fileName);
 	if (!in)
 	{
-		//cerr << "Cannot open " << filename << endl; exit(1);
+		std::cerr << "Cannot open \"" << fileName << "\"" << std::endl;
 	}
 
 	std::string line;

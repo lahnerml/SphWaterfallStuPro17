@@ -1,6 +1,12 @@
 target_sources(
 	SphWaterfall
 	PUBLIC
+		"${CMAKE_CURRENT_LIST_DIR}/CommandHandler.h"
+		"${CMAKE_CURRENT_LIST_DIR}/CommandHandler.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/CUI.h"
 		"${CMAKE_CURRENT_LIST_DIR}/CUI.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/CUICommand.h"
+		"${CMAKE_CURRENT_LIST_DIR}/CUICommand.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/CUICommandParameter.h"
+		"${CMAKE_CURRENT_LIST_DIR}/CUICommandParameter.cpp"
 )
