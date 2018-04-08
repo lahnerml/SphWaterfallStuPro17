@@ -274,8 +274,8 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle) {
 void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	// target domain id, source domain id, rim particles from source in direction of target domain
 	std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>>> target_source_map;
-	std::vector<std::array<int, 5>> meta_list;
-	std::vector<std::array<int, 2>> size_list;
+	std::vector<std::vector<int>> meta_list;
+	std::vector<int> size_list;
 	std::vector<MPI_Request> requests;
 	std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>> new_rim_particles;
 	int target_domain_id, source_domain_id;
@@ -302,17 +302,15 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	// send meta meta data	
 	for (int i = 0; i < slave_comm_size; i++) {
 		if (i != mpi_rank) {
-			int meta_count = META_RIM_TAG;
 			int size = 0;
 			for (auto& target : target_source_map[i]) {
 				size += static_cast<int>(target.second.size());
 			}
-			size_list.push_back({ size, meta_count});
+			size_list.push_back(size);
 
 			requests.push_back(MPI_Request());
-			std::cout << mpi_rank << " send meta meta for " << size_list.back()[0] << " to " << i << std::endl;
-			MPI_Isend(size_list.back().data(), 2, MPI_INT, i, META_META_RIM_TAG, slave_comm, &requests.back());
-			meta_count+= size;
+			std::cout << mpi_rank << " send meta meta for " << size_list.back() << " to " << i << std::endl;
+			MPI_Isend(&size_list.back(), 1, MPI_INT, i, META_META_RIM_TAG, slave_comm, &requests.back());
 		}
 	}
 	MPI_Waitall(requests.size(), requests.data(), MPI_STATUS_IGNORE);
@@ -323,56 +321,56 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	// receive meta meta from all other processors and post meta receives
 	for (int i = 0; i < slave_comm_size; i++) {
 		if (i != mpi_rank) {
-			std::array<int, 2> meta_meta;
-			MPI_Recv(meta_meta.data(), 2, MPI_INT, i, META_META_RIM_TAG, slave_comm, MPI_STATUS_IGNORE);
-			for (int l = 0; l < meta_meta[0]; l++) {
-				int tag = meta_meta[1] + l;
-				meta_list.push_back(std::array<int, 5>());
-				requests.push_back(MPI_Request());
-				MPI_Irecv(meta_list.back().data() + 1, 5, MPI_INT, i, tag, slave_comm, &requests.back());
-				std::cout << mpi_rank << " post meta Tag " << tag << " receive for " << i << std::endl;
-				meta_list.back()[0] = i;
-			}
-			//std::cout << mpi_rank << " post " << meta_meta[0] << " >= Tag " << meta_meta[1] << " receives for " << i << std::endl;
+			int meta_count;
+			requests.push_back(MPI_Request());
+			MPI_Recv(&meta_count, 2, MPI_INT, i, META_META_RIM_TAG, slave_comm, MPI_STATUS_IGNORE);
+			meta_list.push_back(std::vector<int>(1 + meta_count * 4));
+			MPI_Irecv(meta_list.back().data() + 1, 4 * meta_count, MPI_INT, i, META_RIM_TAG, slave_comm, &requests.back());
+			meta_list.back()[0] = i;
+			//std::cout << mpi_rank << " post " << meta_count[0] << " >= Tag " << meta_count[1] << " receives for " << i << std::endl;
 		}
 	}
 	std::cout << mpi_rank << " finished posting meta receives" << std::endl;
 	MPI_Barrier(slave_comm);
 
-
 	// send meta data
 	for (int i = 0; i < slave_comm_size; i++) {
 		if (i != mpi_rank) {
-			int meta_count = META_RIM_TAG;
 			int count = RIM_TAG;
 			for (auto& target : target_source_map[i]) {
+				std::vector<int> meta;
 				for (auto& source : target.second) {
 					// target domain id, source domain id, tag der richtigen Nachricht, größe der richtigen Nachricht
-					std::array<int, 4> meta = { target.first , source.first, count, static_cast<int>(source.second.size()) };
-					MPI_Ssend(meta.data(), 4, MPI_INT, i, meta_count, slave_comm);
-
-					std::cout << mpi_rank << " send meta " << meta_count << " tag " << count << " for " << meta[3] << " to " << i << std::endl;
-
+					meta.push_back(target.first);
+					meta.push_back(source.first);
+					meta.push_back(count);
+					meta.push_back(static_cast<int>(source.second.size()));
 					// increment unique tag
 					count++;
-					meta_count++;
 				}
+				MPI_Ssend(meta.data(), meta.size() , MPI_INT, i, META_RIM_TAG, slave_comm);
 			}
 		}
 	}
 
-	for (auto& request : requests) {
-		std::cout << mpi_rank << " failed sending meta with code " << MPI_Wait(&request, MPI_STATUS_IGNORE) << std::endl;
-	}
+	MPI_Waitall(requests.size(), requests.data(), MPI_STATUS_IGNORE);
 	requests.clear();
 	std::cout << mpi_rank << " finished sending meta" << std::endl;
 	MPI_Barrier(slave_comm);
 
 	// post receive for particles
 	for (auto& each_meta : meta_list) {
-		new_rim_particles[each_meta[1]][each_meta[2]] = std::vector<SphParticle>(each_meta[4]);
-		requests.push_back(MPI_Request());
-		MPI_Irecv(new_rim_particles[each_meta[1]][each_meta[2]].data(), each_meta[4] * sizeof(SphParticle), MPI_BYTE, each_meta[0], each_meta[3], slave_comm, &requests.back());
+		int process_id = each_meta[0];
+		int meta_count = each_meta.size() / 4;
+		for (int i = 0; i < meta_count; i++) {
+			int target = each_meta[1 + i * 4];
+			int source = each_meta[2 + i * 4];
+			int tag = each_meta[3 + i * 4];
+			int count = each_meta[4 + i * 4];
+			new_rim_particles[target][source] = std::vector<SphParticle>(count);
+			requests.push_back(MPI_Request());
+			MPI_Irecv(new_rim_particles[target][source].data(), count * sizeof(SphParticle), MPI_BYTE, process_id, tag, slave_comm, &requests.back());
+		}
 		std::cout << mpi_rank << " post receive Tag " << each_meta[3] << " for " << each_meta[4] << " to " << each_meta[0] << std::endl;
 	}
 
