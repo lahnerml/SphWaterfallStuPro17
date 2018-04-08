@@ -10,7 +10,7 @@
 // max Influence radius
 #define R_MAX Q_MAX * H
 // domain dimesion
-#define DOMAIN_DIMENSION R_MAX * 8.0
+#define DOMAIN_DIMENSION R_MAX * 2.0
 // minimal density of a particle
 #define FLUID_REFERENCE_DENSITY 1.0
 // minimal density of a particle
@@ -27,13 +27,13 @@
 #define TIMESTEPS 1000
 
 // Sph Manager tags
-#define META_RIM_TAG 10
+#define META_RIM_TAG 0
 #define EXCHANGE_TAG 1
 #define EXPORT_TAG 2
 #define EXPORT_PARTICLES_NUMBER_TAG 3
 #define META_EXCHANGE_TAG 4
 #define META_META_RIM_TAG 5
-#define RIM_TAG 10000
+#define RIM_TAG 10
 
 namespace SimulationUtilities {
 	int hash(const Vector3&);
