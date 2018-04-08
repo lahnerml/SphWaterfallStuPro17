@@ -24,7 +24,7 @@
 #define SOURCE_SIZE  Q_MAX * 4.0
 
 // Number of simulation timesteps
-#define TIMESTEPS 1000
+#define TIMESTEPS 10000
 
 // Sph Manager tags
 #define META_RIM_TAG 0
