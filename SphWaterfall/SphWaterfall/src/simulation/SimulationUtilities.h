@@ -10,7 +10,7 @@
 // max Influence radius
 #define R_MAX Q_MAX * H
 // domain dimesion
-#define DOMAIN_DIMENSION R_MAX * 2.0
+#define DOMAIN_DIMENSION R_MAX * 8.0
 // minimal density of a particle
 #define FLUID_REFERENCE_DENSITY 1.0
 // minimal density of a particle
@@ -27,17 +27,19 @@
 #define TIMESTEPS 1000
 
 // Sph Manager tags
-#define META_TAG 0
+#define META_RIM_TAG 10
 #define EXCHANGE_TAG 1
 #define EXPORT_TAG 2
 #define EXPORT_PARTICLES_NUMBER_TAG 3
 #define META_EXCHANGE_TAG 4
+#define META_META_RIM_TAG 5
+#define RIM_TAG 10000
 
 namespace SimulationUtilities {
 	int hash(const Vector3&);
 	Vector3 unhash(const int&);	
 	int computeProcessID(const Vector3 position, const Vector3 domain_dimension);
-	int computeProcessID(const int domain_id, const int& comm_size);
+	int computeProcessID(const int domain_id);
 	int computeDomainID(const Vector3& position, const Vector3& domain_dimension);
 
 	extern MPI_Comm slave_comm;

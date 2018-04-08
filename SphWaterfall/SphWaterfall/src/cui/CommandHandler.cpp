@@ -297,7 +297,7 @@ void CommandHandler::moveShutter(std::string shutter_move_param) {
 }
 
 void CommandHandler::simulate() {
-	if (false) {
+	if (mpi_rank == 1) {
 		std::vector<SphParticle> particles;
 
 		for (int i = 0; i < 20; i++) {
@@ -338,7 +338,6 @@ void CommandHandler::addSource(std::string source_position_string) {
 	source_position_stream >> y;
 	source_position_stream >> z;
 	Vector3 source_position = Vector3(x, y, z);
-	cout << source_position << endl;
 	int proccess_id = SimulationUtilities::computeProcessID(source_position, sph_manager.getDomainDimensions());
 	if (proccess_id == mpi_rank) {
 		sph_manager.addSource(source_position);
