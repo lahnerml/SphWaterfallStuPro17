@@ -25,44 +25,6 @@ SphManager::~SphManager() {
 
 }
 
-void SphManager::initDensities() {
-	/*
-	std::vector<SphParticle> each_neighbour_particles;
-	std::unordered_map <int, std::vector<SphParticle>> each_neighbour_static_rim_particles;
-
-	for (auto& each_domain : domains) {
-		if (each_domain.second.hasStaticParticles()) {
-			// gets neighbour particle map from domain
-			each_neighbour_static_rim_particles = each_domain.second.getStaticNeighbourRimParticles();
-
-			for (auto& each_particle : each_domain.second.getStaticParticles()) {
-				// gets particles of domain the particle is in
-				each_neighbour_particles = each_domain.second.getStaticParticles();
-
-				for (auto& domain_id : neighbour_search->findRelevantNeighbourDomains(each_particle.position, domain_dimensions)) {
-					// tests if domain of particle has neighbour particles for currently looked at neighbour domain
-					if (each_neighbour_static_rim_particles.count(domain_id) != 0) {
-						each_neighbour_particles.insert(each_neighbour_particles.end(),
-							each_neighbour_static_rim_particles.at(domain_id).begin(),
-							each_neighbour_static_rim_particles.at(domain_id).end());
-					}
-				}
-
-				each_neighbour_particles = neighbour_search->findNeigbours(each_particle.position, each_neighbour_particles);
-				neighbour_particles.push_back(std::pair<SphParticle, std::vector<SphParticle>>(each_particle, each_neighbour_particles));
-			}
-		}
-	}
-	*/
-
-	for (auto& each_domain : domains) {
-		for (auto& each_particle : each_domain.second.getStaticParticles()) {
-			//computeLocalDensity(each_particle);
-			each_particle.local_density = 10.0;
-		}
-	}
-}
-
 void SphManager::simulate() {
 	MPI_Comm_rank(slave_comm, &mpi_rank);
 
@@ -78,8 +40,6 @@ void SphManager::simulate() {
 	if (mpi_rank == 0) {
 		std::cout << "finished static rim exchange" << std::endl;
 	}
-
-	initDensities();
 
 	MPI_Barrier(slave_comm);
 
@@ -262,12 +222,12 @@ void SphManager::computeLocalDensity(SphParticle& particle) {
 		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
 	}
 
-	//if (local_density < FLUID_REFERENCE_DENSITY) {
-	//	particle.local_density = FLUID_REFERENCE_DENSITY;
-	//}
-	//else {
+	if (local_density < FLUID_REFERENCE_DENSITY) {
+		particle.local_density = FLUID_REFERENCE_DENSITY;
+	}
+	else {
 		particle.local_density = local_density;
-	//}
+	}
 }
 
 Vector3 SphManager::computeDensityAcceleration(SphParticle& particle) {
@@ -644,7 +604,7 @@ void SphManager::exportParticles() {
 	
 	for (auto& each_domain : domains) {
 		if (each_domain.second.hasFluidParticles()) {
-			for (SphParticle& each_particle : each_domain.second.getParticles()) { // change getParticles to getFluidParticles later
+			for (SphParticle& each_particle : each_domain.second.getFluidParticles()) { // change getParticles to getFluidParticles later
 				particles_to_export.push_back(each_particle);
 			}
 		}

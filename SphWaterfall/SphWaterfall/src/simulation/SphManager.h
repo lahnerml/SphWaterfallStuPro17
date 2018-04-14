@@ -49,7 +49,6 @@ private:
 	void cleanUpFluidParticles();
 	void cleanUpStaticParticles();
 
-	void initDensities();
 	void update();
 	bool updateVelocity(SphParticle& particle);
 	Vector3 computeAcceleration(SphParticle& particle);
