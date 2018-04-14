@@ -108,7 +108,7 @@ Vector3 Vector3::distanceTo(const Vector3& v, const Vector3& v1) {
 	return Vector3(abs(v.x - v1.x), abs(v.y - v1.y), abs(v.z - v1.z));
 }
 
-double Vector3::dot(const Vector3& a) {
+double Vector3::dot(const Vector3& a) const {
 	return this->x * a.x + this->y * a.y + this->z * a.z;
 }
 
