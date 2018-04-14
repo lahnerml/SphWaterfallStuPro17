@@ -18,7 +18,7 @@
 // particle mass
 #define FLUID_MASS 1.0
 // particle mass
-#define STATIC_MASS 5.0
+#define STATIC_MASS 10.0
 
 // size of the sources cubic spawn are
 #define SOURCE_SIZE  Q_MAX * 4.0

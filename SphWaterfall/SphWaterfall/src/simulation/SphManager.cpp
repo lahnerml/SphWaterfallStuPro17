@@ -195,6 +195,11 @@ void SphManager::update() {
 bool SphManager::updateVelocity(SphParticle& particle) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle);
 	particle.velocity += (half_timestep_duration * accelleration_timestep_start);
+
+	if (particle.velocity.length() > 10) {
+		particle.velocity = particle.velocity.normalize() * 10;
+	}
+
 	Vector3 position_timestep_half = particle.position + (half_timestep_duration * particle.velocity);
 
 	Vector3 accelleration_timestep_half = computeAcceleration(particle);
