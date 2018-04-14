@@ -94,7 +94,7 @@ void SphManager::simulate() {
 			export_particles_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 			std::cout << "finished export in " << export_particles_time << "ms" << std::endl;
 
-			simulation_timestep_time = exchange_rim_particles_time + update_particles_time + exchange_particles_time + export_particles_time;
+			simulation_timestep_time = exchange_rim_particles_time + update_particles_time + spawn_particle_time + exchange_particles_time + export_particles_time;
 			std::cout << "finished simulation of timestep " << simulation_timestep << " in " << simulation_timestep_time << " ms" << std::endl;
 		}
 	}
