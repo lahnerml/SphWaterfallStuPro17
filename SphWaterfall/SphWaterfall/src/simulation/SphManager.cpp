@@ -200,41 +200,74 @@ void SphManager::update() {
 
 bool SphManager::updateVelocity(SphParticle& particle) {
 	std::vector<SphParticle> fluid_neighbours;
+	std::vector<SphParticle> static_neighbours;
 	for (auto& neighbour : neighbour_fluid_particles) {
 		if (particle == neighbour.first) {
 			fluid_neighbours = neighbour.second;
 			break;
 		}
 	}
+	for (auto& neighbour : neighbour_static_particles) {
+		if (particle == neighbour.first) {
+			static_neighbours = neighbour.second;
+			break;
+		}
+	}
 
-	Vector3 accelleration_timestep_start = computeAcceleration(particle, fluid_neighbours);
+	Vector3 accelleration_timestep_start = computeAcceleration(particle, fluid_neighbours, static_neighbours);
 	particle.velocity += (half_timestep_duration * accelleration_timestep_start);
 
 	if (particle.velocity.length() > MAX_VELOCITY) {
 		particle.velocity = particle.velocity.normalize() * MAX_VELOCITY;
 	}
+	if (fluid_neighbours.size() > 0) {
+		//interpolateWithNeighbourVelocities(particle.velocity, fluid_neighbours);
+	}
 
 	Vector3 position_timestep_half = particle.position + (half_timestep_duration * particle.velocity);
 
-	Vector3 accelleration_timestep_half = computeAcceleration(particle, fluid_neighbours);
+	Vector3 accelleration_timestep_half = computeAcceleration(particle, fluid_neighbours, static_neighbours);
 	Vector3 velocity_timestep_end = particle.velocity + (timestep_duration * accelleration_timestep_half);
+	if (fluid_neighbours.size() > 0) {
+		//interpolateWithNeighbourVelocities(velocity_timestep_end, fluid_neighbours);
+	}
 	particle.position = position_timestep_half + (half_timestep_duration * velocity_timestep_end);
 	return particle.position.y <= sink_height;
 }
 
-Vector3 SphManager::computeAcceleration(SphParticle& particle, std::vector<SphParticle>& fluid_neighbours) {
-	Vector3 acceleration = gravity_acceleration + computeDensityAcceleration(particle, fluid_neighbours) + 
-		computeViscosityAcceleration(particle, fluid_neighbours);
+void SphManager::interpolateWithNeighbourVelocities(Vector3& particle_velocity_vector, const std::vector<SphParticle>& fluid_neighbours) {
+	double particle_velocity = particle_velocity_vector.length();
+	double average_velocity = 0.0;
+	for (const SphParticle& neighbour_particle : fluid_neighbours) {
+		average_velocity += neighbour_particle.velocity.length();
+	}
+	average_velocity = average_velocity / fluid_neighbours.size();
+
+	if (particle_velocity > 0.0) {
+		double velocity_ratio = (average_velocity / particle_velocity) * 2;
+		if (velocity_ratio < 1) {
+			particle_velocity_vector = particle_velocity_vector * velocity_ratio;
+		}
+	}
+}
+
+Vector3 SphManager::computeAcceleration(SphParticle& particle, std::vector<SphParticle>& fluid_neighbours, std::vector<SphParticle>& static_neighbours) {
+	Vector3 acceleration = gravity_acceleration + computeDensityAcceleration(particle, fluid_neighbours, static_neighbours) + computeViscosityAcceleration(particle, fluid_neighbours);
 	return acceleration;
 }
 
-Vector3 SphManager::computeDensityAcceleration(SphParticle& particle, std::vector<SphParticle>& fluid_neighbours) {
+Vector3 SphManager::computeDensityAcceleration(SphParticle& particle, std::vector<SphParticle>& fluid_neighbours, std::vector<SphParticle>& static_neighbours) {
 	Vector3 density_acceleration = Vector3();
 	double particle_local_pressure = computeLocalPressure(particle);
 
 	for (SphParticle& neighbour_particle : fluid_neighbours) {
 		density_acceleration -= (neighbour_particle.mass / particle.mass) *
 			((particle_local_pressure + computeLocalPressure(neighbour_particle)) / (2 * particle.local_density * neighbour_particle.local_density)) * 
+			(kernel->computeKernelGradientValue(particle.position - neighbour_particle.position));
+	}
+	for (SphParticle& neighbour_particle : static_neighbours) {
+		density_acceleration -= (neighbour_particle.mass / particle.mass) *
+			((particle_local_pressure + computeLocalPressure(neighbour_particle)) / (2 * particle.local_density * neighbour_particle.local_density)) *
 			(kernel->computeKernelGradientValue(particle.position - neighbour_particle.position));
 	}
 
@@ -263,15 +296,25 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle, std::vec
 
 void SphManager::computeLocalDensity(SphParticle& particle) {
 	double local_density = 0.0;
-	std::vector<SphParticle> neighbours;
+	std::vector<SphParticle> fluid_neighbours;
+	std::vector<SphParticle> static_neighbours;
 	for (auto& neighbour : neighbour_fluid_particles) {
 		if (particle == neighbour.first) {
-			neighbours = neighbour.second;
+			fluid_neighbours = neighbour.second;
+			break;
+		}
+	}
+	for (auto& neighbour : neighbour_static_particles) {
+		if (particle == neighbour.first) {
+			static_neighbours = neighbour.second;
 			break;
 		}
 	}
 
-	for (SphParticle& neighbour_particle : neighbours) {
+	for (SphParticle& neighbour_particle : fluid_neighbours) {
+		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
+	}
+	for (SphParticle& neighbour_particle : static_neighbours) {
 		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
 	}
 

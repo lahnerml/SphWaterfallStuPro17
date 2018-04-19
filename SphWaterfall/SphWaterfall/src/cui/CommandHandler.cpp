@@ -297,7 +297,7 @@ void CommandHandler::moveShutter(std::string shutter_move_param) {
 }
 
 void CommandHandler::simulate() {
-	if (false) {
+	if (mpi_rank == 1) {
 		std::vector<SphParticle> particles;
 
 		for (int i = 0; i < 20; i++) {
