@@ -142,7 +142,7 @@ std::unordered_map<int, std::vector<SphParticle>> ParticleDomain::getRimParticle
 			for (int x = -1; x <= 1; x++) {
 				for (int y = -1; y <= 1; y++) {
 					for (int z = -1; z <= 1; z++) {
-						int id = SimulationUtilities::computeDomainID(particle.position + ((Vector3(x, y, z).normalize() * R_MAX)), dimensions);
+						int id = SimulationUtilities::computeDomainID(particle.position + ((Vector3(x, y, z).normalize() * Q_MAX)), dimensions);
 						if (id != domain_id) {
 							target_map[id].push_back(particle);
 						}
@@ -156,7 +156,7 @@ std::unordered_map<int, std::vector<SphParticle>> ParticleDomain::getRimParticle
 			for (int x = -1; x <= 1; x++) {
 				for (int y = -1; y <= 1; y++) {
 					for (int z = -1; z <= 1; z++) {
-						int id = SimulationUtilities::computeDomainID(particle.position + ((Vector3(x, y, z).normalize() * R_MAX)), dimensions);
+						int id = SimulationUtilities::computeDomainID(particle.position + ((Vector3(x, y, z).normalize() * Q_MAX)), dimensions);
 						if (id != domain_id) {
 							target_map[id].push_back(particle);
 						}

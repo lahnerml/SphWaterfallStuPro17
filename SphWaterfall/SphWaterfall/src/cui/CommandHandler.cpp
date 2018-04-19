@@ -303,7 +303,7 @@ void CommandHandler::simulate() {
 		for (int i = 0; i < 20; i++) {
 			for (int j = 0; j < 20; j++) {
 				for (int k = 0; k < 20; k++) {
-					particles.push_back(SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k)));
+					particles.push_back(SphParticle(Vector3(10.0 + i, 10.0 + j, 10.0 + k)));
 				}
 			}
 		}

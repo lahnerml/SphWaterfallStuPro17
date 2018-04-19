@@ -4,13 +4,11 @@
 #include "../data/SphParticle.h"
 
 // kernel Influence radius
-#define Q_MAX 1.2
+#define Q_MAX 1.0
 // smoothing radius 
-#define H 1.0
-// max Influence radius
-#define R_MAX Q_MAX * H
+#define H 0.3
 // domain dimesion
-#define DOMAIN_DIMENSION R_MAX * 2.0
+#define DOMAIN_DIMENSION Q_MAX * 2.0
 // minimal density of a particle
 #define FLUID_REFERENCE_DENSITY 1.0
 // minimal density of a particle
@@ -25,6 +23,9 @@
 
 // Number of simulation timesteps
 #define TIMESTEPS 10000
+
+// maximal velocity of a particle
+#define MAX_VELOCITY 75
 
 // Sph Manager tags
 #define META_RIM_TAG 0
