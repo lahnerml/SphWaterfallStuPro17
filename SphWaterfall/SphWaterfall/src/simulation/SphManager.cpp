@@ -222,11 +222,6 @@ bool SphManager::updateVelocity(SphParticle& particle) {
 	return particle.position.y <= sink_height;
 }
 
-	}
-
-	}
-}
-
 Vector3 SphManager::computeAcceleration(SphParticle& particle, std::vector<SphParticle>& fluid_neighbours) {
 	Vector3 acceleration = gravity_acceleration + computeDensityAcceleration(particle, fluid_neighbours) + 
 		computeViscosityAcceleration(particle, fluid_neighbours);
@@ -264,32 +259,6 @@ Vector3 SphManager::computeViscosityAcceleration(SphParticle& particle, std::vec
 
 	//std::cout << "after viscosity acceleration:" << viscosity_acceleration << std::endl; //debug
 	return viscosity_acceleration;
-}
-
-Vector3 SphManager::computeWallAcceleration(SphParticle& particle) {
-	std::vector<SphParticle> neighbours;
-	for (auto& neighbour : neighbour_static_particles) {
-		if (particle == neighbour.first) {
-			neighbours = neighbour.second;
-			break;
-		}
-	}
-
-	// parameters for calc
-	double d = 0.01; // adjustment variable
-	double p1 = 8; // 4 or 12 p1 > p2
-	double p2 = 4; // 2 or 6 p1 > p2
-	double rref = 1; // initial distance
-
-	Vector3 rij;
-	Vector3 wall_acceleration = Vector3();
-	for (SphParticle& neighbour_particle : neighbours) {
-		rij = particle.position - neighbour_particle.position;
-		double rij_length = rij.length();
-		wall_acceleration += (pow(rref / rij_length, p1) - pow(rref / rij_length, p2)) * (rij / rij_length * rij_length);
-	}
-
-	return d * wall_acceleration;
 }
 
 void SphManager::computeLocalDensity(SphParticle& particle) {
