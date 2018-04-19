@@ -17,8 +17,8 @@ public:
 	~SphManager();
 
 	void simulate();
-	void add_particles(const std::vector<SphParticle>&);
 	void exportParticles();
+	void add_particles(const std::vector<SphParticle>&);
 	void setSink(const double&);
 	void addSource(const Vector3&);
 	const Vector3& getDomainDimensions() const;
@@ -43,9 +43,6 @@ private:
 	SphKernelFactory kernel_factory;
 	SphNeighbourSearchFactory neighbour_search_factory;
 
-	ParticleDomain& getParticleDomain(const int&);
-	ParticleDomain& getParticleDomain(const Vector3&);
-	
 	void cleanUpAllParticles();
 	void cleanUpFluidParticles();
 	void cleanUpStaticParticles();
@@ -58,7 +55,11 @@ private:
 	Vector3 computeViscosityAcceleration(SphParticle&, std::vector<SphParticle>&);
 	void computeLocalDensity(SphParticle&);
 	double computeLocalPressure(SphParticle&);
+
 	void exchangeParticles();
 	void exchangeRimParticles(SphParticle::ParticleType);
 	void spawnSourceParticles();
+
+	ParticleDomain& getParticleDomain(const int&);
+	ParticleDomain& getParticleDomain(const Vector3&);
 };

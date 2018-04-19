@@ -25,6 +25,31 @@ SphManager::~SphManager() {
 
 }
 
+void SphManager::cleanUpAllParticles() {
+	for (auto& each_domain : domains) {
+		each_domain.second.clearParticles();
+		each_domain.second.clearNeighbourRimParticles();
+	}
+}
+
+void SphManager::cleanUpFluidParticles() {
+	for (auto& each_domain : domains) {
+		if (each_domain.second.hasFluidParticles()) {
+			each_domain.second.clearParticles(SphParticle::FLUID);
+		}
+		each_domain.second.clearNeighbourRimParticles(SphParticle::FLUID);
+	}
+}
+
+void SphManager::cleanUpStaticParticles() {
+	for (auto& each_domain : domains) {
+		if (each_domain.second.hasStaticParticles()) {
+			each_domain.second.clearParticles(SphParticle::STATIC);
+		}
+		each_domain.second.clearNeighbourRimParticles(SphParticle::STATIC);
+	}
+}
+
 void SphManager::simulate() {
 	MPI_Comm_rank(slave_comm, &mpi_rank);
 
@@ -330,6 +355,84 @@ double SphManager::computeLocalPressure(SphParticle& particle) {
 	return PRESSURE_CONSTANT * (particle.local_density - FLUID_REFERENCE_DENSITY);
 }
 
+void SphManager::exchangeParticles() {
+	std::unordered_map<int, std::vector<SphParticle>> target_map;
+	std::vector<SphParticle> all_new_particles;
+	std::vector<std::vector<SphParticle>> incoming_particles;
+	int target_id;
+
+	//std::cout << mpi_rank << " start exchange" << std::endl;
+
+	// adds particles that are provided by the addParticles method
+	for (int i = 0; i < slave_comm_size; i++) {
+		target_map[i] = add_particles_map.at(i);
+		add_particles_map.at(i).clear();
+	}
+
+	//std::cout << mpi_rank << " start exchange map" << std::endl;
+
+	// adds particles from domains
+	for (auto& each_domain : domains) {
+		if (each_domain.second.hasFluidParticles()) {
+			std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
+
+			for (auto& each_particle : outside_particles) {
+				target_id = computeProcessID(each_particle.position, domain_dimensions);
+
+				if (target_map.at(target_id).empty()) {
+					target_map[target_id] = std::vector<SphParticle>();
+				}
+
+				target_map[target_id].push_back(each_particle);
+			}
+		}
+	}
+
+	// don't send to yourself
+	int count = target_map.count(mpi_rank);
+	if (count != 0) {
+		all_new_particles = target_map.at(mpi_rank);
+		target_map.erase(mpi_rank);
+	}
+	//std::cout << mpi_rank << " started exchange" << std::endl;
+
+	// send meta data
+	for (int i = 0; i < slave_comm_size; i++) {
+		int size = target_map[i].size();
+		if (i != mpi_rank) {
+			MPI_Request request;
+			MPI_Isend(&size, 1, MPI_INT, i, META_EXCHANGE_TAG, slave_comm, &request);
+		}
+	}
+	//std::cout << mpi_rank << " finished sending meta" << std::endl;
+
+	// receive meta from all other processors and post receives
+	for (int i = 0; i < slave_comm_size; i++) {
+		if (i != mpi_rank) {
+			int size;
+			MPI_Recv(&size, 1, MPI_INT, i, META_EXCHANGE_TAG, slave_comm, MPI_STATUS_IGNORE);
+			if (size != 0) {
+				incoming_particles.push_back(std::vector<SphParticle>(size));
+				MPI_Request request;
+				MPI_Irecv(incoming_particles.back().data(), size * sizeof(SphParticle), MPI_BYTE, i, EXCHANGE_TAG, slave_comm, &request);
+			}
+		}
+	}
+	//std::cout << mpi_rank << " finished sending posting receives" << std::endl;
+	// send particles
+	for (auto& vector : target_map) {
+		if (vector.second.size() != 0) {
+			MPI_Ssend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, EXCHANGE_TAG, slave_comm);
+		}
+	}
+	//std::cout << mpi_rank << " finished sending particles" << std::endl;
+	MPI_Barrier(slave_comm);
+	add_particles(all_new_particles);
+	for (auto& each_new_particle_list : incoming_particles) {
+		add_particles(each_new_particle_list);
+	}
+}
+
 void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	// target domain id, source domain id, rim particles from source in direction of target domain
 	std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, std::vector<SphParticle>>>> target_source_map;
@@ -476,158 +579,6 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	new_rim_particles.clear();
 }
 
-void SphManager::setSink(const double& sink_height)
-{
-	this->sink_height = sink_height;
-}
-
-void SphManager::addSource(const Vector3& source)
-{
-	sources.push_back(source);
-}
-
-const Vector3& SphManager::getDomainDimensions() const
-{
-	return domain_dimensions;
-}
-
-void SphManager::exchangeParticles() {
-	std::unordered_map<int, std::vector<SphParticle>> target_map;
-	std::vector<SphParticle> all_new_particles;
-	std::vector<std::vector<SphParticle>> incoming_particles;
-	int target_id;
-
-	//std::cout << mpi_rank << " start exchange" << std::endl;
-
-	// adds particles that are provided by the addParticles method
-	for (int i = 0; i < slave_comm_size; i++) {
-		target_map[i] = add_particles_map.at(i);
-		add_particles_map.at(i).clear();
-	}
-	
-	//std::cout << mpi_rank << " start exchange map" << std::endl;
-
-	// adds particles from domains
-	for (auto& each_domain : domains) {
-		if (each_domain.second.hasFluidParticles()) {
-			std::vector<SphParticle> outside_particles = each_domain.second.removeParticlesOutsideDomain();
-
-			for (auto& each_particle : outside_particles) {
-				target_id = computeProcessID(each_particle.position, domain_dimensions);
-
-				if (target_map.at(target_id).empty()) {
-					target_map[target_id] = std::vector<SphParticle>();
-				}
-
-				target_map[target_id].push_back(each_particle);
-			}
-		}
-	}
-
-	// don't send to yourself
-	int count = target_map.count(mpi_rank);
-	if (count != 0) {
-		all_new_particles = target_map.at(mpi_rank);
-		target_map.erase(mpi_rank);
-	}
-	//std::cout << mpi_rank << " started exchange" << std::endl;
-
-	// send meta data
-	for (int i = 0; i < slave_comm_size; i++) {
-		int size = target_map[i].size();
-		if (i != mpi_rank) {
-			MPI_Request request;
-			MPI_Isend(&size, 1, MPI_INT, i, META_EXCHANGE_TAG, slave_comm, &request);
-		}
-	}
-	//std::cout << mpi_rank << " finished sending meta" << std::endl;
-
-	// receive meta from all other processors and post receives
-	for (int i = 0; i < slave_comm_size; i++) {
-		if (i != mpi_rank) {
-			int size;
-			MPI_Recv(&size, 1, MPI_INT, i, META_EXCHANGE_TAG, slave_comm, MPI_STATUS_IGNORE);
-			if (size != 0) {
-				incoming_particles.push_back(std::vector<SphParticle>(size));
-				MPI_Request request;
-				MPI_Irecv(incoming_particles.back().data(), size * sizeof(SphParticle), MPI_BYTE, i, EXCHANGE_TAG, slave_comm, &request);
-			}
-		}
-	}
-	//std::cout << mpi_rank << " finished sending posting receives" << std::endl;
-	// send particles
-	for (auto& vector : target_map) {
-		if (vector.second.size() != 0) {
-			MPI_Ssend(vector.second.data(), vector.second.size() * sizeof(SphParticle), MPI_BYTE, vector.first, EXCHANGE_TAG, slave_comm);
-		}		
-	}
-	//std::cout << mpi_rank << " finished sending particles" << std::endl;
-	MPI_Barrier(slave_comm);
-	add_particles(all_new_particles);
-	for (auto& each_new_particle_list : incoming_particles) {
-		add_particles(each_new_particle_list);
-	}
-}
-
-void SphManager::cleanUpAllParticles() {
-	for (auto& each_domain : domains) {
-		each_domain.second.clearParticles();
-		each_domain.second.clearNeighbourRimParticles();
-	}
-	//for (auto& each_domain : domains) {for (auto& each_particle : each_domain.second.getParticles()) {std::cout << "particle in domain: " << each_particle << std::endl;}} // debug
-}
-
-void SphManager::cleanUpFluidParticles() {
-	for (auto& each_domain : domains) {
-		if (each_domain.second.hasFluidParticles()) {
-			each_domain.second.clearParticles(SphParticle::FLUID);
-		}
-		each_domain.second.clearNeighbourRimParticles(SphParticle::FLUID);
-	}
-	//for (auto& each_domain : domains) {for (auto& each_particle : each_domain.second.getParticles()) {std::cout << "particle in domain: " << each_particle << std::endl;}} // debug
-}
-
-void SphManager::cleanUpStaticParticles() {
-	for (auto& each_domain : domains) {
-		if (each_domain.second.hasStaticParticles()) {
-			each_domain.second.clearParticles(SphParticle::STATIC);
-		}
-		each_domain.second.clearNeighbourRimParticles(SphParticle::STATIC);
-	}
-	//for (auto& each_domain : domains) {for (auto& each_particle : each_domain.second.getParticles()) {std::cout << "particle in domain: " << each_particle << std::endl;}} // debug
-}
-
-ParticleDomain& SphManager::getParticleDomain(const int& domain_id) {
-	int count = domains.count(domain_id);
-
-	if (count == 0) {
-		domains[domain_id] = ParticleDomain((unhash(domain_id) * domain_dimensions), domain_dimensions);
-	}
-	return domains.at(domain_id);
-}
-
-ParticleDomain& SphManager::getParticleDomain(const Vector3& particle_position) {
-	int domain_id = computeDomainID(particle_position, domain_dimensions);
-
-	return getParticleDomain(domain_id);
-}
-
-void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
-	for (SphParticle particle : new_particles) {
-		//std::cout << domain_id << std::endl; // debug
-		int domain_id = computeDomainID(particle.position, domain_dimensions);
-		int process_id = computeProcessID(domain_id);
-
-		if (process_id == mpi_rank) {
-			getParticleDomain(domain_id).addParticle(particle);
-		}
-		else {
-			add_particles_map[process_id].push_back(particle);
-		}
-		//std::cout << particle.position << std::endl; // debug
-	}
-}
-
 void SphManager::spawnSourceParticles() {
 	if (sources.empty()) {
 		return;
@@ -670,4 +621,45 @@ void SphManager::exportParticles() {
 		MPI_Send(particles_to_export.data(), number_of_particles_to_send * sizeof(SphParticle), MPI_BYTE, 0, EXPORT_TAG, MPI_COMM_WORLD);
 	}
 
+}
+
+void SphManager::add_particles(const std::vector<SphParticle>& new_particles) {
+	for (SphParticle particle : new_particles) {
+		int domain_id = computeDomainID(particle.position, domain_dimensions);
+		int process_id = computeProcessID(domain_id);
+
+		if (process_id == mpi_rank) {
+			getParticleDomain(domain_id).addParticle(particle);
+		}
+		else {
+			add_particles_map[process_id].push_back(particle);
+		}
+	}
+}
+
+ParticleDomain& SphManager::getParticleDomain(const int& domain_id) {
+	int count = domains.count(domain_id);
+
+	if (count == 0) {
+		domains[domain_id] = ParticleDomain((unhash(domain_id) * domain_dimensions), domain_dimensions);
+	}
+	return domains.at(domain_id);
+}
+
+ParticleDomain& SphManager::getParticleDomain(const Vector3& particle_position) {
+	int domain_id = computeDomainID(particle_position, domain_dimensions);
+
+	return getParticleDomain(domain_id);
+}
+
+void SphManager::setSink(const double& sink_height) {
+	this->sink_height = sink_height;
+}
+
+void SphManager::addSource(const Vector3& source) {
+	sources.push_back(source);
+}
+
+const Vector3& SphManager::getDomainDimensions() const {
+	return domain_dimensions;
 }
