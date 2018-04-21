@@ -24,7 +24,7 @@ public:
 	Frame renderFrame(std::vector<ParticleObject> particles, int frameID);
 
 	//Renders
-	void renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed);
+	void renderGeometryFrames(Terrain terrain, Terrain gate);
 
 	void outputDebugFrame(Frame f, const char* fileName);
 	void setGateSwitchFrame(unsigned int frameID);
@@ -35,7 +35,8 @@ public:
 private:
 
 	Pixel castDebugRay(Ray ray, std::vector<DebugObject> particles);
-	Pixel castGeometryRay(Ray ray, Terrain& terrain);
+	Pixel castTerrainRay(Ray ray, Terrain& terrain);
+	Pixel castTerrainGateRay(Ray ray, Terrain& terrain, Terrain& gate);
 
 	Pixel castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixel basePixel);
 

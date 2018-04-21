@@ -346,7 +346,7 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 	VisualizationManager::importTerrain(loaded_mesh, true);
 	VisualizationManager::importTerrain(loaded_shutter, false);
 
-	VisualizationManager::init(Vector3(10, 5, -20), 200, 200);
+	VisualizationManager::init(Vector3(10, 5, -20), 200, 200, 10*5);
 	//VisualizationManager::renderFrames("sph.ptcl");
 	VisualizationManager::renderFramesDistributed("sph.ptcl", mpi_rank);
 
