@@ -14,6 +14,6 @@ using namespace std;
 class ParticleIO {
 public:
 	static void exportParticles(unordered_map<int, vector<SphParticle>>& frames, string fileName);
-	static void exportParticlesToVTK(vector<SphParticle>& particles, string fileName, int& timestep);
+	static void exportParticlesToVTK(vector<SphParticle>& particles, string fileName, int timestep);
 	static vector<vector<SphParticle>> importParticles(string fileName);
 };

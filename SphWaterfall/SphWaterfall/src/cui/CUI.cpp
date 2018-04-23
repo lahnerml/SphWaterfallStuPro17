@@ -166,7 +166,9 @@ std::string CUI::trimQuotemarks(std::string string) {
 	int positionLeft = string.find_first_not_of("\"");
 	int positionRight = string.find_last_not_of("\"");
 	if (!(positionLeft == -1 || positionRight == -1)) {
-		return string.substr(positionLeft, positionRight - positionLeft + 1);		}
+		return string.substr(positionLeft, positionRight - positionLeft + 1);		
+	}
+	return string;
 }
 
 void CUI::printInputMessage() {

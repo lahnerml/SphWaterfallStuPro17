@@ -16,33 +16,30 @@ public:
 	ParticleDomain(const Vector3& origin, const Vector3& dimension);
 	~ParticleDomain();
 
-	std::vector<SphParticle> removeParticlesOutsideDomain(double);
-
-	int size() const;
 	const Vector3& getDimensions() const;
 	const Vector3& getOrigin() const;
 
 	void addParticle(const SphParticle&);
-	std::vector<SphParticle>& getParticles();
+	std::vector<SphParticle>& getFluidParticles();
+	std::vector<SphParticle>& getStaticParticles();
+	std::vector<SphParticle*> getParticles();
 
 	void clearParticles();
 	void clearParticles(SphParticle::ParticleType);
-	const bool hasFluidParticles() const;
-	const bool& hasStaticParticles() const;
+	const bool hasParticles(SphParticle::ParticleType);
 
-	std::unordered_map<int, std::vector<SphParticle>> getRimParticleTargetMap(SphParticle::ParticleType particle_type);
+	std::vector<SphParticle> removeParticlesOutsideDomain();
+
 	void clearNeighbourRimParticles();
 	void clearNeighbourRimParticles(SphParticle::ParticleType);
-	void addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle>>&);
-	std::unordered_map<int, std::vector<SphParticle>>& getNeighbourRimParticles();
+	void addNeighbourRimParticles(const std::unordered_map<int, std::vector<SphParticle*>>&, SphParticle::ParticleType);
+	std::unordered_map<int, std::vector<SphParticle*>> getNeighbourRimParticles();
+	std::unordered_map<int, std::vector<SphParticle*>> getRimParticleTargetMap(SphParticle::ParticleType);
 
 private:
-	std::vector<SphParticle> particles;
-	std::unordered_map<int, std::vector<SphParticle>> neighbour_rim_particles;
-	std::vector<int> neighbour_domains;
-	bool has_static_particles;
-	int number_of_fluid_particles;
-	int particles_outside_domain;
+	std::unordered_map <SphParticle::ParticleType, std::vector<SphParticle>> particles;
+	std::unordered_map<SphParticle::ParticleType, std::unordered_map<int, std::vector<SphParticle*>>> neighbour_particles;
+
 	Vector3 origin;
 	Vector3 dimensions;
 };

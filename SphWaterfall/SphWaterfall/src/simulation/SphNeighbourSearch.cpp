@@ -8,13 +8,12 @@ SphNeighbourSearch::~SphNeighbourSearch() {
 
 }
 
-std::vector<SphParticle> SphNeighbourSearch::findNeigbours(const Vector3& particle_position, const std::vector<SphParticle>& potential_neighbour_particles) const {
-	std::vector<SphParticle> neighbours = std::vector<SphParticle>();
+std::vector<SphParticle*> SphNeighbourSearch::findNeigbours(const Vector3& particle_position, std::vector<SphParticle*>& potential_neighbour_particles) const {
+	std::vector<SphParticle*> neighbours;
 
-	for (auto each_particle : potential_neighbour_particles) {
-		if (isInInfluentialRadius(particle_position, each_particle.position)) {
+	for (auto& each_particle : potential_neighbour_particles) {
+		if (each_particle->position != particle_position && isInInfluentialRadius(particle_position, (*each_particle).position)) {
 			neighbours.push_back(each_particle);
-
 		}
 	}
 
@@ -30,7 +29,7 @@ std::set<int> SphNeighbourSearch::findRelevantNeighbourDomains(const Vector3& pa
 	for (int x = -1; x <= 1; x++) {
 		for (int y = -1; y <= 1; y++) {
 			for (int z = -1; z <= 1; z++) {
-				testing_point = particle_position + (Vector3(x, y, z).normalize() * R_MAX);
+				testing_point = particle_position + (Vector3(x, y, z) * Q_MAX);
 				neighbour_domain_ids.insert(computeDomainID(testing_point, dimension));
 			}
 		}
@@ -57,12 +56,12 @@ bool SphNeighbourSearch::isInInfluentialRadius(const Vector3& particle_position,
 bool SphNeighbourSearch::isInInfluentialRadius(const Vector3& particle_position, const Vector3& potential_neighbour_particle_position) const {
 	Vector3 distance = (potential_neighbour_particle_position - particle_position).absolute();
 
-	if (distance.x > R_MAX || distance.y > R_MAX || distance.z > R_MAX) {
+	if (distance.x > Q_MAX || distance.y > Q_MAX || distance.z > Q_MAX) {
 		return false;
 	}
-	if (distance.x + distance.y + distance.z <= R_MAX) {
+	if (distance.x + distance.y + distance.z <= Q_MAX) {
 		return true;
 	}
 
-	return ((distance.x * distance.x) + (distance.y * distance.y) + (distance.z * distance.z)) <= (R_MAX * R_MAX);
+	return ((distance.x * distance.x) + (distance.y * distance.y) + (distance.z * distance.z)) <= (Q_MAX * Q_MAX);
 }
