@@ -24,7 +24,7 @@ void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>>& frames
 	else cout << "Unable to open file";
 }
 
-void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string name, int& timestep) {
+void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string name, int timestep) {
 	ofstream myfile;
 	std::ostringstream fileNameStream("");
 	fileNameStream << name << "_" << timestep << ".vtk";

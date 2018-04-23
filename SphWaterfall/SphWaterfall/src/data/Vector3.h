@@ -30,10 +30,11 @@ class Vector3 {
 		friend Vector3& operator*=(Vector3&, const double&);
 
 		friend bool operator==(const Vector3&, const Vector3&);
+		friend bool operator!=(const Vector3&, const Vector3&);
 
 		friend std::ostream& operator<<(std::ostream& out, const Vector3&);
 
-		double dot(const Vector3&);
+		double dot(const Vector3&) const;
 		Vector3 cross(const Vector3&);
 		Vector3 absolute();
 

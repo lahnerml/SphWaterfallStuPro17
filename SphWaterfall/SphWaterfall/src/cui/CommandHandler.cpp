@@ -212,8 +212,10 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::ADD_SOURCE:
-			source_position = cui_command.getParameter(0).getValue();
-			addSource(source_position);
+			if (mpi_rank != 0) {
+				source_position = cui_command.getParameter(0).getValue();
+				addSource(source_position);
+			}
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -222,8 +224,10 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::ADD_SINK:
-			sink_height = cui_command.getParameter(0).getValue();
-			addSink(sink_height);
+			if (mpi_rank != 0) {
+				sink_height = cui_command.getParameter(0).getValue();
+				addSink(sink_height);
+			}
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -323,13 +327,13 @@ void CommandHandler::moveShutter(std::string shutter_move_param) {
 }
 
 void CommandHandler::simulate(int simulation_timesteps) {
-	if (mpi_rank == 1) {
+	if (mpi_rank == -1) {
 		std::vector<SphParticle> particles;
 
 		for (int i = 0; i < 20; i++) {
 			for (int j = 0; j < 20; j++) {
 				for (int k = 0; k < 20; k++) {
-					particles.push_back(SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k)));
+					particles.push_back(SphParticle(Vector3(5.0 + i, 10.0 + j, 5.0 + k)));
 				}
 			}
 		}
@@ -358,11 +362,21 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 }
 
 void CommandHandler::addSource(std::string source_position_string) {
-	Vector3 source_position = parseToVector3(source_position_string);
-	std::cout << "New source: " << source_position << std::endl;
+	std::istringstream source_position_stream(source_position_string);
+	double x, y, z;
+	source_position_stream >> x;
+	source_position_stream >> y;
+	source_position_stream >> z;
+	Vector3 source_position = Vector3(x, y, z);
+	int proccess_id = SimulationUtilities::computeProcessID(source_position, sph_manager.getDomainDimensions());
+	if (proccess_id + 1 == mpi_rank) {
+		sph_manager.addSource(source_position);
+	}
 }
 
 void CommandHandler::addSink(std::string sink_height_string) {
-	double sink_height = parseToDouble(sink_height_string);
-	std::cout << "New sink height: " << sink_height << std::endl;
+	std::istringstream sink_height_stream(sink_height_string);
+	double sink_height;
+	sink_height_stream >> sink_height;
+	sph_manager.setSink(sink_height);
 }
