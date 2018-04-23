@@ -9,7 +9,7 @@
 
 class VisualizationManager {
 public:
-	static void init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID);
+	static void init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID, int rank);
 
 	static void importTerrain(Terrain t, bool isGate);
 

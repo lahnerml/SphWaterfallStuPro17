@@ -355,7 +355,7 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 	VisualizationManager::importTerrain(loaded_mesh, false);
 	VisualizationManager::importTerrain(loaded_shutter, true);
 
-	VisualizationManager::init(cameraPosition, 800, 600, 10*5);
+	VisualizationManager::init(cameraPosition, 800, 600, 10*5, mpi_rank);
 	//VisualizationManager::renderFrames("sph.ptcl");
 	VisualizationManager::renderFramesDistributed("sph.ptcl", mpi_rank);
 
@@ -376,6 +376,7 @@ void CommandHandler::addSource(std::string source_position_string) {
 	int proccess_id = SimulationUtilities::computeProcessID(source_position, sph_manager.getDomainDimensions());
 	if (proccess_id + 1 == mpi_rank) {
 		sph_manager.addSource(source_position);
+		std::cout << "Source added at " << source_position << std::endl;
 	}
 }
 
@@ -384,4 +385,5 @@ void CommandHandler::addSink(std::string sink_height_string) {
 	double sink_height;
 	sink_height_stream >> sink_height;
 	sph_manager.setSink(sink_height);
+	std::cout << "Sink added at y=" << sink_height << std::endl;
 }

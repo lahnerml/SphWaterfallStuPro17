@@ -28,6 +28,7 @@ public:
 
 	void outputDebugFrame(Frame f, const char* fileName);
 	void setGateSwitchFrame(unsigned int frameID);
+	void shareBaseFrame(int);
 
 	Vector3 getLocation();
 	Vector3 getDirection();

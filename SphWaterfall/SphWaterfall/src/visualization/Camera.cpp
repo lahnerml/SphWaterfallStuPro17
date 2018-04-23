@@ -329,6 +329,24 @@ void Camera::setGateSwitchFrame(unsigned int frameID) {
 	this->switchFrameID = frameID;
 }
 
+void Camera::shareBaseFrame(int rank)
+{
+	if (rank == 0) {
+		int world_size;
+		MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+		for (int i = 1; i < world_size; i++) {
+			Frame::MpiSendFrame(baseFrameOpen, i);
+			Frame::MpiSendFrame(baseFrameClosed, i);
+		}
+	}
+	else {
+		this->baseFrameOpen = Frame::MpiReceiveFrame(0);
+		this->baseFrameClosed = Frame::MpiReceiveFrame(0);
+		std::cout << "Base Frames passed to processor" << rank << std::endl;
+	}
+}
+
 void Camera::outputDebugFrame(Frame f, const char* fileName) {
 	writeFrameToBitmap(f, fileName, this->width, this->height);
 }

@@ -1,15 +1,18 @@
 #include "VisualizationManager.h"
 
-void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID) {
-	Vector3 cameraDir = (cameraLocation*-1);
+void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID, int rank) {
+	Vector3 cameraDir = Vector3(-cameraLocation.x, -cameraLocation.y / 2, -cameraLocation.z);
 	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
-	if (terrain.getVertexCount() > 0 && gate.getVertexCount() > 0) {
-		camera.renderGeometryFrames(terrain, gate);
-		std::cout << "Terrain rendered" << std::endl;
+	if (rank == 0) {
+		if (terrain.getVertexCount() > 0 && gate.getVertexCount() > 0) {
+			camera.renderGeometryFrames(terrain, gate);
+			std::cout << "Terrain rendered" << std::endl;
+		}
+		else {
+			std::cout << "No terrain found" << std::endl;
+		}
 	}
-	else {
-		std::cout << "No terrain found" << std::endl;
-	}
+	camera.shareBaseFrame(rank);
 	initilaized = true;
 }
 
