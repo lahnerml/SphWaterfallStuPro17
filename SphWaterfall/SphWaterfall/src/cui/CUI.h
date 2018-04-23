@@ -17,12 +17,11 @@ class CUI {
 	private:
 		CommandHandler command_handler;
 		CUICommand current_command;
-		bool exit_programm;
 
 		void startWithStream(std::istream&, bool);
 
 		void parseCommand(std::string);
-		void cleanAndExecuteCommand(bool);
+		void cleanAndExecuteCommand(bool, bool&);
 
 		void trim(std::string& string);
 		std::string trimQuotemarks(std::string string);

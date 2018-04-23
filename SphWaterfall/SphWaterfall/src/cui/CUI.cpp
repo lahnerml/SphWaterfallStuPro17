@@ -14,8 +14,8 @@ void CUI::startWithStream(std::istream &input_stream, bool is_config_execution) 
 
 	printInputMessage();
 
-	exit_programm = false;
-	while (!exit_programm) {
+	bool exit_program = false;
+	while (!exit_program) {
 		// read command_name
 		getline(input_stream, input_line);
 		trim(input_line);
@@ -28,7 +28,7 @@ void CUI::startWithStream(std::istream &input_stream, bool is_config_execution) 
 		parseCommand(input_line);
 
 		// clean command from not relevant parameters for each command and executes them
-		cleanAndExecuteCommand(is_config_execution);
+		cleanAndExecuteCommand(is_config_execution, exit_program);
 	}
 }
 
@@ -70,7 +70,7 @@ void CUI::parseCommand(std::string input_line) {
 	}
 }
 
-void CUI::cleanAndExecuteCommand(bool is_config_execution) {
+void CUI::cleanAndExecuteCommand(bool is_config_execution, bool& exit_program) {
 	std::string command = current_command.getCommandName();
 	if (command.front() == '#') {
 		//Comment
@@ -141,8 +141,8 @@ void CUI::cleanAndExecuteCommand(bool is_config_execution) {
 		printInputMessage();
 	}
 	else if (command == "exit") {
+		exit_program = true;
 		if (!is_config_execution) {
-			exit_programm = true;
 			current_command.setCommand(CUICommand::EXIT);
 			command_handler.handleCUICommand(current_command);
 		}
@@ -368,7 +368,7 @@ bool CUI::cleanSimulate() {
 	for (CUICommandParameter& parameter : current_command.getParameterList()) {
 		if (parameter.getParameterName() == "-t") {
 			std::string time_for_move = parameter.getValue();
-			if (time_for_move.find_first_not_of("0123456789") != std::string::npos) {
+			if (time_for_move.find_first_not_of(",.0123456789") != std::string::npos) {
 				current_command.removeParameter(parameter);
 				std::cout << "'" << parameter.getValue() << "' is not a number" << std::endl;
 			}
