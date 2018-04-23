@@ -12,7 +12,7 @@ std::vector<SphParticle*> SphNeighbourSearch::findNeigbours(const Vector3& parti
 	std::vector<SphParticle*> neighbours;
 
 	for (auto& each_particle : potential_neighbour_particles) {
-		if (isInInfluentialRadius(particle_position, (*each_particle).position)) {
+		if (each_particle->position != particle_position && isInInfluentialRadius(particle_position, (*each_particle).position)) {
 			neighbours.push_back(each_particle);
 		}
 	}

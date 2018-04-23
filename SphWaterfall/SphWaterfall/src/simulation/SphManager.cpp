@@ -256,7 +256,7 @@ bool SphManager::updateVelocity(SphParticle& particle, std::vector<SphParticle>&
 }
 
 Vector3 SphManager::correctVelocity(SphParticle& particle, Vector3& particle_velocity, std::vector<SphParticle>& neighbours) {
-	double epsilon = 0.1;
+	double epsilon = 0.8;
 	Vector3 velocity_correction = Vector3();
 	Vector3 rij;
 
