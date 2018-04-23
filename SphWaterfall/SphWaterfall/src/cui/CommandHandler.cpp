@@ -183,7 +183,7 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			break;
 		case CUICommand::SIMULATE:
 			if (cui_command.hasParameter("-t")) {
-				simulation_timesteps = round(parseToInteger(cui_command.getParameter(0).getValue()) / TIMESTEP_DURATION);
+				simulation_timesteps = round(parseToDouble(cui_command.getParameter(0).getValue()) / TIMESTEP_DURATION);
 			}
 			else {
 				simulation_timesteps = round(simulation_time / TIMESTEP_DURATION);
@@ -359,12 +359,12 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 
 void CommandHandler::addSource(std::string source_position_string) {
 	Vector3 source_position = parseToVector3(source_position_string);
-	sph_manager.setSource(source_position);
+	//sph_manager.setSource(source_position);
 	std::cout << "New source: " << source_position << std::endl;
 }
 
 void CommandHandler::addSink(std::string sink_height_string) {
 	double sink_height = parseToDouble(sink_height_string);
-	sph_manager.setSink(sink_height);
+	//sph_manager.setSink(sink_height);
 	std::cout << "New sink height: " << sink_height << std::endl;
 }

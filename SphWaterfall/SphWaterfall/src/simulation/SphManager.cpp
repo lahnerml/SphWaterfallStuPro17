@@ -343,11 +343,6 @@ void SphManager::exchangeRimParticles(SphParticle::ParticleType particle_type) {
 	MPI_Barrier(slave_comm);
 }
 
-void SphManager::setSink(double sink_height)
-{
-	this->sink_height = sink_height;
-}
-
 void SphManager::exchangeParticles() {
 	std::unordered_map<int, std::vector<SphParticle>> target_map;
 	std::vector<SphParticle> all_new_particles;
@@ -504,12 +499,12 @@ void SphManager::exportParticles() {
 
 }
 
-void setSink(double sink_height)
+void SphManager::setSink(double sink_height)
 {
-
+	this->sink_height = sink_height;
 }
 
-void setSource(Vector3 source_position)
+void SphManager::setSource(Vector3 source_position)
 {
 
 }
