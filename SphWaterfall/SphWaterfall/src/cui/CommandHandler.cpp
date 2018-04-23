@@ -2,7 +2,7 @@
 
 CommandHandler::CommandHandler(int mpi_rank) : 
 	mpi_rank(mpi_rank),
-	sph_manager(SphManager(Vector3(DOMAIN_DIMENSION, DOMAIN_DIMENSION, DOMAIN_DIMENSION), TIMESTEPS, 0.03)){
+	sph_manager(SphManager(Vector3(DOMAIN_DIMENSION, DOMAIN_DIMENSION, DOMAIN_DIMENSION), TIMESTEPS, STEP_DURATION)){
 }
 
 void CommandHandler::start() {

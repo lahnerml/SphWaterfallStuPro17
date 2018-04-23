@@ -2,8 +2,6 @@
 #include <chrono>
 #include <thread>
 
-#define PRESSURE_CONSTANT 20.0
-
 SphManager::SphManager(const Vector3& domain_dimensions, int number_of_timesteps, double timestep_duration) :
 	domain_dimensions(domain_dimensions),
 	number_of_timesteps(number_of_timesteps),
@@ -184,6 +182,14 @@ void SphManager::update() {
 			index++;
 		}
 	}
+
+	index = 0;
+	for (auto& each_domain : domains) {
+		for (auto& each_particle : each_domain.second.getFluidParticles()) {
+			//filterLocalDensity(each_particle, getNeighbours(index));
+			index++;
+		}
+	}
 	MPI_Barrier(slave_comm);
 	if (mpi_rank == 0) {
 		end = std::chrono::steady_clock::now();
@@ -318,7 +324,8 @@ void SphManager::computeLocalDensity(SphParticle& particle, std::vector<SphParti
 	double local_density = 0.0;
 
 	for (SphParticle& neighbour_particle : neighbours) {
-		local_density += neighbour_particle.mass * kernel->computeKernelValue(particle.position - neighbour_particle.position);
+		Vector3 test = particle.position - neighbour_particle.position;
+		local_density += neighbour_particle.mass * kernel->computeKernelValue(test);
 	}
 
 	if (local_density < FLUID_REFERENCE_DENSITY) {
@@ -329,7 +336,21 @@ void SphManager::computeLocalDensity(SphParticle& particle, std::vector<SphParti
 	}
 }
 
+void SphManager::filterLocalDensity(SphParticle& particle, std::vector<SphParticle>& neighbours) {
+	double shepard_divider = 0.0;
+	for (SphParticle& neighbour_particle : neighbours) {
+		if (neighbour_particle.getParticleType() == SphParticle::FLUID) {
+			Vector3 test = particle.position - neighbour_particle.position;
+			shepard_divider += neighbour_particle.mass / neighbour_particle.local_density * kernel->computeKernelValue(test);
+		}
+	}
+	if (shepard_divider != 0.0) {
+		particle.local_density /= shepard_divider;
+	}
+}
+
 double SphManager::computeLocalPressure(SphParticle& particle) {
+	//return PRESSURE_CONSTANT * (pow(particle.local_density / FLUID_REFERENCE_DENSITY, 7) - 1);
 	return PRESSURE_CONSTANT * (particle.local_density - FLUID_REFERENCE_DENSITY);
 }
 

@@ -9,7 +9,7 @@
 // kernel Influence radius
 #define Q_MAX 1.2
 // smoothing radius 
-#define H 1
+#define H 1.0
 // domain dimesion
 #define DOMAIN_DIMENSION Q_MAX * 2.0
 // minimal density of a particle
@@ -20,12 +20,16 @@
 #define FLUID_MASS 1.0
 // particle mass
 #define STATIC_MASS 2.0
+// reference pressure
+#define PRESSURE_CONSTANT 20.0
 
 // size of the sources cubic spawn are
 #define SOURCE_SIZE  Q_MAX * 4.0
 
 // Number of simulation timesteps
-#define TIMESTEPS 10000
+#define TIMESTEPS 3000
+// timestep duration
+#define STEP_DURATION  0.03
 
 // maximal velocity of a particle
 #define MAX_VELOCITY 50

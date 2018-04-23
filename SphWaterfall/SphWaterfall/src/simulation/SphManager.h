@@ -56,6 +56,7 @@ private:
 	Vector3 computeDensityAcceleration(SphParticle&, std::vector<SphParticle>&);
 	Vector3 computeViscosityAcceleration(SphParticle&, std::vector<SphParticle>&);
 	void computeLocalDensity(SphParticle&, std::vector<SphParticle>&);
+	void filterLocalDensity(SphParticle&, std::vector<SphParticle>&);
 	double computeLocalPressure(SphParticle&);
 
 	void exchangeParticles();
