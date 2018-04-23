@@ -259,11 +259,16 @@ Vector3 SphManager::correctVelocity(SphParticle& particle, Vector3& particle_vel
 	double epsilon = 0.1;
 	Vector3 velocity_correction = Vector3();
 	Vector3 rij;
+	double local_pressure = computeLocalPressure(particle);
+
 	for (SphParticle& neighbour_particle : neighbours) {
-		rij = particle.position - neighbour_particle.position;
-		velocity_correction += (neighbour_particle.mass / (0.5 * (computeLocalPressure(particle) + computeLocalPressure(neighbour_particle)))) *
-			(neighbour_particle.velocity - particle_velocity) *
-			kernel->computeKernelValue(rij);
+		double neighbour_local_pressure = computeLocalPressure(neighbour_particle);
+		if (local_pressure + neighbour_local_pressure > EPSILON) {
+			rij = particle.position - neighbour_particle.position;
+			velocity_correction += (neighbour_particle.mass / (0.5 * (local_pressure + neighbour_local_pressure))) *
+				(neighbour_particle.velocity - particle_velocity) *
+				kernel->computeKernelValue(rij);
+		}
 	}
 
 	return particle_velocity + epsilon * velocity_correction;

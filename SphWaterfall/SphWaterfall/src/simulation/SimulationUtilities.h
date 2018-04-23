@@ -3,6 +3,9 @@
 #include "../data/Vector3.h"
 #include "../data/SphParticle.h"
 
+// for checking if a double is 0
+#define EPSILON 1e-6
+
 // kernel Influence radius
 #define Q_MAX 1.2
 // smoothing radius 
