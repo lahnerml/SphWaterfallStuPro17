@@ -168,7 +168,7 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 	return Shader::applyGaussianSmoothing(frame, 5, 8);
 }
 
-void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
+void Camera::renderGeometryFrames(Terrain terrain, Terrain gate) {
 	const double aspectRatio = (double)width / (double)height;
 	const double l = -1.f *aspectRatio;
 	const double r = +1.f *aspectRatio;
@@ -190,7 +190,7 @@ void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
 			Ray ray = Ray(vec_s, this->location);
 
-			baseFrameOpen.setPixel(x, y, castGeometryRay(ray, terrainOpen));
+			baseFrameOpen.setPixel(x, y, castTerrainRay(ray, terrain));
 		}
 	}
 
@@ -204,7 +204,7 @@ void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
 			Ray ray = Ray(vec_s, this->location);
 
-			baseFrameClosed.setPixel(x, y, castGeometryRay(ray, terrainClosed));
+			baseFrameClosed.setPixel(x, y, castTerrainGateRay(ray, terrain, gate));
 		}
 	}
 
@@ -213,7 +213,7 @@ void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
 	writeFrameToBitmap(baseFrameClosed, "terrain_debug_closed.bmp", baseFrameClosed.getWidth(), baseFrameClosed.getHeight());
 }
 
-Pixel Camera::castGeometryRay(Ray ray, Terrain& terrain) {
+Pixel Camera::castTerrainRay(Ray ray, Terrain& terrain) {
 	double bestDistance = std::numeric_limits<float>::max();
 	int hitIndex = -1;
 
@@ -258,6 +258,65 @@ Pixel Camera::castGeometryRay(Ray ray, Terrain& terrain) {
 
 		return p;
     }
+
+	return initColor;
+}
+
+Pixel Camera::castTerrainGateRay(Ray ray, Terrain& terrain, Terrain& gate) {
+	double bestDistance = std::numeric_limits<float>::max();
+	int hitIndex = -1;
+
+	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
+
+	for (int i = 0; i < terrain.getFaceCount() + gate.getFaceCount(); i++) {
+		double currDist = bestDistance;
+
+		if (i >= terrain.getFaceCount()) {
+			if (intersectsWithFace(ray, gate.getFace(i - terrain.getFaceCount()), currDist)) {
+				if (currDist < bestDistance) {
+					bestDistance = currDist;
+					hitIndex = i;
+				}
+			}
+		}
+		else {
+			if (intersectsWithFace(ray, terrain.getFace(i), currDist)) {
+				if (currDist < bestDistance) {
+					bestDistance = currDist;
+					hitIndex = i;
+				}
+			}
+		}
+	}
+
+	initColor.setBaseDepth(bestDistance);
+
+	//Calculate Light to not have just brown everywhere
+	if (hitIndex >= 0) {
+
+		Vector3 planar1 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).b;
+		Vector3 planar2 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).c;
+
+		//Calculate norm vector
+		Vector3 n = planar1.cross(planar2).normalize();
+
+		Vector3 staticLight = Vector3(0, 200, 0);
+		Vector3 lightToHit = (staticLight - (ray.origin + ray.direction * bestDistance)).normalize();
+
+		//Calculate angle between norm vector of the plane and vector between light and hit point
+		double rad = acos(n.dot(lightToHit) / (n.length() * lightToHit.length()));
+
+		//Check if the angle is more than 180°, if so substract 180°
+		rad = rad > M_PI ? rad - M_PI : rad;
+
+		//Get a factor between 1 and 0; 90° = 0 ; 0° = 180° = 1
+		double factor = 1 - (rad / (M_PI / 2));
+
+		//Darken the pixel based on the factor
+		Pixel p = Pixel(127 * factor, 67 * factor, 67 * factor);
+
+		return p;
+	}
 
 	return initColor;
 }

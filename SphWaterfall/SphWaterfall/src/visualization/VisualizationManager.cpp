@@ -1,11 +1,11 @@
 #include "VisualizationManager.h"
 
-void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight) {
+void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID) {
 	Vector3 cameraDir = (cameraLocation*-1);
 	cameraDir = Vector3(0, 0, 1);
 	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
-	if (terrainOpen.getVertexCount() > 0 && terrainClosed.getVertexCount() > 0) {
-		camera.renderGeometryFrames(terrainOpen, terrainClosed);
+	if (terrain.getVertexCount() > 0 && gate.getVertexCount() > 0) {
+		camera.renderGeometryFrames(terrain, gate);
 	}
 	initilaized = true;
 }
@@ -14,9 +14,9 @@ void VisualizationManager::debugRenderFrame(std::vector<SphParticle> particles, 
 	camera.debugRenderFrame(convertSphParticles(particles));
 }
 
-void VisualizationManager::importTerrain(Terrain t, bool open) {
-	if (open) { terrainOpen = t; }
-	else { terrainClosed = t; }
+void VisualizationManager::importTerrain(Terrain t, bool isGate) {
+	if (isGate) { gate = t; }
+	else { terrain = t; }
 }
 
 void VisualizationManager::renderFrames(string inputFileName) {
@@ -151,5 +151,5 @@ void VisualizationManager::debug() {
 
 bool VisualizationManager::initilaized = false;
 Camera VisualizationManager::camera = Camera();
-Terrain VisualizationManager::terrainOpen = Terrain();
-Terrain VisualizationManager::terrainClosed = Terrain();
+Terrain VisualizationManager::terrain = Terrain();
+Terrain VisualizationManager::gate = Terrain();
