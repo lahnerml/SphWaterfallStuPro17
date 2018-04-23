@@ -8,13 +8,12 @@ SphNeighbourSearch::~SphNeighbourSearch() {
 
 }
 
-std::vector<SphParticle> SphNeighbourSearch::findNeigbours(const Vector3& particle_position, const std::vector<SphParticle>& potential_neighbour_particles) const {
-	std::vector<SphParticle> neighbours = std::vector<SphParticle>();
+std::vector<SphParticle*> SphNeighbourSearch::findNeigbours(const Vector3& particle_position, std::vector<SphParticle*>& potential_neighbour_particles) const {
+	std::vector<SphParticle*> neighbours;
 
-	for (auto each_particle : potential_neighbour_particles) {
-		if (isInInfluentialRadius(particle_position, each_particle.position)) {
+	for (auto& each_particle : potential_neighbour_particles) {
+		if (isInInfluentialRadius(particle_position, (*each_particle).position)) {
 			neighbours.push_back(each_particle);
-
 		}
 	}
 
@@ -30,7 +29,7 @@ std::set<int> SphNeighbourSearch::findRelevantNeighbourDomains(const Vector3& pa
 	for (int x = -1; x <= 1; x++) {
 		for (int y = -1; y <= 1; y++) {
 			for (int z = -1; z <= 1; z++) {
-				testing_point = particle_position + (Vector3(x, y, z).normalize() * Q_MAX);
+				testing_point = particle_position + (Vector3(x, y, z) * Q_MAX);
 				neighbour_domain_ids.insert(computeDomainID(testing_point, dimension));
 			}
 		}

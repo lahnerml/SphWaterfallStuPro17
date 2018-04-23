@@ -34,8 +34,9 @@ private:
 
 	std::unordered_map<int, ParticleDomain> domains;
 	std::unordered_map<int, std::vector<SphParticle>> add_particles_map;
-	std::vector<std::pair<SphParticle, std::vector<SphParticle>>> neighbour_fluid_particles;
-	std::vector<std::pair<SphParticle, std::vector<SphParticle>>> neighbour_static_particles;
+	std::unordered_map<SphParticle::ParticleType, std::unordered_map<int, std::vector<SphParticle*>>> process_map;
+	std::unordered_map<SphParticle::ParticleType, std::unordered_map<int, std::vector<SphParticle>>> incoming;
+	std::vector<std::vector<SphParticle*>> neighbour_particles;
 	std::vector<Vector3> sources;
 
 	ISphKernel* kernel;
@@ -47,17 +48,19 @@ private:
 	void cleanUpFluidParticles();
 	void cleanUpStaticParticles();
 
+	std::vector<SphParticle> getNeighbours(int);
 	void update();
-	bool updateVelocity(SphParticle&);
+	bool updateVelocity(SphParticle&, std::vector<SphParticle>&);
 	void interpolateWithNeighbourVelocities(Vector3&, const std::vector<SphParticle>&);
-	Vector3 computeAcceleration(SphParticle&, std::vector<SphParticle>&, std::vector<SphParticle>&);
-	Vector3 computeDensityAcceleration(SphParticle&, std::vector<SphParticle>&, std::vector<SphParticle>&);
+	Vector3 computeAcceleration(SphParticle&, std::vector<SphParticle>&);
+	Vector3 computeDensityAcceleration(SphParticle&, std::vector<SphParticle>&);
 	Vector3 computeViscosityAcceleration(SphParticle&, std::vector<SphParticle>&);
-	void computeLocalDensity(SphParticle&);
+	void computeLocalDensity(SphParticle&, std::vector<SphParticle>&);
 	double computeLocalPressure(SphParticle&);
 
 	void exchangeParticles();
 	void exchangeRimParticles(SphParticle::ParticleType);
+	void exchangeRimDensity(SphParticle::ParticleType);
 	void spawnSourceParticles();
 
 	ParticleDomain& getParticleDomain(const int&);

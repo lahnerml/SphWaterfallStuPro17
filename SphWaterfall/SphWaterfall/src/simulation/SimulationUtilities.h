@@ -34,6 +34,7 @@
 #define EXPORT_PARTICLES_NUMBER_TAG 3
 #define META_EXCHANGE_TAG 4
 #define META_META_RIM_TAG 5
+#define DENSITY_RIM_TAG 6
 #define RIM_TAG 10
 
 namespace SimulationUtilities {
