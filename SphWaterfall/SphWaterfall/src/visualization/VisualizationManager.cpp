@@ -2,7 +2,6 @@
 
 void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID) {
 	Vector3 cameraDir = (cameraLocation*-1);
-	cameraDir = Vector3(0, 0, 1);
 	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
 	if (terrain.getVertexCount() > 0 && gate.getVertexCount() > 0) {
 		camera.renderGeometryFrames(terrain, gate);
