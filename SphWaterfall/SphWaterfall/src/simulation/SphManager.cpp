@@ -696,7 +696,7 @@ void SphManager::setSink(const double& sink_height) {
 }
 
 void SphManager::addSource(const Vector3& source) {
-	sources.push_back(source);
+	sources.push_back(source - Vector3(0.5, 0.5, 0.5));
 }
 
 const Vector3& SphManager::getDomainDimensions() const {
