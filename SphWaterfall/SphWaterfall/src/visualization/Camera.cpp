@@ -108,7 +108,7 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 	Pixel pixel = Pixel(basePixel.getRedValue(), basePixel.getGreenValue(), basePixel.getRedValue());
 
 	if (waterDepth <= 0) {
-		return basePixel;
+		return pixel;
 	}
 
 	Pixel waterColor = Pixel(30, 30, 170); //Color of "pure water"
