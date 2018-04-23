@@ -343,8 +343,8 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 	if (mpi_rank == 0) {
 		cout << "Rendering in progress..." << endl;
 	}
-	VisualizationManager::importTerrain(loaded_mesh, true);
-	VisualizationManager::importTerrain(loaded_shutter, false);
+	VisualizationManager::importTerrain(loaded_mesh, false);
+	VisualizationManager::importTerrain(loaded_shutter, true);
 
 	VisualizationManager::init(Vector3(10, 5, -20), 200, 200, 10*5);
 	//VisualizationManager::renderFrames("sph.ptcl");
