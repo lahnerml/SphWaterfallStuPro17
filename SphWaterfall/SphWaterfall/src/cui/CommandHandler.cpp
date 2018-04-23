@@ -137,6 +137,7 @@ void CommandHandler::sendCommand(CUICommand& cui_command) {
 void CommandHandler::executeCommand(CUICommand& cui_command) {
 	std::string file_path, time_for_move, source_position, sink_height;
 	int simulation_timesteps;
+	Vector3 camera_position = Vector3(0, 5, -5);
 
 	switch (cui_command.getCommand()) {
 		case CUICommand::LOAD_MESH:
@@ -203,7 +204,11 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::RENDER:
-			render(loaded_mesh, loaded_shutter, 0);
+			if (cui_command.hasParameter("-v")) {
+				camera_position = parseToVector3(cui_command.getParameter(0).getValue());
+			}
+
+			render(loaded_mesh, loaded_shutter, 0, camera_position);
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -326,27 +331,27 @@ void CommandHandler::simulate(int simulation_timesteps) {
 	if (mpi_rank == 1) {
 		std::vector<SphParticle> particles;
 
-		for (int i = 0; i < 20; i++) {
-			for (int j = 0; j < 20; j++) {
-				for (int k = 0; k < 20; k++) {
-					particles.push_back(SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k)));
+		/*for (int i = 0; i < 1; i++) {
+			for (int j = 1; j < 2; j++) {
+				for (int k = 0; k < 1; k++) {
+					particles.push_back(SphParticle(Vector3(i, j, k)));
 				}
 			}
-		}
+		}*/
 
 		sph_manager.add_particles(particles);
 	}
 	sph_manager.simulate(simulation_timesteps);
 }
 
-void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shutter_time) {
+void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shutter_time, Vector3 cameraPosition) {
 	if (mpi_rank == 0) {
 		cout << "Rendering in progress..." << endl;
 	}
 	VisualizationManager::importTerrain(loaded_mesh, false);
 	VisualizationManager::importTerrain(loaded_shutter, true);
 
-	VisualizationManager::init(Vector3(10, 5, -20), 200, 200, 10*5);
+	VisualizationManager::init(cameraPosition, 800, 600, 10*5);
 	//VisualizationManager::renderFrames("sph.ptcl");
 	VisualizationManager::renderFramesDistributed("sph.ptcl", mpi_rank);
 
@@ -360,6 +365,11 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 void CommandHandler::addSource(std::string source_position_string) {
 	Vector3 source_position = parseToVector3(source_position_string);
 	//sph_manager.setSource(source_position);
+	if (mpi_rank == 1) {
+		std::vector<SphParticle> particles;
+		particles.push_back(SphParticle(source_position));
+		sph_manager.add_particles(particles);
+	}
 	std::cout << "New source: " << source_position << std::endl;
 }
 

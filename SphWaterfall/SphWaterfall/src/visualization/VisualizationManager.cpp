@@ -6,6 +6,10 @@ void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth,
 	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
 	if (terrain.getVertexCount() > 0 && gate.getVertexCount() > 0) {
 		camera.renderGeometryFrames(terrain, gate);
+		std::cout << "Terrain rendered" << std::endl;
+	}
+	else {
+		std::cout << "No terrain found" << std::endl;
 	}
 	initilaized = true;
 }
@@ -102,6 +106,7 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 				Frame f = camera.renderFrame(frame, i);
 
 				writeFrameToBitmap(f, (("output/frame_" + std::to_string(i)) + ".bmp").c_str(), f.getWidth(), f.getHeight());
+				std::cout << "Frame " << i+1 << "/" << frameCount << " finished on Processor " << rank << "." << std::endl;
 				counter++;
 			}
 		}

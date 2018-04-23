@@ -127,8 +127,10 @@ void CUI::cleanAndExecuteCommand(bool is_config_execution, bool& exit_program) {
 	}
 	else if (command == "render")
 	{
-		current_command.setCommand(CUICommand::RENDER);
-		command_handler.handleCUICommand(current_command);
+		if (cleanRender()) {
+			current_command.setCommand(CUICommand::RENDER);
+			command_handler.handleCUICommand(current_command);
+		}
 		printInputMessage();
 	}
 	else if (command == "loadconfig")
@@ -216,8 +218,8 @@ void CUI::showHelp() {
 		<< "   simulate -t" << endl
 		<< "      start a sph simulation, time can be set with '-t' parameter." << endl << endl
 
-		<< "   render" << endl
-		<< "      start the rendering process." << endl << endl
+		<< "   render -v" << endl
+		<< "      start the rendering process, the camera can be set with '-v' parameter." << endl << endl
 
 		<< "   addsource -v" << endl
 		<< "      add a water source at a given point." << endl << endl
@@ -298,7 +300,7 @@ bool CUI::cleanMoveShutter() {
 		else {
 			current_command.removeParameter(parameter);
 			hasOnlyValidParameters = false;
-			std::cout << "Missing path parameter '-t'" << std::endl;
+			std::cout << "Missing time parameter '-t'" << std::endl;
 		}
 	}
 
@@ -333,7 +335,7 @@ bool CUI::cleanAddSource() {
 		else {
 			current_command.removeParameter(parameter);
 			hasOnlyValidParameters = false;
-			std::cout << "Missing path parameter '-v'" << std::endl;
+			std::cout << "Missing vector parameter '-v'" << std::endl;
 		}
 	}
 
@@ -355,7 +357,7 @@ bool CUI::cleanAddSink() {
 		{
 			current_command.removeParameter(parameter);
 			hasOnlyValidParameters = false;
-			std::cout << "Missing path parameter '-h'" << std::endl;
+			std::cout << "Missing height parameter '-h'" << std::endl;
 		}
 	}
 
@@ -371,6 +373,39 @@ bool CUI::cleanSimulate() {
 			if (time_for_move.find_first_not_of(",.0123456789") != std::string::npos) {
 				current_command.removeParameter(parameter);
 				std::cout << "'" << parameter.getValue() << "' is not a number" << std::endl;
+			}
+		}
+		else {
+			current_command.removeParameter(parameter);
+		}
+	}
+
+	return hasOnlyValidParameters;
+}
+bool CUI::cleanRender()
+{
+	bool hasOnlyValidParameters = true;
+
+	for (CUICommandParameter& parameter : current_command.getParameterList()) {
+		if (parameter.getParameterName() == "-v") {
+			std::string source_position = parameter.getValue();
+
+			if (source_position.find_first_not_of("+-,.0123456789 ") != std::string::npos)
+			{
+				std::cout << "'" << source_position << "' is not a valid input" << std::endl;
+				hasOnlyValidParameters = false;
+			}
+
+			int spaces = 0;
+			for (char character : source_position) {
+				if (character == ' ') {
+					spaces++;
+				}
+			}
+
+			if (spaces != 2) {
+				std::cout << "'" << source_position << "' is not a valid input" << std::endl;
+				hasOnlyValidParameters = false;
 			}
 		}
 		else {

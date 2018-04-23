@@ -19,7 +19,7 @@ const int infoHeaderSize = 40;
 
 
 static Vector3 findRightSkalar(Vector3 vec, Vector3 right) {
-	Vector3 left = Vector3(right.x * -1, right.y * -1, right.z * -1);
+	Vector3 left = right * -1;
 
 	if (vec.x >= 0) {
 		if ((vec.z > 0 && right.x < 0) || (vec.z < 0 && right.x > 0) || (vec.z == 0 && right.z > 0)) return left;

@@ -40,7 +40,7 @@ class CommandHandler {
 		void createExport(int simulation_timesteps);
 		void moveShutter(std::string);
 		void simulate(int simulation_timesteps);
-		void render(Terrain, Terrain, int);
+		void render(Terrain, Terrain, int, Vector3);
 		void addSource(std::string);
 		void addSink(std::string);
 };

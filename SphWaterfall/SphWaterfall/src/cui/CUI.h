@@ -35,4 +35,5 @@ class CUI {
 		bool cleanAddSource();
 		bool cleanAddSink();
 		bool cleanSimulate();
+		bool cleanRender();
 };
