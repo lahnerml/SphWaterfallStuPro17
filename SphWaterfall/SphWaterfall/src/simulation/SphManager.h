@@ -18,6 +18,8 @@ public:
 	void simulate(int number_of_timesteps);
 	void add_particles(const std::vector<SphParticle>&);
 	void exportParticles();
+	void setSink(double sink_height);
+	void setSource(Vector3 source_position);
 
 private:
 	int mpi_rank;

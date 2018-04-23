@@ -503,3 +503,13 @@ void SphManager::exportParticles() {
 	}
 
 }
+
+void setSink(double sink_height)
+{
+
+}
+
+void setSource(Vector3 source_position)
+{
+
+}
