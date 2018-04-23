@@ -239,6 +239,7 @@ void SphManager::update() {
 bool SphManager::updateVelocity(SphParticle& particle, std::vector<SphParticle>& neighbours) {
 	Vector3 accelleration_timestep_start = computeAcceleration(particle, neighbours);
 	particle.velocity += (half_timestep_duration * accelleration_timestep_start);
+	particle.velocity = correctVelocity(particle, particle.velocity, neighbours);
 
 	if (particle.velocity.length() > MAX_VELOCITY) {
 		particle.velocity = particle.velocity.normalize() * MAX_VELOCITY;
@@ -248,25 +249,24 @@ bool SphManager::updateVelocity(SphParticle& particle, std::vector<SphParticle>&
 
 	Vector3 accelleration_timestep_half = computeAcceleration(particle, neighbours);
 	Vector3 velocity_timestep_end = particle.velocity + (timestep_duration * accelleration_timestep_half);
+	velocity_timestep_end = correctVelocity(particle, velocity_timestep_end, neighbours);
 
 	particle.position = position_timestep_half + (half_timestep_duration * velocity_timestep_end);
 	return particle.position.y <= sink_height;
 }
 
-void SphManager::interpolateWithNeighbourVelocities(Vector3& particle_velocity_vector, const std::vector<SphParticle>& fluid_neighbours) {
-	double particle_velocity = particle_velocity_vector.length();
-	double average_velocity = 0.0;
-	for (const SphParticle& neighbour_particle : fluid_neighbours) {
-		average_velocity += neighbour_particle.velocity.length();
+Vector3 SphManager::correctVelocity(SphParticle& particle, Vector3& particle_velocity, std::vector<SphParticle>& neighbours) {
+	double epsilon = 0.1;
+	Vector3 velocity_correction = Vector3();
+	Vector3 rij;
+	for (SphParticle& neighbour_particle : neighbours) {
+		rij = particle.position - neighbour_particle.position;
+		velocity_correction += (neighbour_particle.mass / (0.5 * (computeLocalPressure(particle) + computeLocalPressure(neighbour_particle)))) *
+			(neighbour_particle.velocity - particle_velocity) *
+			kernel->computeKernelValue(rij);
 	}
-	average_velocity = average_velocity / fluid_neighbours.size();
 
-	if (particle_velocity > 0.0) {
-		double velocity_ratio = (average_velocity / particle_velocity) * 2;
-		if (velocity_ratio < 1) {
-			particle_velocity_vector = particle_velocity_vector * velocity_ratio;
-		}
-	}
+	return particle_velocity + epsilon * velocity_correction;
 }
 
 Vector3 SphManager::computeAcceleration(SphParticle& particle, std::vector<SphParticle>& neighbours) {

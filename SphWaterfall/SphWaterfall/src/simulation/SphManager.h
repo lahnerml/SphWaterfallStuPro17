@@ -51,7 +51,7 @@ private:
 	std::vector<SphParticle> getNeighbours(int);
 	void update();
 	bool updateVelocity(SphParticle&, std::vector<SphParticle>&);
-	void interpolateWithNeighbourVelocities(Vector3&, const std::vector<SphParticle>&);
+	Vector3 correctVelocity(SphParticle&, Vector3&, std::vector<SphParticle>&);
 	Vector3 computeAcceleration(SphParticle&, std::vector<SphParticle>&);
 	Vector3 computeDensityAcceleration(SphParticle&, std::vector<SphParticle>&);
 	Vector3 computeViscosityAcceleration(SphParticle&, std::vector<SphParticle>&);
