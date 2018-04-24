@@ -14,9 +14,10 @@ public:
 	size_t getFaceCount();
 
 	Vector3 getVertex(int);
-	Face getFace(int);
+	Face& getFace(int);
 
 private:
 	std::vector<Vector3> vertices;
 	std::vector<Face> faces;
+	Face nullFace;
 };

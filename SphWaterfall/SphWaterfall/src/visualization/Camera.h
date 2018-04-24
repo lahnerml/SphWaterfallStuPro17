@@ -35,11 +35,11 @@ public:
 
 private:
 
-	Pixel castDebugRay(Ray ray, std::vector<DebugObject> particles);
-	Pixel castTerrainRay(Ray ray, Terrain& terrain);
-	Pixel castTerrainGateRay(Ray ray, Terrain& terrain, Terrain& gate);
+	Pixel castDebugRay(Ray& ray, std::vector<DebugObject> particles);
+	Pixel castTerrainRay(Ray& ray, Terrain& terrain);
+	Pixel castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate);
 
-	Pixel castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixel basePixel);
+	Pixel castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pixel basePixel);
 
 	Frame& getCurrentlyUsedBaseFrame(unsigned int frameID);
 

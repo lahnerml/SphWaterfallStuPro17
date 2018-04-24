@@ -2,7 +2,7 @@
 
 
 Terrain::Terrain(std::vector<Vector3> &vertices, std::vector<Vector3> &normals, std::vector<int> &faces) :
-	vertices(vertices)
+	vertices(vertices), nullFace(Face())
 {
 	for(int i = 0; i < faces.size(); i++)
 	{
@@ -16,7 +16,8 @@ Terrain::Terrain(std::vector<Vector3> &vertices, std::vector<Vector3> &normals, 
 
 Terrain::Terrain() :
 	vertices(std::vector<Vector3>()),
-	faces(std::vector<Face>())
+	faces(std::vector<Face>()),
+	nullFace(Face())
 {
 }
 
@@ -40,10 +41,10 @@ Vector3 Terrain::getVertex(int index)
 	return this->vertices[index];
 }
 
-Face Terrain::getFace(int faceId)
+Face& Terrain::getFace(int faceId)
 {
 	if (faceId < 0 || faceId >= this->faces.size())
-		return Face();
+		return nullFace;
 
 	return this->faces[faceId];
 }

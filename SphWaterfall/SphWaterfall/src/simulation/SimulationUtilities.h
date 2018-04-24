@@ -24,7 +24,7 @@
 #define PRESSURE_CONSTANT 20.0
 
 // size of the sources cubic spawn are
-#define SOURCE_SIZE  Q_MAX * 4.0
+#define SOURCE_SIZE  Q_MAX * 2.0
 
 // maximal velocity of a particle
 #define MAX_VELOCITY 50

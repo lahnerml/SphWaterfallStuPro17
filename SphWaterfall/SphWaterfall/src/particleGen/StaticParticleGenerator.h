@@ -25,6 +25,5 @@ public:
 	static void detectDuplicate(SphParticle, SphParticle);
 	static void removeDuplicate(SphParticle, SphParticle);
 private:
-	static SphParticle generateMoonParticle(Vector3, double, SphParticle::ParticleType);
 };
 

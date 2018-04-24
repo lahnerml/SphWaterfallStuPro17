@@ -59,7 +59,7 @@ void Camera::debugRenderFrame(std::vector<DebugObject> particles) {
 	this->outputDebugFrame(frame, "debug_output.bmp");
 }
 
-Pixel Camera::castDebugRay(Ray ray, std::vector<DebugObject> particles) {
+Pixel Camera::castDebugRay(Ray& ray, std::vector<DebugObject> particles) {
 	double bestDistance = std::numeric_limits<float>::max();
 	double waterDepth = 0;
 	DebugObject hitObject;
@@ -82,7 +82,7 @@ Pixel Camera::castDebugRay(Ray ray, std::vector<DebugObject> particles) {
 	return hit == nullptr ? Pixel(0, 0, 0) : Pixel(0, 255, 0);
 }
 
-Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixel basePixel) {
+Pixel Camera::castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pixel basePixel) {
 	double bestDistance = std::numeric_limits<float>::max();
 	double waterDepth = 0;
 	ParticleObject hitObject;
@@ -213,7 +213,7 @@ void Camera::renderGeometryFrames(Terrain terrain, Terrain gate) {
 	writeFrameToBitmap(baseFrameClosed, "terrain_debug_closed.bmp", baseFrameClosed.getWidth(), baseFrameClosed.getHeight());
 }
 
-Pixel Camera::castTerrainRay(Ray ray, Terrain& terrain) {
+Pixel Camera::castTerrainRay(Ray& ray, Terrain& terrain) {
 	double bestDistance = std::numeric_limits<float>::max();
 	int hitIndex = -1;
 
@@ -262,7 +262,7 @@ Pixel Camera::castTerrainRay(Ray ray, Terrain& terrain) {
 	return initColor;
 }
 
-Pixel Camera::castTerrainGateRay(Ray ray, Terrain& terrain, Terrain& gate) {
+Pixel Camera::castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate) {
 	double bestDistance = std::numeric_limits<float>::max();
 	int hitIndex = -1;
 

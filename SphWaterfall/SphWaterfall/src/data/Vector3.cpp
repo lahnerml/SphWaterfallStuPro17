@@ -112,6 +112,20 @@ Vector3 Vector3::distanceTo(const Vector3& v, const Vector3& v1) {
 	return Vector3(abs(v.x - v1.x), abs(v.y - v1.y), abs(v.z - v1.z));
 }
 
+Vector3 Vector3::perpendicular(const Vector3& v)
+{
+	return Vector3::perpendicular(*this, v);
+}
+
+Vector3 Vector3::perpendicular(const Vector3& u, const Vector3& v)
+{
+	double x, y, z;
+	z = 1;
+	x = (z*((u.z*v.y) - (u.y*v.z))) / ((u.y*v.x) - (u.x*v.y));
+	y = (z*((u.z*v.x) - (u.x*v.z))) / ((u.x*v.y) - (u.y*v.x));
+	return Vector3(x, y, z).normalize();
+}
+
 double Vector3::dot(const Vector3& a) const {
 	return this->x * a.x + this->y * a.y + this->z * a.z;
 }

@@ -711,7 +711,7 @@ void SphManager::setSink(const double& sink_height) {
 }
 
 void SphManager::addSource(const Vector3& source) {
-	sources.push_back(source - Vector3(1, 1, 1));
+	sources.push_back(source);
 }
 
 void SphManager::setShutterTimestep(int shutter_timestep)
