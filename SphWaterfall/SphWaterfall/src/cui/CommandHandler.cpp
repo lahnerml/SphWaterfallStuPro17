@@ -327,7 +327,23 @@ void CommandHandler::createExport(int simulation_timesteps) {
 }
 
 void CommandHandler::moveShutter(std::string shutter_move_param) {
-	int shutter_move_frame = parseToInteger(shutter_move_param);
+	int worldSize;
+	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+	int shutter_move_frame;
+	
+	if (mpi_rank == 0) {
+		shutter_move_frame = round(parseToDouble(shutter_move_param) / TIMESTEP_DURATION);
+
+		for (int i = 1; i < worldSize; i++) {
+			MPI_Send(&shutter_move_frame, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+		}
+	}
+	else {
+		MPI_Recv(&shutter_move_frame, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}
+
+	sph_manager.setShutterTimestep(shutter_move_frame);
+	VisualizationManager::setSwitchFrame(shutter_move_frame);
 	std::cout << "Shutter opening at frame: " << shutter_move_frame << std::endl;
 }
 
@@ -355,7 +371,7 @@ void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shu
 	VisualizationManager::importTerrain(loaded_mesh, false);
 	VisualizationManager::importTerrain(loaded_shutter, true);
 
-	VisualizationManager::init(cameraPosition, 800, 600, 10*5, mpi_rank);
+	VisualizationManager::init(cameraPosition, 800, 600, mpi_rank);
 	//VisualizationManager::renderFrames("sph.ptcl");
 	VisualizationManager::renderFramesDistributed("sph.ptcl", mpi_rank);
 

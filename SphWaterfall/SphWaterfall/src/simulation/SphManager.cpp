@@ -46,6 +46,14 @@ void SphManager::cleanUpStaticParticles() {
 	}
 }
 
+void SphManager::cleanUpShutterParticles()
+{
+	for (auto& each_domain : domains) {
+		each_domain.second.clearParticles(SphParticle::SHUTTER);
+		each_domain.second.clearNeighbourRimParticles(SphParticle::SHUTTER);
+	}
+}
+
 void SphManager::simulate(int number_of_timesteps) {
 	MPI_Comm_rank(slave_comm, &mpi_rank);
 
@@ -73,6 +81,13 @@ void SphManager::simulate(int number_of_timesteps) {
 
 	std::cout << number_of_timesteps << std::endl;
 	for (int simulation_timestep = 1; simulation_timestep <= number_of_timesteps; simulation_timestep++) {
+		if (simulation_timestep == this->shutter_timestep) {
+			//Remove shutter particles
+			MPI_Barrier(slave_comm);
+			cleanUpShutterParticles();
+			std::cout << "Opened shutter in timestep " << simulation_timestep << std::endl;
+		}
+
 		if (mpi_rank == 0) {
 			begin = std::chrono::steady_clock::now();
 		}
@@ -630,7 +645,7 @@ void SphManager::spawnSourceParticles() {
 	auto random = std::bind(distribution, generator);
 
 	for (auto& each_source : sources) {
-		new_particles.push_back(SphParticle(each_source + Vector3(random(), random(), random())));
+		new_particles.push_back(SphParticle(each_source + (2 * Vector3(random(), random(), random()))));
 	}
 
 	add_particles(new_particles);
@@ -696,7 +711,12 @@ void SphManager::setSink(const double& sink_height) {
 }
 
 void SphManager::addSource(const Vector3& source) {
-	sources.push_back(source - Vector3(0.5, 0.5, 0.5));
+	sources.push_back(source - Vector3(1, 1, 1));
+}
+
+void SphManager::setShutterTimestep(int shutter_timestep)
+{
+	this->shutter_timestep = shutter_timestep;
 }
 
 const Vector3& SphManager::getDomainDimensions() const {

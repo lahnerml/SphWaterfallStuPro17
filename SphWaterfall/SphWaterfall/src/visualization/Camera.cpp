@@ -14,14 +14,14 @@ Camera::Camera() {
 	baseFrameClosed = Frame(this->width, this->height);
 }
 
-Camera::Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height) {
+Camera::Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height, int switch_frame) {
 	this->width = width;
 	this->height = height;
 	
 	this->location = location;
 	this->direction = direction;
 
-	this->switchFrameID = std::numeric_limits<unsigned int>::max();
+	this->switchFrameID = switch_frame;
 
 	baseFrameOpen = Frame(this->width, this->height);
 	baseFrameClosed = Frame(this->width, this->height);

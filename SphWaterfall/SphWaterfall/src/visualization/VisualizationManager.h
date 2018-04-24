@@ -9,9 +9,11 @@
 
 class VisualizationManager {
 public:
-	static void init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID, int rank);
+	static void init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int rank);
 
 	static void importTerrain(Terrain t, bool isGate);
+
+	static void setSwitchFrame(int switch_frame);
 
 	static void debugRenderFrame(std::vector<SphParticle> particles, string fileName);
 
@@ -31,4 +33,5 @@ private:
 	static Camera camera;
 	static Terrain terrain;
 	static Terrain gate;
+	static int switch_frame;
 };

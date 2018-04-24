@@ -294,7 +294,7 @@ bool CUI::cleanMoveShutter() {
 	for (CUICommandParameter& parameter : current_command.getParameterList()) {
 		if (parameter.getParameterName() == "-t") {
 			std::string time_for_move = parameter.getValue();
-			if (time_for_move.find_first_not_of("0123456789") != std::string::npos) {
+			if (time_for_move.find_first_not_of(",.0123456789") != std::string::npos) {
 				hasOnlyValidParameters = false;
 				std::cout << "'" << parameter.getValue() << "' is not a number" << std::endl;
 			}

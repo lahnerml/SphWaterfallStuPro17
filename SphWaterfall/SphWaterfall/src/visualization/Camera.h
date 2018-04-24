@@ -15,7 +15,7 @@
 class Camera {
 public:
 	Camera();
-	Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height);
+	Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height, int switch_frame);
 
 	//Renders a frame based on debug object # Green on Black
 	void debugRenderFrame(std::vector<DebugObject> particles);

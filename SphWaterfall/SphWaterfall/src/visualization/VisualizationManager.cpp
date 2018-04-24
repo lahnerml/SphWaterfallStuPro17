@@ -1,8 +1,8 @@
 #include "VisualizationManager.h"
 
-void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int switchFrameID, int rank) {
+void VisualizationManager::init(Vector3 cameraLocation, unsigned int frameWidth, unsigned int frameHeight, int rank) {
 	Vector3 cameraDir = Vector3(-cameraLocation.x, -cameraLocation.y / 2, -cameraLocation.z);
-	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight);
+	camera = Camera(cameraLocation, cameraDir.normalize(), frameWidth, frameHeight, VisualizationManager::switch_frame);
 	if (rank == 0) {
 		if (terrain.getVertexCount() > 0 && gate.getVertexCount() > 0) {
 			camera.renderGeometryFrames(terrain, gate);
@@ -23,6 +23,11 @@ void VisualizationManager::debugRenderFrame(std::vector<SphParticle> particles, 
 void VisualizationManager::importTerrain(Terrain t, bool isGate) {
 	if (isGate) { gate = t; }
 	else { terrain = t; }
+}
+
+void VisualizationManager::setSwitchFrame(int switch_frame)
+{
+	VisualizationManager::switch_frame = switch_frame;
 }
 
 void VisualizationManager::renderFrames(string inputFileName) {
@@ -160,3 +165,4 @@ bool VisualizationManager::initilaized = false;
 Camera VisualizationManager::camera = Camera();
 Terrain VisualizationManager::terrain = Terrain();
 Terrain VisualizationManager::gate = Terrain();
+int VisualizationManager::switch_frame = std::numeric_limits<unsigned int>::max();

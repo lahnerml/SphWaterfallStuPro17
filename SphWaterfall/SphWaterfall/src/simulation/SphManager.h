@@ -22,6 +22,7 @@ public:
 	void exportParticles();
 	void setSink(const double&);
 	void addSource(const Vector3&);
+	void setShutterTimestep(int shutter_timestep);
 	const Vector3& getDomainDimensions() const;
 
 private:
@@ -30,6 +31,7 @@ private:
 	double sink_height;
 	double half_timestep_duration;
 	Vector3 const gravity_acceleration;
+	int shutter_timestep;
 
 	std::unordered_map<int, ParticleDomain> domains;
 	std::unordered_map<int, std::vector<SphParticle>> add_particles_map;
@@ -46,6 +48,7 @@ private:
 	void cleanUpAllParticles();
 	void cleanUpFluidParticles();
 	void cleanUpStaticParticles();
+	void cleanUpShutterParticles();
 
 	std::vector<SphParticle> getNeighbours(int);
 	void update();
