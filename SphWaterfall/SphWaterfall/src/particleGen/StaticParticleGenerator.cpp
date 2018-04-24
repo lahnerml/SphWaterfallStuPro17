@@ -155,8 +155,7 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
 
 			particlePosition = face.a + ((face.b - face.a) * x_perc) + ((face.c - face.a) * y_perc);
 			generatedParticles.push_back(SphParticle(particlePosition, SphParticle::STATIC));
-			//std::cout << particlePosition << std::endl;
-			//TODO Debug output
+			generatedParticles.push_back(generateMoonParticle(particlePosition, particleDensity, type));
 		}
 
 		uneven = !uneven;
@@ -183,4 +182,13 @@ void StaticParticleGenerator::detectDuplicate(SphParticle a, SphParticle b) {
 
 void StaticParticleGenerator::removeDuplicate(SphParticle a, SphParticle b) {
 	
+}
+
+SphParticle StaticParticleGenerator::generateMoonParticle(Vector3 particle_position, double particle_density, SphParticle::ParticleType particle_type)
+{
+	std::random_device rd;
+	std::default_random_engine generator(rd());
+	std::uniform_real_distribution<double> distribution(-particle_density / 2, particle_density / 2);
+	auto random = std::bind(distribution, generator);
+	return SphParticle(Vector3(particle_position.x + random(), particle_position.y + random(), particle_position.z + random()), particle_type);
 }

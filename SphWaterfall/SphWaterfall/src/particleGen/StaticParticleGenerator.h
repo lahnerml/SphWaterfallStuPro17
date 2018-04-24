@@ -8,6 +8,8 @@
 #include "../data/Vector3.h"
 #include "../simulation/SphManager.h"
 
+#include <random>
+
 class StaticParticleGenerator {
 public:
 	StaticParticleGenerator();
@@ -23,5 +25,6 @@ public:
 	static void detectDuplicate(SphParticle, SphParticle);
 	static void removeDuplicate(SphParticle, SphParticle);
 private:
+	static SphParticle generateMoonParticle(Vector3, double, SphParticle::ParticleType);
 };
 
