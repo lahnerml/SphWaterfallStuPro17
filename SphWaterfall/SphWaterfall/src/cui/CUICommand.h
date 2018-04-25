@@ -15,10 +15,10 @@ class CUICommand {
 			LOAD_SHUTTER,
 			GENERATE_PARTICLES,
 			MOVE_SHUTTER,
-			SIMULATE,
-			RENDER,
 			ADD_SOURCE,
-			ADD_SINK
+			ADD_SINK,
+			SIMULATE,
+			RENDER
 		};
 
 		CUICommand();

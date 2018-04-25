@@ -23,6 +23,7 @@ class CUI {
 		void parseCommand(std::string);
 		void cleanAndExecuteCommand(bool, bool&);
 
+		
 		void trim(std::string& string);
 		std::string trimQuotemarks(std::string string);
 

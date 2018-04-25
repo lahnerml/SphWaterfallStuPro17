@@ -192,7 +192,7 @@ void CUI::showHelp() {
 
 		<< "Flags:" << endl
 		<< "   -p | file path to the file you want to load " << endl
-		<< "   -t | defines at what time a command specific event occurs  " << endl
+		<< "   -t | defines at what time (in sonconds) a command specific event occurs" << endl
 		<< "      | simulate: simulation time" << endl
 		<< "      | moveshutter: time at which the shutter is moved" << endl
 		<< "   -v | followed by 3 numbers x y z, who stand for the coordinates of a point in 3D space" << endl
@@ -200,40 +200,40 @@ void CUI::showHelp() {
 
 		<< "Commands:" << endl
 		<< "   print" << endl
-		<< "      echo the give input." << endl << endl
+		<< "      Echo the give input. Mainly for config files." << endl << endl
 
 		<< "   loadconfig -p" << endl
-		<< "      load a configuration from a given file path, the file has to ba a .cfg-file." << endl << endl
+		<< "      Load a configuration from a given file path. The file has to be a .cfg-file." << endl << endl
 
 		<< "   loadmesh -p" << endl
-		<< "      load a mesh from a give file path, the mash has to be a .obj-file." << endl << endl
+		<< "      Load a mesh from a give file path. The mesh has to be a .obj-file." << endl << endl
 
 		<< "   loadshutter -p" << endl
-		<< "      load a shutter mesh from a give file path, the mash has to be a .obj-file." << endl << endl
+		<< "      Load a shutter mesh from a give file path. The mesh has to be a .obj-file." << endl << endl
 		
 		<< "   moveshutter -t" << endl
-		<< "      set the time at which the shutter will move." << endl << endl
+		<< "      Set the time at which the shutter will move." << endl << endl
 
 		<< "   particlegen" << endl
-		<< "      generate wall particles on the loaded mesh and shutter." << endl << endl
-
-		<< "   simulate -t" << endl
-		<< "      start a sph simulation, time can be set with '-t' parameter." << endl << endl
-
-		<< "   render -v" << endl
-		<< "      start the rendering process, the camera can be set with '-v' parameter." << endl << endl
+		<< "      Generate wall particles on the loaded mesh and shutter." << endl << endl
 
 		<< "   addsource -v" << endl
-		<< "      add a water source at a given point." << endl << endl
+		<< "      Add a water source at a given point. Multiple sources may be used." << endl << endl
 
 		<< "   addsink -h" << endl
-		<< "      add a senk at a given height" << endl << endl
+		<< "      Add a senk at a given height" << endl << endl
+
+		<< "   simulate -t" << endl
+		<< "      Start a sph-simulation. Time can be set with '-t' parameter." << endl << endl
+
+		<< "   render -v" << endl
+		<< "      Start the rendering process. The camera position can be set with '-v' parameter. Camera is looking roughly towards (0,0,0)." << endl << endl
 
 		<< "   help" << endl
-		<< "      show help" << endl << endl
+		<< "      Show help" << endl << endl
 
 		<< "   exit" << endl
-		<< "      quit the application" << endl << endl;
+		<< "      Quit the application" << endl << endl;
 }
 
 void CUI::loadConfig() {

@@ -278,13 +278,12 @@ Terrain CommandHandler::loadMesh(std::string file_path) {
 }
 
 void CommandHandler::generateParticles(Terrain& loaded_mesh, SphParticle::ParticleType particle_type) {
-	StaticParticleGenerator static_particle_generator;
 
 	if (mpi_rank == 0) {
-		static_particle_generator.sendAndGenerate(loaded_mesh, particle_type);
+		StaticParticleGenerator::sendAndGenerate(loaded_mesh, particle_type);
 	}
 	else {
-		static_particle_generator.receiveAndGenerate(sph_manager, particle_type);
+		StaticParticleGenerator::receiveAndGenerate(sph_manager, particle_type);
 	}
 }
 

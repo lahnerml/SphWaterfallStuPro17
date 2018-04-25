@@ -120,6 +120,7 @@ Vector3 Vector3::perpendicular(const Vector3& v)
 Vector3 Vector3::perpendicular(const Vector3& u, const Vector3& v)
 {
 	double x, y, z;
+	//Vector will be normalized, so z won't matter
 	z = 1;
 	x = (z*((u.z*v.y) - (u.y*v.z))) / ((u.y*v.x) - (u.x*v.y));
 	y = (z*((u.z*v.x) - (u.x*v.z))) / ((u.x*v.y) - (u.y*v.x));
