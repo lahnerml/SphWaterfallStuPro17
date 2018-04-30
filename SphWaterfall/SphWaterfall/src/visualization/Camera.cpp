@@ -84,7 +84,7 @@ Pixel Camera::castDebugRay(Ray& ray, std::vector<DebugObject> particles) {
 
 Pixel Camera::castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pixel basePixel) {
 	double bestDistance = std::numeric_limits<float>::max();
-	double waterDepth = 0;
+	double waterDepth = -0.2;
 	ParticleObject hitObject;
 	ParticleObject *hit = &hitObject;
 	hit = nullptr;
@@ -105,7 +105,7 @@ Pixel Camera::castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pix
 	waterDepth = waterDepth > 15 ? 15 : waterDepth; //Cap waterDepth at 15
 
 	//Copy the pixel from the base Frame
-	Pixel pixel = Pixel(basePixel.getRedValue(), basePixel.getGreenValue(), basePixel.getRedValue());
+	Pixel pixel = Pixel(basePixel.getRedValue(), basePixel.getGreenValue(), basePixel.getBlueValue());
 
 	if (waterDepth <= 0) {
 		return pixel;
@@ -113,9 +113,11 @@ Pixel Camera::castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pix
 
 	Pixel waterColor = Pixel(30, 30, 170); //Color of "pure water"
 	pixel.setShaderUsage(true);
+
 	//Shade the pixel depending on water depth
 	if (hit != nullptr) {
 	//New Shading, should work smiliar to alpha
+		
 		int diffR = waterColor.getRedValue() - pixel.getRedValue();
 		int diffG = waterColor.getGreenValue() - pixel.getGreenValue();
 		int diffB = waterColor.getBlueValue() - pixel.getBlueValue();
@@ -129,6 +131,7 @@ Pixel Camera::castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pix
 		pixel.setRed((unsigned short)newR);
 		pixel.setGreen((unsigned short)newG);
 		pixel.setBlue((unsigned short)newB);
+		
 	}
 
 	return pixel;
@@ -157,15 +160,14 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 
 			//Ray Direction Vector
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
-			Ray ray = Ray(vec_s, this->location);
+			Ray ray = Ray(vec_s.normalize(), this->location);
 
 			//Set pixel in Frame
-			frame.setPixel(x, y, castVolumeRay(ray, particles, getCurrentlyUsedBaseFrame(frameID).getPixel(x, y)));
-			
+			frame.setPixel(x, y, castVolumeRay(ray, particles, getCurrentlyUsedBaseFrame(frameID).getPixel(x, y)));	
 		}
 	}
 
-	return Shader::applyGaussianSmoothing(frame, 5, 8);
+	return frame;// Shader::applyGaussianSmoothing(frame, 5, 8);
 }
 
 void Camera::renderGeometryFrames(Terrain terrain, Terrain gate) {
@@ -188,7 +190,7 @@ void Camera::renderGeometryFrames(Terrain terrain, Terrain gate) {
 			double v = t + (b - t) * (y + 0.5f) / this->height;
 
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
-			Ray ray = Ray(vec_s, this->location);
+			Ray ray = Ray(vec_s.normalize(), this->location);
 
 			baseFrameOpen.setPixel(x, y, castTerrainRay(ray, terrain));
 		}
@@ -202,7 +204,7 @@ void Camera::renderGeometryFrames(Terrain terrain, Terrain gate) {
 			double v = t + (b - t) * (y + 0.5f) / this->height;
 
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
-			Ray ray = Ray(vec_s, this->location);
+			Ray ray = Ray(vec_s.normalize(), this->location);
 
 			baseFrameClosed.setPixel(x, y, castTerrainGateRay(ray, terrain, gate));
 		}
@@ -251,10 +253,11 @@ Pixel Camera::castTerrainRay(Ray& ray, Terrain& terrain) {
 		rad = rad > M_PI ? rad - M_PI : rad;
 
 		//Get a factor between 1 and 0; 90° = 0 ; 0° = 180° = 1
-		double factor = 1 - (rad / (M_PI / 2));
+		double factor = 1 - std::fmax(std::fmin(rad / (M_PI / 2), 1), 0);
 
 		//Darken the pixel based on the factor
 		Pixel p = Pixel(127 * factor, 67 * factor, 67 * factor);
+		p.setBaseDepth(bestDistance);
 
 		return p;
     }
@@ -268,7 +271,7 @@ Pixel Camera::castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate) {
 
 	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
 
-	for (int i = 0; i < terrain.getFaceCount() + gate.getFaceCount(); i++) {
+	for (int i = 0; i <= terrain.getFaceCount() + gate.getFaceCount(); i++) {
 		double currDist = bestDistance;
 
 		if (i >= terrain.getFaceCount()) {
@@ -293,9 +296,17 @@ Pixel Camera::castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate) {
 
 	//Calculate Light to not have just brown everywhere
 	if (hitIndex >= 0) {
+		Vector3 planar1;
+		Vector3 planar2;
 
-		Vector3 planar1 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).b;
-		Vector3 planar2 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).c;
+		if (hitIndex >= terrain.getFaceCount()) {
+			planar1 = gate.getFace(hitIndex - terrain.getFaceCount()).a - gate.getFace(hitIndex - terrain.getFaceCount()).b;
+			planar2 = gate.getFace(hitIndex - terrain.getFaceCount()).a - gate.getFace(hitIndex - terrain.getFaceCount()).c;
+		}
+		else {
+			planar1 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).b;
+			planar2 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).c;
+		}
 
 		//Calculate norm vector
 		Vector3 n = planar1.cross(planar2).normalize();
@@ -307,13 +318,14 @@ Pixel Camera::castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate) {
 		double rad = acos(n.dot(lightToHit) / (n.length() * lightToHit.length()));
 
 		//Check if the angle is more than 180°, if so substract 180°
-		rad = rad > M_PI ? rad - M_PI : rad;
+		rad = rad >= M_PI ? rad - M_PI : rad;
 
 		//Get a factor between 1 and 0; 90° = 0 ; 0° = 180° = 1
-		double factor = 1 - (rad / (M_PI / 2));
+		double factor = 1 - std::fmax(std::fmin(rad / (M_PI / 2), 1), 0);
 
 		//Darken the pixel based on the factor
 		Pixel p = Pixel(127 * factor, 67 * factor, 67 * factor);
+		p.setBaseDepth(bestDistance);
 
 		return p;
 	}
@@ -336,14 +348,15 @@ void Camera::shareBaseFrame(int rank)
 		MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 		for (int i = 1; i < world_size; i++) {
-			Frame::MpiSendFrame(baseFrameOpen, i);
-			Frame::MpiSendFrame(baseFrameClosed, i);
+			Frame::MpiSendFrame(this->baseFrameOpen, i);
+			Frame::MpiSendFrame(this->baseFrameClosed, i);
 		}
 	}
 	else {
 		this->baseFrameOpen = Frame::MpiReceiveFrame(0);
 		this->baseFrameClosed = Frame::MpiReceiveFrame(0);
-		std::cout << "Base Frames passed to processor" << rank << std::endl;
+		cout << this->baseFrameOpen.getPixel(400, 300).getBaseDepth() << endl;
+		std::cout << "Base Frames passed to processor " << rank << std::endl;
 	}
 }
 

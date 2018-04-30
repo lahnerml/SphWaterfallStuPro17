@@ -5,7 +5,7 @@ Pixel::Pixel() {
 	this->green = 0;
 	this->blue = 0;
 	this->shaderUsage = false;
-	this->baseDepth = std::numeric_limits<unsigned int>::max();
+	this->baseDepth = std::numeric_limits<float>::max();
 }
 
 Pixel::Pixel(unsigned short red, unsigned short green, unsigned short blue) {
@@ -13,7 +13,7 @@ Pixel::Pixel(unsigned short red, unsigned short green, unsigned short blue) {
 	this->green = green > 255 ? 255 : (green < 0 ? 0 : green);
 	this->blue = blue > 255 ? 255 : (blue < 0 ? 0 : blue);
 	this->shaderUsage = false;
-	this->baseDepth = std::numeric_limits<unsigned int>::max();
+	this->baseDepth = std::numeric_limits<float>::max();
 }
 
 void Pixel::setColor(unsigned short red, unsigned short green, unsigned short blue) {

@@ -103,8 +103,6 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 
 		int counter = 0;
 
-		//Here it stops working for some reason..
-
 		for (int i = 0; i < frameCount; i++) {
 			if ((i % (world_size - 1)) + 1 == rank) {
 				if (counter >= frameParticles.size()) continue;
