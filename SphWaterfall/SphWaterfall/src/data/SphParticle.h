@@ -8,7 +8,7 @@ class SphParticle {
 			FLUID,
 			STATIC,
 			MIRRORED,
-			SHUTTER
+			SHUTTER //Will be removed after 'shutter opened timestep'
 		};
 
 		SphParticle();
