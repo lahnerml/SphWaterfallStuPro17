@@ -63,3 +63,11 @@ Commands:
 - The initial step of rendering might take very long (about 10 minutes for our test-mesh). Following render steps depend only on the chosen resolution and the number of rendered particles.
 - Failing to load a mesh will have the same effect as loading an empty mesh.
 - Sources generate an infinite amount of particles.
+
+4. Mesh import
+
+The mesh can be loaded from a file in the .obj format. To create a new mesh use the following settings in your 3D-modelling-software:
+- triangulate faces
+- no UVs
+- no normals
+- no materials
