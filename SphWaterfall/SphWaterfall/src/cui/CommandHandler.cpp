@@ -316,7 +316,7 @@ void CommandHandler::createExport(int simulation_timesteps) {
 		}
 
 		export_map[current_timestep] = all_particles_of_timestep;
-		ParticleIO::exportParticlesToVTK(all_particles_of_timestep, "vtk/particles", current_timestep);
+		ParticleIO::exportParticlesToVTK(all_particles_of_timestep, "vtk/particles", current_timestep, number_of_incoming_particles);
 
 		current_timestep++;
 	}

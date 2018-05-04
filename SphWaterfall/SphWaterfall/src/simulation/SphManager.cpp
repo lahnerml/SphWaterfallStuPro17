@@ -196,7 +196,8 @@ void SphManager::update() {
 	int index = 0;
 	for (auto& each_domain : domains) {
 		for (auto& each_particle : each_domain.second.getFluidParticles()) {
-			computeLocalDensity(each_particle, getNeighbours(index));
+            auto n = getNeighbours(index);
+			computeLocalDensity(each_particle, n);
 			index++;
 		}
 	}
