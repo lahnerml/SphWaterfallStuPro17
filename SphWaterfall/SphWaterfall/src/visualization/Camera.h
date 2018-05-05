@@ -17,17 +17,22 @@ public:
 	Camera();
 	Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height, int switch_frame);
 
-	//Renders a frame based on debug object # Green on Black
+	//Rendert einen Frame basierend auf DebugObject
 	void debugRenderFrame(std::vector<DebugObject> particles);
 
-	//Renders a frame based on Particle Objects # Uses Geometry Frames as base  # Color, Shader, Gate Switch included
+	//Rendert einen Frame basierend auf ParticleObject
 	Frame renderFrame(std::vector<ParticleObject> particles, int frameID);
 
-	//Renders
+	//Rendert die Geometrie als Basis Frames für weitere Operationen
 	void renderGeometryFrames(Terrain terrain, Terrain gate);
 
+	//Schreibt einen Frame als bmp Datei
 	void outputDebugFrame(Frame f, const char* fileName);
+
+	//Definiert den Frame ab wann das offene Terrain als Basis Frame genommen wird
 	void setGateSwitchFrame(unsigned int frameID);
+
+	//Verteilt die Basis Frames auf alle Prozessoren
 	void shareBaseFrame(int);
 
 	Vector3 getLocation();
@@ -35,12 +40,16 @@ public:
 
 private:
 
+	//Rendert einen Pixel basierend auf DebugObject
 	Pixel castDebugRay(Ray& ray, std::vector<DebugObject> particles);
+	//Rendert ein einzelnes Terrain
 	Pixel castTerrainRay(Ray& ray, Terrain& terrain);
+	//Rendert zwei Terrain Modelle in einen Frame; wird für das Gatter genutzt
 	Pixel castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate);
-
+	//Rendert ParticleObjects; arbeitet mit Wassertiefe
 	Pixel castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pixel basePixel);
 
+	//Gibt einen Verweiß auf den aktuell genutzten Basis Frame zurueck
 	Frame& getCurrentlyUsedBaseFrame(unsigned int frameID);
 
 	Frame baseFrameOpen;

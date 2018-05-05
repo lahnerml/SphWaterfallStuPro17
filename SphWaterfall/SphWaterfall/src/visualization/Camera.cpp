@@ -42,6 +42,7 @@ void Camera::debugRenderFrame(std::vector<DebugObject> particles) {
 	Vector3 vec_u = findSkalarVectorWithYZero(this->direction).normalize();
 	Vector3 vec_v = findUpVector(this->direction, vec_u).normalize();
 
+	//Cast a ray for every pixel in the frame
 	for (int x = 0; x < this->width; x++) {
 		for (int y = 0; y < this->height; y++) {
 			double u = l + (r - l) * (x + 0.5f) / this->width;
@@ -167,7 +168,7 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 		}
 	}
 
-	return frame;// Shader::applyGaussianSmoothing(frame, 5, 8);
+	return Shader::applyGaussianSmoothing(frame, 5, 8);
 }
 
 void Camera::renderGeometryFrames(Terrain terrain, Terrain gate) {
@@ -221,6 +222,7 @@ Pixel Camera::castTerrainRay(Ray& ray, Terrain& terrain) {
 
 	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
 
+	//Iterate over all faces and find best hit
 	for (int i = 0; i < terrain.getFaceCount(); i++) {
 		double currDist = bestDistance;
 
@@ -271,6 +273,7 @@ Pixel Camera::castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate) {
 
 	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
 
+	//Iterate over all faces and find best hit
 	for (int i = 0; i <= terrain.getFaceCount() + gate.getFaceCount(); i++) {
 		double currDist = bestDistance;
 
@@ -355,7 +358,6 @@ void Camera::shareBaseFrame(int rank)
 	else {
 		this->baseFrameOpen = Frame::MpiReceiveFrame(0);
 		this->baseFrameClosed = Frame::MpiReceiveFrame(0);
-		cout << this->baseFrameOpen.getPixel(400, 300).getBaseDepth() << endl;
 		std::cout << "Base Frames passed to processor " << rank << std::endl;
 	}
 }

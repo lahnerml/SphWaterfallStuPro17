@@ -56,6 +56,7 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 	if (rank == 0) {
+		//Send frame count
 		vector<vector<SphParticle>> frameParticles = ParticleIO::importParticles(inputFileName);
 		for (int i = 1; i < world_size; i++) {
 			unsigned int buf[1] =
@@ -65,6 +66,7 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 			MPI_Send(buf, 1, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD);
 		}
 
+		//Send Frames distributed to all other processors
 		for (int g = 0; g < frameParticles.size(); g++) {
 				int target = (g % (world_size - 1)) + 1;
 				vector<ParticleObject> frame = convertFluidParticles(frameParticles.at(g));
@@ -82,13 +84,14 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 		}
 	}
 	else {
+		//Receive Frame count
 		unsigned int buf[1];
 		MPI_Recv(buf, 1, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		int frameCount = buf[0];
 
 		vector<vector<ParticleObject>> frameParticles;
 
-
+		//Receive Frames from master
 		for (int g = 0; g < frameCount; g++) {
 			if ((g % (world_size - 1)) + 1 == rank) {
 				unsigned int frameSize[1];
@@ -103,6 +106,7 @@ void VisualizationManager::renderFramesDistributed(string inputFileName, int ran
 
 		int counter = 0;
 
+		//Render frames and save to disk
 		for (int i = 0; i < frameCount; i++) {
 			if ((i % (world_size - 1)) + 1 == rank) {
 				if (counter >= frameParticles.size()) continue;
@@ -144,19 +148,6 @@ vector<SphParticle> VisualizationManager::generateDebugParticles(int count) {
 		particles.emplace_back(f);
 	}
 	return particles;
-}
-
-void VisualizationManager::debug() {
-	unordered_map<int, vector<SphParticle>> frames;
-
-	vector<SphParticle> part;
-	part.emplace_back(SphParticle(Vector3(3, 0, 0)));
-
-	for (int i = 1; i <= 1; i++) {
-		frames.insert_or_assign(i, part);
-	}
-
-	ParticleIO::exportParticles(frames, "test.particles");
 }
 
 bool VisualizationManager::initilaized = false;

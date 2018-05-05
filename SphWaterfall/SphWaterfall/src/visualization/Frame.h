@@ -3,6 +3,7 @@
 #include "Pixel.h"
 #include <vector>
 
+//Frame Klasse; enthält einen Array von Pixel um ein Bild der Größe N x M zu halten
 class Frame {
 	public:
 		Frame(); //To genereate placeholder
@@ -14,6 +15,7 @@ class Frame {
 		unsigned int getWidth();
 		unsigned int getHeight();
 
+		//MPI Funktionalitaet zum Verteilen auf Prozessoren
 		static void MpiSendFrame(Frame frame, int dest);
 		static Frame MpiReceiveFrame(int source);
 				
