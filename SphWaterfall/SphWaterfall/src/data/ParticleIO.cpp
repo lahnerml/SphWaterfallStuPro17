@@ -24,7 +24,8 @@ void ParticleIO::exportParticles(unordered_map<int, vector<SphParticle>>& frames
 	else cout << "Unable to open file";
 }
 
-void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string name, int& timestep) {
+void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string name, int timestep,
+                                      vector<int> proc_boundaries) {
 	ofstream myfile;
 	std::ostringstream fileNameStream("");
 	fileNameStream << name << "_" << timestep << ".vtk";
@@ -55,10 +56,12 @@ void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string nam
 		myfile << each_particle.position.length() << "\n";
 	}
 	//myfile << "POINT_DATA " << nodes << "\n";
-	myfile << "SCALARS Velocity FLOAT" << "\n";
+	myfile << "VECTORS Velocity FLOAT" << "\n";
 	myfile << "LOOKUP_TABLE default" << "\n";
 	for (auto& each_particle : particles) {
-		myfile << each_particle.velocity.length() << "\n";
+		myfile << each_particle.velocity.x << " "
+               << each_particle.velocity.y << " "
+               << each_particle.velocity.z << "\n";
 	}
 
 	myfile << "SCALARS Density FLOAT" << "\n";
@@ -66,6 +69,16 @@ void ParticleIO::exportParticlesToVTK(vector<SphParticle>& particles, string nam
 	for (auto& each_particle : particles) {
 		myfile << each_particle.local_density << "\n";
 	}
+
+    if (!proc_boundaries.empty()) {
+        myfile << "SCALARS MPI_Rank INT" << "\n";
+        for (int p = 0; p < proc_boundaries.size(); ++p) {
+            for (int part = 0; part < proc_boundaries[p]; ++part) {
+                myfile << p << "\n";
+            }
+        }
+    }
+
 	myfile.close();
 }
 

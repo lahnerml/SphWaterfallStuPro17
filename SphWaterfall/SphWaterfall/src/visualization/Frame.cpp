@@ -1,4 +1,6 @@
 #include "Frame.h"
+#include <iostream>
+
 
 Frame::Frame() {
 	this->width = 0;
@@ -13,7 +15,7 @@ Frame::Frame(unsigned int width, unsigned int height) {
 	}
 }
 
-Pixel Frame::getPixel(unsigned int x, unsigned int y) {
+Pixel& Frame::getPixel(unsigned int x, unsigned int y) {
 	if (x >= this->width || y >= this->height) return Pixel(0, 0, 0);
 	return pixels.at(y*width + x);
 }
@@ -43,9 +45,12 @@ void Frame::MpiSendFrame(Frame frame, int dest)
 			unsigned short pixel[3] = {
 				frame.getPixel(x, y).getRedValue(),		//R
 				frame.getPixel(x, y).getGreenValue(),	//G
-				frame.getPixel(x, y).getBlueValue()		//B
+				frame.getPixel(x, y).getBlueValue(),	//B
 			};
 			MPI_Send(pixel, 3, MPI_UNSIGNED_SHORT, dest, 0, MPI_COMM_WORLD);
+			
+			double pixel_depth[1] = { frame.getPixel(x, y).getBaseDepth() };
+			MPI_Send(pixel_depth, 1, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
 		}
 	}
 
@@ -63,6 +68,11 @@ Frame Frame::MpiReceiveFrame(int source)
 			unsigned short pixel[3];
 			MPI_Recv(pixel, 3, MPI_UNSIGNED_SHORT, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			frame.setPixel(x, y, Pixel(pixel[0], pixel[1], pixel[2]));
+
+			
+			double pixel_depth[1];
+			MPI_Recv(pixel_depth, 1, MPI_DOUBLE, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			frame.getPixel(x, y).setBaseDepth(pixel_depth[0]);
 		}
 	}
 

@@ -3,10 +3,6 @@
 // density of how much the distance between static particles is
 #define STATIC_PARTICLE_GENERATION_DENSITY 0.3
 
-StaticParticleGenerator::StaticParticleGenerator()
-{
-}
-
 void StaticParticleGenerator::sendAndGenerate(Terrain& terrain, SphParticle::ParticleType type)
 {
 	int rank;
@@ -38,7 +34,7 @@ void StaticParticleGenerator::sendAndGenerate(Terrain& terrain, SphParticle::Par
 		//Send faces to remote processors
 		for (int f = 0; f < facesToSend; f++)
 		{
-			//Check if remote processor has to change
+			//Check if it's next remote processors turn to receive faces
 			if (currentProcessor != (f / facesPerProcessor) + 2)
 			{
 				currentProcessor = (f / facesPerProcessor) + 2;
@@ -52,13 +48,12 @@ void StaticParticleGenerator::sendAndGenerate(Terrain& terrain, SphParticle::Par
 
 		}
 	}
-	//TODO Debug output
-	int facesForP1 = terrain.getFaceCount() - facesToSend;
-	std::cout << facesForP1 << " faces remaining for processor 1" << std::endl;
-
 
 	//Process faces of processor 1
 	//Send number of total faces
+	int facesForP1 = terrain.getFaceCount() - facesToSend;
+	std::cout << facesForP1 << " faces remaining for processor 1" << std::endl;
+
 	MPI_Send(&facesForP1, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
 
 	for (int f = facesToSend; f < terrain.getFaceCount(); f++)
@@ -90,7 +85,6 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager& manager, SphParticl
 	{
 		faces.push_back(Face::MpiReceiveFace(0));
 	}
-	//TODO Debug output
 	std::cout << facesToReceive << " faces received at processor " << rank << std::endl;
 
 
@@ -102,9 +96,7 @@ void StaticParticleGenerator::receiveAndGenerate(SphManager& manager, SphParticl
 		generateParticlesOnFace(face, STATIC_PARTICLE_GENERATION_DENSITY, generatedParticles, type);
 	}
 
-	//for (auto each_particle : generatedParticles) { std::cout << "static particle: " << each_particle << std::endl; } //debug
-
-	//TODO Reintegrate
+	//Send faces to simulation
 	manager.add_particles(generatedParticles);
 }
 
@@ -123,14 +115,14 @@ std::vector<SphParticle> StaticParticleGenerator::generateStaticParticles(Terrai
 
 
 
-void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, std::vector<SphParticle>& generatedParticles, SphParticle::ParticleType type)
+void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDistance, std::vector<SphParticle>& generatedParticles, SphParticle::ParticleType type)
 {
-	if (particleDensity < 0.0)
+	if (particleDistance < 0.0)
 		return;
 
 	Vector3 particlePosition = Vector3();
 
-	double uneven_offset = particleDensity / 2;
+	double uneven_offset = particleDistance / 2;
 	double curr_offset = 0.0;
 
 	double x_distance = (face.b - face.a).length();
@@ -141,22 +133,24 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
 	bool uneven = false;
 
 	//Create triangualted grid of particles
-	for (int x = 0; x * particleDensity <= x_distance; x++)
+	for (int x = 0; x * particleDistance <= x_distance; x++)
 	{
-		x_perc = (x * particleDensity) / x_distance;
+		x_perc = (x * particleDistance) / x_distance;
 		curr_offset = uneven ? uneven_offset : 0.0;
 		
-		for (int y = 0; ((y * particleDensity) + curr_offset) <= y_distance; y++)
+		for (int y = 0; ((y * particleDistance) + curr_offset) <= y_distance; y++)
 		{
-			y_perc = ((y * particleDensity) + curr_offset) / y_distance;
+			y_perc = ((y * particleDistance) + curr_offset) / y_distance;
 			
 			if (x_perc + y_perc >= 1.0)
 				continue;
 
 			particlePosition = face.a + ((face.b - face.a) * x_perc) + ((face.c - face.a) * y_perc);
-			generatedParticles.push_back(SphParticle(particlePosition, SphParticle::STATIC));
-			//std::cout << particlePosition << std::endl;
-			//TODO Debug output
+			generatedParticles.push_back(SphParticle(particlePosition, type));
+
+			Vector3 perpendicular = Vector3::perpendicular((face.b - face.a), (face.c - face.a));
+			generatedParticles.push_back(SphParticle(particlePosition + (particleDistance * perpendicular), type));
+			generatedParticles.push_back(SphParticle(particlePosition + (-particleDistance * perpendicular), type));
 		}
 
 		uneven = !uneven;
@@ -165,22 +159,11 @@ void StaticParticleGenerator::generateParticlesOnFace(Face& face, double particl
 
 /*
  * Generates static particles uniformly on a given face
- * face: The face to genrate the particles on
- * particleDensity: How much space lies between 2 particles 0.0 < density <= 1.0
- * A particleDenisty of 1.0 means that there will only be particles on the corners of the Face
+ * particleDensity: How much space lies between 2 particles
  */
-std::vector<SphParticle> StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDensity, SphParticle::ParticleType pType)
+std::vector<SphParticle> StaticParticleGenerator::generateParticlesOnFace(Face& face, double particleDistance, SphParticle::ParticleType pType)
 {
 	std::vector<SphParticle> result = std::vector<SphParticle>();
-	generateParticlesOnFace(face, particleDensity, result, pType);
+	generateParticlesOnFace(face, particleDistance, result, pType);
 	return result;
-}
-
-
-void StaticParticleGenerator::detectDuplicate(SphParticle a, SphParticle b) {
-	
-}
-
-void StaticParticleGenerator::removeDuplicate(SphParticle a, SphParticle b) {
-	
 }

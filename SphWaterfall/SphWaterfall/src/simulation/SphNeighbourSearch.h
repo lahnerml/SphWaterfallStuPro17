@@ -6,7 +6,7 @@ public:
 	SphNeighbourSearch();
 	~SphNeighbourSearch();
 
-	std::vector<SphParticle> findNeigbours(const Vector3& particle_position, const std::vector<SphParticle>& potential_neighbour_particles) const;
+	std::vector<SphParticle*> findNeigbours(const Vector3& particle_position, std::vector<SphParticle*>& potential_neighbour_particles) const;
 	std::set<int> findRelevantNeighbourDomains(const Vector3& particle_position, const Vector3& dimension) const;
 
 private:

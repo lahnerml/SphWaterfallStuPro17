@@ -17,9 +17,9 @@ const int bytesPerPixel = 3; /// red, green, blue
 const int fileHeaderSize = 14;
 const int infoHeaderSize = 40;
 
-
+//Entscheidet ob der berechnete Skalar Vektor tatsächlich nach rechts von der Kamera ViewDirection geht
 static Vector3 findRightSkalar(Vector3 vec, Vector3 right) {
-	Vector3 left = Vector3(right.x * -1, right.y * -1, right.z * -1);
+	Vector3 left = right * -1;
 
 	if (vec.x >= 0) {
 		if ((vec.z > 0 && right.x < 0) || (vec.z < 0 && right.x > 0) || (vec.z == 0 && right.z > 0)) return left;
@@ -31,6 +31,7 @@ static Vector3 findRightSkalar(Vector3 vec, Vector3 right) {
 	return right;
 }
 
+//Findet den entsprechenden Vektor um die Vektoren nach Rechts und oben finden zu können
 static Vector3 findSkalarVectorWithYZero(Vector3 vector) {
 	double x = 1;
 	double y = 0;
@@ -39,6 +40,7 @@ static Vector3 findSkalarVectorWithYZero(Vector3 vector) {
 	return findRightSkalar(vector, Vector3(x, y, z));
 }
 
+//Berechnet den Vektor der für die Kamera nach oben zeigt
 static Vector3 findUpVector(Vector3 first, Vector3 second) {
 	Vector3 up = Vector3(first.y * second.z - first.z * second.y,
 		first.z * second.x - first.x * second.z,
@@ -48,6 +50,7 @@ static Vector3 findUpVector(Vector3 first, Vector3 second) {
 	return up*-1;
 }
 
+//Konvertiert SphParticle zu DebugObject
 static std::vector<DebugObject> convertSphParticles(std::vector<SphParticle> &particles) {
 	std::vector<DebugObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
@@ -57,6 +60,7 @@ static std::vector<DebugObject> convertSphParticles(std::vector<SphParticle> &pa
 	return output;
 }
 
+//Konvertiert SphParticle zu ParticleObject
 static std::vector<ParticleObject> convertFluidParticles(std::vector<SphParticle> &particles) {
 	std::vector<ParticleObject> output;
 	for (unsigned int i = 0; i < particles.size(); i++) {
@@ -66,6 +70,7 @@ static std::vector<ParticleObject> convertFluidParticles(std::vector<SphParticle
 	return output;
 }
 
+//Schreibt einen Frame als bmp
 static void writeFrameToBitmap(Frame f, const char* fileName, unsigned int w, unsigned int h) {
 	FILE *file;
 	unsigned char *img = NULL;
@@ -122,6 +127,7 @@ static void writeFrameToBitmap(Frame f, const char* fileName, unsigned int w, un
 	fclose(file);
 }
 
+//String Operationen welche nicht in std enthalten sind; Heutige Ausgabe: Split
 static vector<string> split(const string &s, const char &c)
 {
 	string buff{ "" };
@@ -137,6 +143,7 @@ static vector<string> split(const string &s, const char &c)
 	return v;
 }
 
+//String Operationen welche nicht in std enthalten sind; Heutige Ausgabe: StartsWith
 static bool startsWith(const string &s, const string &sequence) {
 	if (s.size() < sequence.size()) return false;
 
@@ -147,8 +154,8 @@ static bool startsWith(const string &s, const string &sequence) {
 	return true;
 }
 
-static bool intersectsWithFace(Ray &ray, Face face, double &distance) {
-	const float EPSILON = 0.0000001;
+//Berechnet Schnittpunkt zwischen Ray und Face
+static bool intersectsWithFace(Ray &ray, const Face& face, double &distance) {
 	Vector3 vertex0 = face.a;
 	Vector3 vertex1 = face.b;
 	Vector3 vertex2 = face.c;
@@ -169,13 +176,12 @@ static bool intersectsWithFace(Ray &ray, Face face, double &distance) {
 	v = f * ray.direction.dot(q);
 	if (v < 0.0 || u + v > 1.0)
 		return false;
-	// At this stage we can compute t to find out where the intersection point is on the line.
 	float t = f * edge2.dot(q);
-	if (t > EPSILON) // ray intersection
+	if (t > EPSILON)
 	{
 		distance = t;
 		return true;
 	}
-	else // This means that there is a line intersection but not a ray intersection.
+	else
 		return false;
 }

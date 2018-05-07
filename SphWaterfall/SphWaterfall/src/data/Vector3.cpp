@@ -87,6 +87,10 @@ bool operator==(const Vector3& a, const Vector3& b) {
 	return ((a.x == b.x) && (a.y == b.y) && (a.z == b.z));
 }
 
+bool operator!=(const Vector3 & a, const Vector3 & b) {
+	return ((a.x != b.x) || (a.y != b.y) || (a.z != b.z));
+}
+
 bool Vector3::isInRangeOf(const Vector3& vector) const {
 	double epsilon = 1e-6;
 	return ((abs(x) >= 0) && ((x - vector.x) < epsilon) && (abs(y) >= 0) && ((y - vector.y) < epsilon) && (abs(z) >= 0) && ((z - vector.z) < epsilon));
@@ -108,7 +112,22 @@ Vector3 Vector3::distanceTo(const Vector3& v, const Vector3& v1) {
 	return Vector3(abs(v.x - v1.x), abs(v.y - v1.y), abs(v.z - v1.z));
 }
 
-double Vector3::dot(const Vector3& a) {
+Vector3 Vector3::perpendicular(const Vector3& v)
+{
+	return Vector3::perpendicular(*this, v);
+}
+
+Vector3 Vector3::perpendicular(const Vector3& u, const Vector3& v)
+{
+	double x, y, z;
+	//Vector will be normalized, so z won't matter
+	z = 1;
+	x = (z*((u.z*v.y) - (u.y*v.z))) / ((u.y*v.x) - (u.x*v.y));
+	y = (z*((u.z*v.x) - (u.x*v.z))) / ((u.x*v.y) - (u.y*v.x));
+	return Vector3(x, y, z).normalize();
+}
+
+double Vector3::dot(const Vector3& a) const {
 	return this->x * a.x + this->y * a.y + this->z * a.z;
 }
 

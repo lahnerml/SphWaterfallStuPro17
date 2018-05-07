@@ -2,6 +2,7 @@
 
 #include <limits>
 
+//Pixel Klasse; enthält RGB-Farbwerte
 class Pixel {
 public:
 	Pixel();
@@ -16,9 +17,11 @@ public:
 	void setGreen(unsigned short green);
 	void setBlue(unsigned short blue);
 
+	//Shader Funktionalitaet; Kontrolliert ob der Pixel im Shader miteinbezogen wird
 	bool usesShader();
 	void setShaderUsage(bool shaderUsage);
 
+	//Setzt die Geometrie Tiefe für den Pixel; Wird bentuzt um das zu unterscheiden ob WasserPartikel hinter oder vor dem Terrain liegen
 	void setBaseDepth(double baseDepth);
 	double getBaseDepth();
 

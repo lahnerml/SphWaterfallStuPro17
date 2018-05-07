@@ -2,7 +2,8 @@
 
 CommandHandler::CommandHandler(int mpi_rank) : 
 	mpi_rank(mpi_rank),
-	sph_manager(SphManager(Vector3(DOMAIN_DIMENSION, DOMAIN_DIMENSION, DOMAIN_DIMENSION), TIMESTEPS, 0.03)){
+	simulation_time(DEFAULT_SIMULATION_TIME),
+	sph_manager(SphManager(Vector3(DOMAIN_DIMENSION, DOMAIN_DIMENSION, DOMAIN_DIMENSION))){
 }
 
 void CommandHandler::start() {
@@ -135,6 +136,9 @@ void CommandHandler::sendCommand(CUICommand& cui_command) {
 
 void CommandHandler::executeCommand(CUICommand& cui_command) {
 	std::string file_path, time_for_move, source_position, sink_height;
+	int simulation_timesteps;
+	Vector3 camera_position = Vector3(0, 5, -5);
+	unsigned int width = 800, height = 600;
 
 	switch (cui_command.getCommand()) {
 		case CUICommand::LOAD_MESH:
@@ -180,11 +184,18 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::SIMULATE:
-			if (mpi_rank != 0) {
-				simulate();
+			if (cui_command.hasParameter("-t")) {
+				simulation_timesteps = round(parseToDouble(cui_command.getParameter(0).getValue()) / TIMESTEP_DURATION);
 			}
 			else {
-				createExport();
+				simulation_timesteps = round(simulation_time / TIMESTEP_DURATION);
+			}
+			
+			if (mpi_rank != 0) {
+				simulate(simulation_timesteps);
+			}
+			else {
+				createExport(simulation_timesteps);
 			}
 			MPI_Barrier(MPI_COMM_WORLD);
 
@@ -194,7 +205,16 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::RENDER:
-			render(loaded_mesh, loaded_shutter, 0);
+			if (cui_command.hasParameter("-v")) {
+				camera_position = parseToVector3(cui_command.getParameter(cui_command.getParameterIndex("-v")).getValue());
+			}
+
+			if (cui_command.hasParameter("-w") && cui_command.hasParameter("-h")) {
+				width = parseToUInteger(cui_command.getParameter(cui_command.getParameterIndex("-w")).getValue());
+				height = parseToUInteger(cui_command.getParameter(cui_command.getParameterIndex("-h")).getValue());
+			}
+
+			render(loaded_mesh, loaded_shutter, 0, camera_position, width, height);
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -203,8 +223,10 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::ADD_SOURCE:
-			source_position = cui_command.getParameter(0).getValue();
-			addSource(source_position);
+			if (mpi_rank != 0) {
+				source_position = cui_command.getParameter(0).getValue();
+				addSource(source_position);
+			}
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -213,8 +235,10 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			}
 			break;
 		case CUICommand::ADD_SINK:
-			sink_height = cui_command.getParameter(0).getValue();
-			addSink(sink_height);
+			if (mpi_rank != 0) {
+				sink_height = cui_command.getParameter(0).getValue();
+				addSink(sink_height);
+			}
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -227,6 +251,35 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 	}
 }
 
+
+int CommandHandler::parseToInteger(std::string input) {
+	std::istringstream input_parse_stream(input);
+	int output;
+	input_parse_stream >> output;
+	return output;
+}
+
+unsigned int CommandHandler::parseToUInteger(std::string input) {
+	int result = this->parseToInteger(input);
+	return (result > 0) ? result : 0;
+}
+
+double CommandHandler::parseToDouble(std::string input) {
+	std::istringstream input_parse_stream(input);
+	double output;
+	input_parse_stream >> output;
+	return output;
+}
+
+Vector3 CommandHandler::parseToVector3(std::string input) {
+	std::istringstream input_parse_stream(input);
+	double x, y, z;
+	input_parse_stream >> x;
+	input_parse_stream >> y;
+	input_parse_stream >> z;
+	return Vector3(x, y, z);
+}
+
 void CommandHandler::printInputMessage() {
 	std::cout << std::endl << "Please enter a command or enter 'help' to show a list of all commands" << std::endl;
 }
@@ -237,17 +290,16 @@ Terrain CommandHandler::loadMesh(std::string file_path) {
 }
 
 void CommandHandler::generateParticles(Terrain& loaded_mesh, SphParticle::ParticleType particle_type) {
-	StaticParticleGenerator static_particle_generator;
 
 	if (mpi_rank == 0) {
-		static_particle_generator.sendAndGenerate(loaded_mesh, particle_type);
+		StaticParticleGenerator::sendAndGenerate(loaded_mesh, particle_type);
 	}
 	else {
-		static_particle_generator.receiveAndGenerate(sph_manager, particle_type);
+		StaticParticleGenerator::receiveAndGenerate(sph_manager, particle_type);
 	}
 }
 
-void CommandHandler::createExport() {
+void CommandHandler::createExport(int simulation_timesteps) {
 	int current_timestep = 1;
 	unordered_map<int, vector<SphParticle>> export_map;
 
@@ -255,7 +307,7 @@ void CommandHandler::createExport() {
 	MPI_Comm_size(MPI_COMM_WORLD, &slave_comm_size);
 	slave_comm_size--;
 
-	while (current_timestep <= TIMESTEPS) {
+	while (current_timestep <= simulation_timesteps) {
 		std::vector<SphParticle> all_particles_of_timestep;
 
 		std::vector<int> number_of_incoming_particles = std::vector<int>(slave_comm_size);
@@ -276,49 +328,77 @@ void CommandHandler::createExport() {
 		}
 
 		export_map[current_timestep] = all_particles_of_timestep;
-		ParticleIO::exportParticlesToVTK(all_particles_of_timestep, "vtk/particles", current_timestep);
+		ParticleIO::exportParticlesToVTK(all_particles_of_timestep, "vtk/particles", current_timestep, number_of_incoming_particles);
 
 		current_timestep++;
 	}
-	ParticleIO::exportParticles(export_map, "test.test");
+	ParticleIO::exportParticles(export_map, "sph.ptcl");
 
 	std::cout << "Done exporting" << std::endl;
 }
 
 void CommandHandler::moveShutter(std::string shutter_move_param) {
-	std::istringstream shutterMoveValues(shutter_move_param);
+	int worldSize;
+	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 	int shutter_move_frame;
-	shutterMoveValues >> shutter_move_frame;
+	
+	if (mpi_rank == 0) {
+		shutter_move_frame = round(parseToDouble(shutter_move_param) / TIMESTEP_DURATION);
+
+		for (int i = 1; i < worldSize; i++) {
+			MPI_Send(&shutter_move_frame, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+		}
+	}
+	else {
+		MPI_Recv(&shutter_move_frame, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}
+
+	sph_manager.setShutterTimestep(shutter_move_frame);
+	VisualizationManager::setSwitchFrame(shutter_move_frame);
 	std::cout << "Shutter opening at frame: " << shutter_move_frame << std::endl;
 }
 
-void CommandHandler::simulate() {
-	if (mpi_rank == 1) {
+void CommandHandler::simulate(int simulation_timesteps) {
+	if (mpi_rank == -1) {
 		std::vector<SphParticle> particles;
 
 		for (int i = 0; i < 20; i++) {
 			for (int j = 0; j < 20; j++) {
 				for (int k = 0; k < 20; k++) {
-					particles.push_back(SphParticle(Vector3(3.0 + i, 3.0 + j, 3.0 + k)));
+					particles.push_back(SphParticle(Vector3(5.0 + i, 10.0 + j, 5.0 + k)));
 				}
 			}
 		}
 
 		sph_manager.add_particles(particles);
 	}
-	sph_manager.simulate();
+	sph_manager.simulate(simulation_timesteps);
 }
 
-void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shutter_time) {
-	if (mpi_rank == 0) {
-		cout << "Rendering in progress..." << endl;
-	}
-	VisualizationManager::importTerrain(loaded_mesh, true);
-	VisualizationManager::importTerrain(loaded_shutter, false);
+void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shutter_time, Vector3 cameraPosition, unsigned int width, unsigned int height) {
+	int worldSize;
+	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+	
+	VisualizationManager::importTerrain(loaded_mesh, false);
+	VisualizationManager::importTerrain(loaded_shutter, true);
 
-	VisualizationManager::init(Vector3(10, 5, -20), 200, 200);
-	//VisualizationManager::renderFrames("test.test");
-	VisualizationManager::renderFramesDistributed("test.test", mpi_rank);
+	if (mpi_rank == 0) {
+
+		for (int i = 1; i < worldSize; i++) {
+			MPI_Send(&width, 1, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD);
+			MPI_Send(&height, 1, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD);
+		}
+
+		cout << "Rendering in progress with (" << width << " * " << height << ") ..." << endl;
+	}
+	else {
+		MPI_Recv(&width, 1, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(&height, 1, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}
+
+	VisualizationManager::init(cameraPosition, width, height, mpi_rank);
+	//VisualizationManager::renderFrames("sph.ptcl");
+	VisualizationManager::renderFramesDistributed("sph.ptcl", mpi_rank);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
@@ -334,12 +414,17 @@ void CommandHandler::addSource(std::string source_position_string) {
 	source_position_stream >> y;
 	source_position_stream >> z;
 	Vector3 source_position = Vector3(x, y, z);
-	std::cout << "New source: " << source_position << std::endl;
+	int proccess_id = SimulationUtilities::computeProcessID(source_position, sph_manager.getDomainDimensions());
+	if (proccess_id + 1 == mpi_rank) {
+		sph_manager.addSource(source_position);
+		std::cout << "Source added at " << source_position << std::endl;
+	}
 }
 
 void CommandHandler::addSink(std::string sink_height_string) {
 	std::istringstream sink_height_stream(sink_height_string);
 	double sink_height;
 	sink_height_stream >> sink_height;
-	std::cout << "New sink height: " << sink_height << std::endl;
+	sph_manager.setSink(sink_height);
+	std::cout << "Sink added at y=" << sink_height << std::endl;
 }

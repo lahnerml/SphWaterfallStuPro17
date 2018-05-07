@@ -14,14 +14,14 @@ Camera::Camera() {
 	baseFrameClosed = Frame(this->width, this->height);
 }
 
-Camera::Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height) {
+Camera::Camera(Vector3 location, Vector3 direction, unsigned int width, unsigned int height, int switch_frame) {
 	this->width = width;
 	this->height = height;
 	
 	this->location = location;
 	this->direction = direction;
 
-	this->switchFrameID = std::numeric_limits<unsigned int>::max();
+	this->switchFrameID = switch_frame;
 
 	baseFrameOpen = Frame(this->width, this->height);
 	baseFrameClosed = Frame(this->width, this->height);
@@ -42,6 +42,7 @@ void Camera::debugRenderFrame(std::vector<DebugObject> particles) {
 	Vector3 vec_u = findSkalarVectorWithYZero(this->direction).normalize();
 	Vector3 vec_v = findUpVector(this->direction, vec_u).normalize();
 
+	//Cast a ray for every pixel in the frame
 	for (int x = 0; x < this->width; x++) {
 		for (int y = 0; y < this->height; y++) {
 			double u = l + (r - l) * (x + 0.5f) / this->width;
@@ -59,7 +60,7 @@ void Camera::debugRenderFrame(std::vector<DebugObject> particles) {
 	this->outputDebugFrame(frame, "debug_output.bmp");
 }
 
-Pixel Camera::castDebugRay(Ray ray, std::vector<DebugObject> particles) {
+Pixel Camera::castDebugRay(Ray& ray, std::vector<DebugObject> particles) {
 	double bestDistance = std::numeric_limits<float>::max();
 	double waterDepth = 0;
 	DebugObject hitObject;
@@ -82,9 +83,9 @@ Pixel Camera::castDebugRay(Ray ray, std::vector<DebugObject> particles) {
 	return hit == nullptr ? Pixel(0, 0, 0) : Pixel(0, 255, 0);
 }
 
-Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixel basePixel) {
+Pixel Camera::castVolumeRay(Ray& ray, std::vector<ParticleObject> particles, Pixel basePixel) {
 	double bestDistance = std::numeric_limits<float>::max();
-	double waterDepth = 0;
+	double waterDepth = -0.2;
 	ParticleObject hitObject;
 	ParticleObject *hit = &hitObject;
 	hit = nullptr;
@@ -105,17 +106,19 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 	waterDepth = waterDepth > 15 ? 15 : waterDepth; //Cap waterDepth at 15
 
 	//Copy the pixel from the base Frame
-	Pixel pixel = Pixel(basePixel.getRedValue(), basePixel.getGreenValue(), basePixel.getRedValue());
+	Pixel pixel = Pixel(basePixel.getRedValue(), basePixel.getGreenValue(), basePixel.getBlueValue());
 
 	if (waterDepth <= 0) {
-		return basePixel;
+		return pixel;
 	}
 
 	Pixel waterColor = Pixel(30, 30, 170); //Color of "pure water"
 	pixel.setShaderUsage(true);
+
 	//Shade the pixel depending on water depth
 	if (hit != nullptr) {
 	//New Shading, should work smiliar to alpha
+		
 		int diffR = waterColor.getRedValue() - pixel.getRedValue();
 		int diffG = waterColor.getGreenValue() - pixel.getGreenValue();
 		int diffB = waterColor.getBlueValue() - pixel.getBlueValue();
@@ -129,6 +132,7 @@ Pixel Camera::castVolumeRay(Ray ray, std::vector<ParticleObject> particles, Pixe
 		pixel.setRed((unsigned short)newR);
 		pixel.setGreen((unsigned short)newG);
 		pixel.setBlue((unsigned short)newB);
+		
 	}
 
 	return pixel;
@@ -157,18 +161,17 @@ Frame Camera::renderFrame(std::vector<ParticleObject> particles, int frameID) {
 
 			//Ray Direction Vector
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
-			Ray ray = Ray(vec_s, this->location);
+			Ray ray = Ray(vec_s.normalize(), this->location);
 
 			//Set pixel in Frame
-			frame.setPixel(x, y, castVolumeRay(ray, particles, getCurrentlyUsedBaseFrame(frameID).getPixel(x, y)));
-			
+			frame.setPixel(x, y, castVolumeRay(ray, particles, getCurrentlyUsedBaseFrame(frameID).getPixel(x, y)));	
 		}
 	}
 
 	return Shader::applyGaussianSmoothing(frame, 5, 8);
 }
 
-void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
+void Camera::renderGeometryFrames(Terrain terrain, Terrain gate) {
 	const double aspectRatio = (double)width / (double)height;
 	const double l = -1.f *aspectRatio;
 	const double r = +1.f *aspectRatio;
@@ -188,9 +191,9 @@ void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
 			double v = t + (b - t) * (y + 0.5f) / this->height;
 
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
-			Ray ray = Ray(vec_s, this->location);
+			Ray ray = Ray(vec_s.normalize(), this->location);
 
-			baseFrameOpen.setPixel(x, y, castGeometryRay(ray, terrainOpen));
+			baseFrameOpen.setPixel(x, y, castTerrainRay(ray, terrain));
 		}
 	}
 
@@ -202,9 +205,9 @@ void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
 			double v = t + (b - t) * (y + 0.5f) / this->height;
 
 			Vector3 vec_s = vec_u * u + vec_v * v + this->direction * d;
-			Ray ray = Ray(vec_s, this->location);
+			Ray ray = Ray(vec_s.normalize(), this->location);
 
-			baseFrameClosed.setPixel(x, y, castGeometryRay(ray, terrainClosed));
+			baseFrameClosed.setPixel(x, y, castTerrainGateRay(ray, terrain, gate));
 		}
 	}
 
@@ -213,12 +216,13 @@ void Camera::renderGeometryFrames(Terrain terrainOpen, Terrain terrainClosed) {
 	writeFrameToBitmap(baseFrameClosed, "terrain_debug_closed.bmp", baseFrameClosed.getWidth(), baseFrameClosed.getHeight());
 }
 
-Pixel Camera::castGeometryRay(Ray ray, Terrain& terrain) {
+Pixel Camera::castTerrainRay(Ray& ray, Terrain& terrain) {
 	double bestDistance = std::numeric_limits<float>::max();
 	int hitIndex = -1;
 
 	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
 
+	//Iterate over all faces and find best hit
 	for (int i = 0; i < terrain.getFaceCount(); i++) {
 		double currDist = bestDistance;
 
@@ -251,13 +255,83 @@ Pixel Camera::castGeometryRay(Ray ray, Terrain& terrain) {
 		rad = rad > M_PI ? rad - M_PI : rad;
 
 		//Get a factor between 1 and 0; 90° = 0 ; 0° = 180° = 1
-		double factor = 1 - (rad / (M_PI / 2));
+		double factor = 1 - std::fmax(std::fmin(rad / (M_PI / 2), 1), 0);
 
 		//Darken the pixel based on the factor
 		Pixel p = Pixel(127 * factor, 67 * factor, 67 * factor);
+		p.setBaseDepth(bestDistance);
 
 		return p;
     }
+
+	return initColor;
+}
+
+Pixel Camera::castTerrainGateRay(Ray& ray, Terrain& terrain, Terrain& gate) {
+	double bestDistance = std::numeric_limits<float>::max();
+	int hitIndex = -1;
+
+	Pixel initColor = Pixel(200, 200, 200); //Make the background gray
+
+	//Iterate over all faces and find best hit
+	for (int i = 0; i <= terrain.getFaceCount() + gate.getFaceCount(); i++) {
+		double currDist = bestDistance;
+
+		if (i >= terrain.getFaceCount()) {
+			if (intersectsWithFace(ray, gate.getFace(i - terrain.getFaceCount()), currDist)) {
+				if (currDist < bestDistance) {
+					bestDistance = currDist;
+					hitIndex = i;
+				}
+			}
+		}
+		else {
+			if (intersectsWithFace(ray, terrain.getFace(i), currDist)) {
+				if (currDist < bestDistance) {
+					bestDistance = currDist;
+					hitIndex = i;
+				}
+			}
+		}
+	}
+
+	initColor.setBaseDepth(bestDistance);
+
+	//Calculate Light to not have just brown everywhere
+	if (hitIndex >= 0) {
+		Vector3 planar1;
+		Vector3 planar2;
+
+		if (hitIndex >= terrain.getFaceCount()) {
+			planar1 = gate.getFace(hitIndex - terrain.getFaceCount()).a - gate.getFace(hitIndex - terrain.getFaceCount()).b;
+			planar2 = gate.getFace(hitIndex - terrain.getFaceCount()).a - gate.getFace(hitIndex - terrain.getFaceCount()).c;
+		}
+		else {
+			planar1 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).b;
+			planar2 = terrain.getFace(hitIndex).a - terrain.getFace(hitIndex).c;
+		}
+
+		//Calculate norm vector
+		Vector3 n = planar1.cross(planar2).normalize();
+
+		Vector3 staticLight = Vector3(0, 200, 0);
+		Vector3 lightToHit = (staticLight - (ray.origin + ray.direction * bestDistance)).normalize();
+
+		//Calculate angle between norm vector of the plane and vector between light and hit point
+		double rad = acos(n.dot(lightToHit) / (n.length() * lightToHit.length()));
+
+		//Check if the angle is more than 180°, if so substract 180°
+		rad = rad >= M_PI ? rad - M_PI : rad;
+
+		//Get a factor between 1 and 0; 90° = 0 ; 0° = 180° = 1
+		double factor = 1 - std::fmax(std::fmin(rad / (M_PI / 2), 1), 0);
+
+		//Darken the pixel based on the factor
+		Pixel p = Pixel(127 * factor, 67 * factor, 67 * factor);
+		p.setBaseDepth(bestDistance);
+
+		return p;
+	}
 
 	return initColor;
 }
@@ -268,6 +342,24 @@ Frame& Camera::getCurrentlyUsedBaseFrame(unsigned int frameID) {
 
 void Camera::setGateSwitchFrame(unsigned int frameID) {
 	this->switchFrameID = frameID;
+}
+
+void Camera::shareBaseFrame(int rank)
+{
+	if (rank == 0) {
+		int world_size;
+		MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+		for (int i = 1; i < world_size; i++) {
+			Frame::MpiSendFrame(this->baseFrameOpen, i);
+			Frame::MpiSendFrame(this->baseFrameClosed, i);
+		}
+	}
+	else {
+		this->baseFrameOpen = Frame::MpiReceiveFrame(0);
+		this->baseFrameClosed = Frame::MpiReceiveFrame(0);
+		std::cout << "Base Frames passed to processor " << rank << std::endl;
+	}
 }
 
 void Camera::outputDebugFrame(Frame f, const char* fileName) {

@@ -15,10 +15,10 @@ class CUICommand {
 			LOAD_SHUTTER,
 			GENERATE_PARTICLES,
 			MOVE_SHUTTER,
-			SIMULATE,
-			RENDER,
 			ADD_SOURCE,
-			ADD_SINK
+			ADD_SINK,
+			SIMULATE,
+			RENDER
 		};
 
 		CUICommand();
@@ -33,9 +33,11 @@ class CUICommand {
 		std::string getCommandName() const;
 		std::vector<CUICommandParameter> getParameterList() const;
 		CUICommandParameter getParameter(int index) const;
+		int getParameterIndex(std::string parameter_name);
 		void addParameter(CUICommandParameter parameter);
 		bool removeParameter(CUICommandParameter parameter);
 		bool removeParameter(std::string parameter_name);
+		bool hasParameter(std::string parameter_name);
 	private:
 		std::string input_line;
 		Command command;

@@ -25,12 +25,12 @@ namespace SimulationUtilities {
 		return hash((position / domain_dimension).roundDownward());
 	}
 
-	int computeProcessID(const int domain_id, const int& comm_size) {
-		return abs(domain_id % comm_size);
+	int computeProcessID(const int domain_id) {
+		return abs(domain_id % slave_comm_size);
 	}
 
-	int computeProcessID(const Vector3 position, const Vector3 domain_dimension, const int& comm_size) {
-		return abs(computeDomainID(position, domain_dimension) % comm_size);
+	int computeProcessID(const Vector3 position, const Vector3 domain_dimension) {
+		return abs(computeDomainID(position, domain_dimension) % slave_comm_size);
 	}
 
 }

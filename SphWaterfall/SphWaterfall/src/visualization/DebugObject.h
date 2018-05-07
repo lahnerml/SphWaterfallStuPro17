@@ -12,6 +12,7 @@ public:
 	Vector3 getLocation();
 	double getRadius();
 
+	//Berechnet einen Schnittpunkt zwischen dem DebugObject und einem Ray
 	bool intersects(Ray &ray, double &distance, double &highestDistance);
 
 private:

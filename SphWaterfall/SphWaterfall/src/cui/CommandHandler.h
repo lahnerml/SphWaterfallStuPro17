@@ -25,17 +25,23 @@ class CommandHandler {
 
 		SphManager sph_manager;
 		Terrain loaded_mesh, loaded_shutter;
+		int simulation_time;
 
 		CUICommand recieveCommand();
 		void sendCommand(CUICommand&);
 		void executeCommand(CUICommand&);
 
+		int parseToInteger(std::string);
+		unsigned int parseToUInteger(std::string);
+		double parseToDouble(std::string);
+		Vector3 parseToVector3(std::string);
+
 		Terrain loadMesh(std::string);
 		void generateParticles(Terrain&, SphParticle::ParticleType);
-		void createExport();
+		void createExport(int simulation_timesteps);
 		void moveShutter(std::string);
-		void simulate();
-		void render(Terrain, Terrain, int);
+		void simulate(int simulation_timesteps);
+		void render(Terrain, Terrain, int, Vector3, unsigned int, unsigned int);
 		void addSource(std::string);
 		void addSink(std::string);
 };

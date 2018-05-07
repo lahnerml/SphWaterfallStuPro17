@@ -5,18 +5,20 @@
 #include "../data/Vector3.h"
 #include "Face.h"
 
+//Basically a const mesh consisting of vertices and faces
 class Terrain{
 public:
-	Terrain(std::vector<Vector3> &vertices, std::vector<Vector3> &normals, std::vector<int> &faces);
+	Terrain(std::vector<Vector3> &vertices, std::vector<int> &faces);
 	Terrain();
 
-	size_t getVertexCount();
-	size_t getFaceCount();
+	const size_t getVertexCount();
+	const size_t getFaceCount();
 
-	Vector3 getVertex(int);
-	Face getFace(int);
+	const Vector3 getVertex(int);
+	const Face& getFace(int);
 
 private:
 	std::vector<Vector3> vertices;
 	std::vector<Face> faces;
+	Face nullFace;
 };
