@@ -33,6 +33,7 @@ class CUICommand {
 		std::string getCommandName() const;
 		std::vector<CUICommandParameter> getParameterList() const;
 		CUICommandParameter getParameter(int index) const;
+		int getParameterIndex(std::string parameter_name);
 		void addParameter(CUICommandParameter parameter);
 		bool removeParameter(CUICommandParameter parameter);
 		bool removeParameter(std::string parameter_name);

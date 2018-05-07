@@ -138,6 +138,7 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 	std::string file_path, time_for_move, source_position, sink_height;
 	int simulation_timesteps;
 	Vector3 camera_position = Vector3(0, 5, -5);
+	unsigned int width = 800, height = 600;
 
 	switch (cui_command.getCommand()) {
 		case CUICommand::LOAD_MESH:
@@ -205,10 +206,15 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 			break;
 		case CUICommand::RENDER:
 			if (cui_command.hasParameter("-v")) {
-				camera_position = parseToVector3(cui_command.getParameter(0).getValue());
+				camera_position = parseToVector3(cui_command.getParameter(cui_command.getParameterIndex("-v")).getValue());
 			}
 
-			render(loaded_mesh, loaded_shutter, 0, camera_position);
+			if (cui_command.hasParameter("-w") && cui_command.hasParameter("-h")) {
+				width = parseToUInteger(cui_command.getParameter(cui_command.getParameterIndex("-w")).getValue());
+				height = parseToUInteger(cui_command.getParameter(cui_command.getParameterIndex("-h")).getValue());
+			}
+
+			render(loaded_mesh, loaded_shutter, 0, camera_position, width, height);
 			MPI_Barrier(MPI_COMM_WORLD);
 
 			// console feedback
@@ -245,11 +251,17 @@ void CommandHandler::executeCommand(CUICommand& cui_command) {
 	}
 }
 
+
 int CommandHandler::parseToInteger(std::string input) {
 	std::istringstream input_parse_stream(input);
 	int output;
 	input_parse_stream >> output;
 	return output;
+}
+
+unsigned int CommandHandler::parseToUInteger(std::string input) {
+	int result = this->parseToInteger(input);
+	return (result > 0) ? result : 0;
 }
 
 double CommandHandler::parseToDouble(std::string input) {
@@ -363,14 +375,28 @@ void CommandHandler::simulate(int simulation_timesteps) {
 	sph_manager.simulate(simulation_timesteps);
 }
 
-void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shutter_time, Vector3 cameraPosition) {
-	if (mpi_rank == 0) {
-		cout << "Rendering in progress..." << endl;
-	}
+void CommandHandler::render(Terrain loaded_mesh, Terrain loaded_shutter, int shutter_time, Vector3 cameraPosition, unsigned int width, unsigned int height) {
+	int worldSize;
+	MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+	
 	VisualizationManager::importTerrain(loaded_mesh, false);
 	VisualizationManager::importTerrain(loaded_shutter, true);
 
-	VisualizationManager::init(cameraPosition, 800, 600, mpi_rank);
+	if (mpi_rank == 0) {
+
+		for (int i = 1; i < worldSize; i++) {
+			MPI_Send(&width, 1, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD);
+			MPI_Send(&height, 1, MPI_UNSIGNED, i, 0, MPI_COMM_WORLD);
+		}
+
+		cout << "Rendering in progress with (" << width << " * " << height << ") ..." << endl;
+	}
+	else {
+		MPI_Recv(&width, 1, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(&height, 1, MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}
+
+	VisualizationManager::init(cameraPosition, width, height, mpi_rank);
 	//VisualizationManager::renderFrames("sph.ptcl");
 	VisualizationManager::renderFramesDistributed("sph.ptcl", mpi_rank);
 

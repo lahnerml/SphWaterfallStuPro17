@@ -58,6 +58,17 @@ CUICommandParameter CUICommand::getParameter(int index) const {
 	return parameter_list.at(index);
 }
 
+int CUICommand::getParameterIndex(std::string parameter_name)
+{
+	for (int i = 0; i < parameter_list.size(); i++) {
+		CUICommandParameter& parameter = parameter_list.at(i);
+		if (parameter.getParameterName() == parameter_name) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 void CUICommand::addParameter(CUICommandParameter parameter) {
 	parameter_list.push_back(parameter);
 }

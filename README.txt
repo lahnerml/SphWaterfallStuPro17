@@ -18,7 +18,8 @@ Flags:
       | simulate: simulation time
       | moveshutter: time at which the shutter is moved
    -v | followed by 3 numbers x y z, who stand for the coordinates of a point in 3D space
-   -h | for addsink which determines the sink height
+   -h | for addsink which determines the sink height or for render sets the height of the output image
+   -w | for render sets the width of the output image
 
 Commands:
 	print
@@ -45,10 +46,10 @@ Commands:
 	addsink -h
 		Add a sink at a given height.
 		
-	simulate -t
+	simulate [-t]
 		Start a sph-simulation. Simulated time can be set with '-t' parameter.
 
-	render -v
+	render [-v] [-w -h]
 		Start the rendering process. The camera can be set with '-v' parameter. Camera is looking roughly towards (0,0,0)
 
 	help

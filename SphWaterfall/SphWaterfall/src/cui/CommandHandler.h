@@ -32,6 +32,7 @@ class CommandHandler {
 		void executeCommand(CUICommand&);
 
 		int parseToInteger(std::string);
+		unsigned int parseToUInteger(std::string);
 		double parseToDouble(std::string);
 		Vector3 parseToVector3(std::string);
 
@@ -40,7 +41,7 @@ class CommandHandler {
 		void createExport(int simulation_timesteps);
 		void moveShutter(std::string);
 		void simulate(int simulation_timesteps);
-		void render(Terrain, Terrain, int, Vector3);
+		void render(Terrain, Terrain, int, Vector3, unsigned int, unsigned int);
 		void addSource(std::string);
 		void addSink(std::string);
 };

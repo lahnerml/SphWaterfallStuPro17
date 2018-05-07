@@ -40,6 +40,7 @@ void CUI::parseCommand(std::string input_line) {
 
 	while (command_token_stream >> command) {
 		if (!first_loop_done) {
+			// Reads the name of the command
 			std::transform(command.begin(), command.end(), command.begin(), ::tolower);
 			current_command = CUICommand(command, input_line);
 			first_loop_done = true;
@@ -49,24 +50,31 @@ void CUI::parseCommand(std::string input_line) {
 		// is new parameter when string starts with '-' and there are no numbers in it
 		bool isNewParameter = ((command.front() == '-') && (command.find_first_of("0123456789") == std::string::npos));
 
-		if (!isNewParameter) {
-			if (!last_read_parameter_value.isNull()) {
-				last_read_parameter_value.set(last_read_parameter_value.getInternal() + " " + command);
-			}
-			else {
-				last_read_parameter_value.set(command);
-			}
-		}
 
-		if ((command_token_stream.rdbuf()->in_avail() == 0) || (!last_read_parameter_name.isNull() && isNewParameter)) {
-			current_command.addParameter(CUICommandParameter(last_read_parameter_name.getInternal(), trimQuotemarks(last_read_parameter_value.getInternal())));
-			last_read_parameter_name.reset();
-			last_read_parameter_value.reset();
-		}
 		if (isNewParameter) {
+			// Are we reding a new parameter...
+			if (!last_read_parameter_name.isNull()) {
+				current_command.addParameter(
+					CUICommandParameter(last_read_parameter_name.getInternal(), trimQuotemarks(last_read_parameter_value.getInternal()))
+				);
+			}
+
 			last_read_parameter_name.set(command);
 			last_read_parameter_value.reset();
+		} else {
+			// ...or a value for the current parameter
+			last_read_parameter_value.set(
+				(last_read_parameter_value.isNull()) ?
+				command :
+				last_read_parameter_value.getInternal() + " " + command
+			);
 		}
+	}
+
+	if (!last_read_parameter_name.isNull()) {
+		current_command.addParameter(
+			CUICommandParameter(last_read_parameter_name.getInternal(), trimQuotemarks(last_read_parameter_value.getInternal()))
+		);
 	}
 }
 
@@ -196,7 +204,8 @@ void CUI::showHelp() {
 		<< "      | simulate: simulation time" << endl
 		<< "      | moveshutter: time at which the shutter is moved" << endl
 		<< "   -v | followed by 3 numbers x y z, who stand for the coordinates of a point in 3D space" << endl
-		<< "   -h | for addsink which determines the sink height" << endl << endl
+		<< "   -h | for addsink which determines the sink height or for render sets the height of the output image" << endl << endl
+		<< "   -w | for render sets the width of the output image" << endl << endl
 
 		<< "Commands:" << endl
 		<< "   print" << endl
@@ -223,11 +232,11 @@ void CUI::showHelp() {
 		<< "   addsink -h" << endl
 		<< "      Add a senk at a given height" << endl << endl
 
-		<< "   simulate -t" << endl
+		<< "   simulate [-t]" << endl
 		<< "      Start a sph-simulation. Time can be set with '-t' parameter." << endl << endl
 
-		<< "   render -v" << endl
-		<< "      Start the rendering process. The camera position can be set with '-v' parameter. Camera is looking roughly towards (0,0,0)." << endl << endl
+		<< "   render [-v] [-w -h]" << endl
+		<< "      Start the rendering process. The camera position can be set with '-v' parameter. Camera is looking roughly towards (0,0,0). -w and -h can be used to set the reolution of the output images." << endl << endl
 
 		<< "   help" << endl
 		<< "      Show help" << endl << endl
@@ -408,6 +417,13 @@ bool CUI::cleanRender()
 			if (spaces != 2) {
 				std::cout << "'" << source_position << "' is not a valid input" << std::endl;
 				hasOnlyValidParameters = false;
+			}
+		}
+		else if (parameter.getParameterName() == "-w" || parameter.getParameterName() == "-h"){
+			std::string resolution_value = parameter.getValue();
+			if (resolution_value.find_first_not_of("+-,.0123456789") != std::string::npos) {
+				hasOnlyValidParameters = false;
+				std::cout << "'" << resolution_value << "' is not a number" << std::endl;
 			}
 		}
 		else {
